@@ -770,6 +770,19 @@
       "w": 120,
       "h": 8,
       "max": 2
+    },
+    {
+      "id": "sport_emblem",
+      "type": "text",
+      "x": 135,
+      "y": 593,
+      "w": 68,
+      "h": 31,
+      "z": 5,
+      "text": "M",
+      "font": "sport_emblem",
+      "color": "fg",
+      "align": "left"
     }
   ]
 }

@@ -941,19 +941,6 @@ void main() {
     float bannerEdge = min(min(p.x - 570.0, 1395.0 - p.x), p.y - 555.0);
     c.a *= min(vehicleFade, mix(bannerFade, cov(bannerEdge), foot)) * cov(signArea);
 
-    // Small monochrome, slanted M emblem above the left end of the status row.
-    vec2 mark = p - vec2(141.0, 599.0);
-    mark.x += 0.48 * (mark.y - 10.0);
-    if (mark.x > -2.0 && mark.x < 63.0 && abs(mark.y - 10.0) < 12.0) {
-        float stripeX = mod(mark.x, 7.0);
-        float stripes = max(abs(stripeX - 2.4) - 1.7, abs(mark.y - 10.0) - 8.0);
-        float m = min(segD(mark, vec2(23.0, 18.0), vec2(23.0, 2.0)),
-                      segD(mark, vec2(23.0, 2.0), vec2(36.0, 14.0)));
-        m = min(m, segD(mark, vec2(36.0, 14.0), vec2(49.0, 2.0)));
-        m = min(m, segD(mark, vec2(49.0, 2.0), vec2(49.0, 18.0)));
-        float emblem = max(mark.x >= 0.0 && mark.x < 21.0 ? cov(stripes) : 0.0, cov(m - 2.0));
-        c = over(vec4(vec3(0.83, 0.85, 0.89), emblem), c);
-    }
     gl_FragColor = c;
 }
 `;
