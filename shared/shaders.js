@@ -890,10 +890,14 @@ void main() {
             vec2 panel = abs(p - vec2(u_size.x * 0.5, 358.0));
             float silhouette = max(panel.y - 190.0, panel.x + 0.66 * panel.y - 526.0);
             float diagonal = p.x + 0.58 * (p.y - 358.0);
-            float facet = step(810.0, diagonal) - step(1010.0, diagonal);
-            float fade = 1.0 - smoothstep(140.0, 540.0, panel.x);
-            vec3 midnight = mix(vec3(0.024, 0.044, 0.077), vec3(0.039, 0.078, 0.137), facet);
-            c = over(vec4(midnight * (0.65 + 0.35 * fade), cov(silhouette)), c);
+            // Broad graphite-blue facets with a narrow crimson face on the trailing edge.
+            vec3 midnight = mix(vec3(0.025, 0.052, 0.092), vec3(0.065, 0.16, 0.27),
+                                clamp((548.0 - p.y) / 380.0, 0.0, 1.0));
+            midnight += vec3(0.035, 0.095, 0.16) * (step(794.0, diagonal) - step(908.0, diagonal));
+            midnight += vec3(0.025, 0.045, 0.105) * (step(908.0, diagonal) - step(984.0, diagonal));
+            midnight = mix(midnight, vec3(0.24, 0.048, 0.09),
+                           0.7 * (step(984.0, diagonal) - step(1006.0, diagonal)));
+            c = over(vec4(midnight, cov(silhouette)), c);
         }
         c = bar(p, u_fuelSeg, u_fuel, 0.0, c);
         c = bar(p, u_oilSeg, u_oil, 1.0, c);
