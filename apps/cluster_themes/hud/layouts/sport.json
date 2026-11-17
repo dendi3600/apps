@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "name": "Sport",
   "theme": "sportdash",
-  "_about": "Sport frames the native BMW center, speed, gear, Check Control and speed-limit sign with angular side gauges and setup indicators above.",
+  "_about": "Sport with opaque gauge wings, custom speed and gear, and an optional factory vehicle window.",
   "widgets": [
     {
       "id": "sport",
@@ -53,7 +53,15 @@
         30,
         24
       ],
-      "topEnd": 733
+      "topEnd": 733,
+      "hole": [
+        690,
+        204,
+        575,
+        349
+      ],
+      "holeWhen": "sportFactoryCenter",
+      "holeRadius": 12
     },
     {
       "id": "spd0",
@@ -717,6 +725,59 @@
       "w": 120,
       "h": 8,
       "max": 2
+    },
+    {
+      "id": "mspeed",
+      "type": "text",
+      "z": 5,
+      "x": 375,
+      "y": 246,
+      "w": 310,
+      "h": 74,
+      "text": "{{speed}}",
+      "font": "sport_drive",
+      "color": "fg",
+      "align": "center"
+    },
+    {
+      "id": "mspeed_unit",
+      "type": "text",
+      "z": 5,
+      "x": 470,
+      "y": 323,
+      "w": 120,
+      "h": 27,
+      "text": "{{u:speedLc}}",
+      "font": "s_unit",
+      "color": "sblue",
+      "align": "center"
+    },
+    {
+      "id": "mgear",
+      "type": "text",
+      "z": 5,
+      "x": 1270,
+      "y": 246,
+      "w": 240,
+      "h": 74,
+      "text": "{{gearnum}}",
+      "font": "sport_drive",
+      "color": "fg",
+      "align": "center",
+      "hotWhen": "now"
+    },
+    {
+      "id": "mmode",
+      "type": "text",
+      "z": 5,
+      "x": 1270,
+      "y": 323,
+      "w": 240,
+      "h": 27,
+      "text": "{{mode}}",
+      "font": "m_label",
+      "color": "dim",
+      "align": "center"
     }
   ]
 }

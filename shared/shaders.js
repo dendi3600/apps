@@ -910,12 +910,10 @@ void main() {
     if (abs(p.y - u_geo.z) < 3.0 && abs(p.x - u_size.x * 0.5) < u_size.x * 0.5 - outerX(u_geo.z))
         c = over(vec4(mix(BLUE_LINE, RED_LINE, step(u_size.x * 0.5, p.x)) * 0.8, cov(abs(p.y - u_geo.z) - 1.2)), c);
 
-    // One continuous factory display below the setup row. The wings follow the
-    // auxiliary gauges, then end above BMW's speed-limit sign and status area.
-    float wingEdge = mix(330.0, 535.0, clamp((p.y - 352.0) / 198.0, 0.0, 1.0));
-    float factoryInterior = min(min(p.x, pm.x) - wingEdge, p.y - 194.0);
-    float factoryFooter = max(p.y - 608.0, min(p.y - 570.0, min(p.x, pm.x) - 410.0));
-    c.a *= cov(max(factoryInterior, factoryFooter));
+    // Only expose the native sign and Check Control banner below the gauges.
+    float signArea = min(min(p.x - 465.0, 605.0 - p.x), p.y - 565.0);
+    float bannerArea = min(min(p.x - 570.0, 1395.0 - p.x), p.y - 555.0);
+    c.a *= cov(max(signArea, bannerArea));
     gl_FragColor = c;
 }
 `;
