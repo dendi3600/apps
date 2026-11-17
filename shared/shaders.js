@@ -886,17 +886,6 @@ void main() {
             float lane = cov(abs(abs(xw) - 0.5) * px - hw) * dash;
             c = over(vec4(0.85, 0.93, 1.0, fade * max(edge, lane)), c);
         }
-        if (u_road.w < 0.5) {
-            vec2 panel = abs(p - vec2(u_size.x * 0.5, 358.0));
-            float silhouette = max(panel.y - 190.0, panel.x + 0.66 * panel.y - 526.0);
-            float diagonal = p.x + 0.58 * (p.y - 358.0);
-            float facet = step(810.0, diagonal) - step(1010.0, diagonal);
-            float fade = 1.0 - smoothstep(140.0, 540.0, panel.x);
-            vec3 midnight = mix(vec3(0.024, 0.044, 0.077), vec3(0.039, 0.078, 0.137), facet);
-            float centerMask = 1.0 - smoothstep(0.0, 28.0, max(abs(p.x - 917.5) - 127.5, abs(p.y - 339.5) - 54.5));
-            float rightMask = 1.0 - smoothstep(0.0, 28.0, max(abs(p.x - 1312.5) - 97.5, abs(p.y - 367.5) - 47.5));
-            c = over(vec4(midnight * (0.65 + 0.35 * fade), cov(silhouette) * (1.0 - max(centerMask, rightMask))), c);
-        }
         c = bar(p, u_fuelSeg, u_fuel, 0.0, c);
         c = bar(p, u_oilSeg, u_oil, 1.0, c);
     }
