@@ -796,7 +796,14 @@ float outerX(float y) {
     return u_geo.w + outerSlope(y) * (y - u_geo.y);
 }
 // px from the outer line, inwards (perpendicular)
-float dIn(vec2 q) { return (q.x - outerX(q.y)) / sqrt(1.0 + outerSlope(q.y) * outerSlope(q.y)); }
+float dIn(vec2 q) {
+    // Intersect the two offset half-planes. Their inner rails meet at a
+    // slightly different y from the outside vertex when the slopes differ.
+    vec2 v = q - vec2(u_geo.w, u_geo.y);
+    float upper = outerSlope(u_geo.x), lower = outerSlope(u_geo.z);
+    return min((v.x - upper * v.y) * inversesqrt(1.0 + upper * upper),
+               (v.x - lower * v.y) * inversesqrt(1.0 + lower * lower));
+}
 
 // one bracket in the left frame (q mirrored for the right one)
 vec4 bracket(vec2 q, float val, float redFrom, float orange, float ticks, vec3 line, vec3 band, vec3 lit, vec3 inner, vec4 c) {
@@ -824,14 +831,14 @@ vec4 bracket(vec2 q, float val, float redFrom, float orange, float ticks, vec3 l
         }
     }
     // the outer line, its top run and its bottom run
-    float o = inY || abs(q.y - u_geo.x) < 6.0 || abs(q.y - u_geo.z) < 6.0 ? cov(abs(d - 1.0) - 1.8) : 0.0;
+    float o = cov(abs(d - 1.0) - 1.8) * cov(u_geo.x - q.y) * cov(q.y - u_geo.z);
     vec2 tl = vec2(outerX(u_geo.x), u_geo.x), bl = vec2(outerX(u_geo.z), u_geo.z);
     o = max(o, cov(segD(q, tl, vec2(u_topEnd, u_geo.x)) - 2.2));
     o = max(o, cov(segD(q, bl, bl + vec2(u_inner + 40.0, 0.0)) - 2.2));
     c = over(vec4(line, 0.35 * exp(-abs(d) / 5.0) * (inY ? 1.0 : 0.0) * step(d, 0.0)), c);
     c = over(vec4(line, o), c);
     // the inner line: down the bracket from its top run to the bottom
-    float il = (q.y > yTopI && q.y < u_geo.z - 6.0) ? cov(abs(d - u_inner) - 1.6) : 0.0;
+    float il = (q.y > yTopI && q.y <= u_geo.z) ? cov(abs(d - u_inner) - 1.6) : 0.0;
     float xi = outerX(yTopI) + u_inner * sqrt(1.0 + outerSlope(yTopI) * outerSlope(yTopI));
     il = max(il, cov(segD(q, vec2(xi, yTopI), vec2(u_topEnd - 14.0, yTopI)) - 1.6));
     c = over(vec4(inner, 0.95 * il), c);
@@ -928,8 +935,25 @@ void main() {
     vec2 bannerMargin = max(vec2(abs(p.x - 982.5) - 412.5, 555.0 - p.y), 0.0);
     float vehicleFade = smoothstep(0.0, 1.0, length(vehicleMargin / vec2(145.0, 74.0)));
     float bannerFade = smoothstep(0.0, 1.0, length(bannerMargin / vec2(95.0, 70.0)));
-    float signArea = min(min(p.x - 465.0, 605.0 - p.x), p.y - 565.0);
-    c.a *= min(vehicleFade, bannerFade) * cov(signArea);
+    float signArea = min(min(p.x - 499.0, 605.0 - p.x), p.y - 565.0);
+    // Keep the gauge feet opaque up to the native sign / banner openings.
+    float foot = step(u_geo.z - 42.0, p.y);
+    float bannerEdge = min(min(p.x - 570.0, 1395.0 - p.x), p.y - 555.0);
+    c.a *= min(vehicleFade, mix(bannerFade, cov(bannerEdge), foot)) * cov(signArea);
+
+    // Small monochrome, slanted M emblem above the left end of the status row.
+    vec2 mark = p - vec2(141.0, 599.0);
+    mark.x += 0.48 * (mark.y - 10.0);
+    if (mark.x > -2.0 && mark.x < 63.0 && abs(mark.y - 10.0) < 12.0) {
+        float stripeX = mod(mark.x, 7.0);
+        float stripes = max(abs(stripeX - 2.4) - 1.7, abs(mark.y - 10.0) - 8.0);
+        float m = min(segD(mark, vec2(23.0, 18.0), vec2(23.0, 2.0)),
+                      segD(mark, vec2(23.0, 2.0), vec2(36.0, 14.0)));
+        m = min(m, segD(mark, vec2(36.0, 14.0), vec2(49.0, 2.0)));
+        m = min(m, segD(mark, vec2(49.0, 2.0), vec2(49.0, 18.0)));
+        float emblem = max(mark.x >= 0.0 && mark.x < 21.0 ? cov(stripes) : 0.0, cov(m - 2.0));
+        c = over(vec4(vec3(0.83, 0.85, 0.89), emblem), c);
+    }
     gl_FragColor = c;
 }
 `;
