@@ -786,15 +786,14 @@ vec4 over(vec4 top, vec4 under) {
 float segD(vec2 p, vec2 a, vec2 b) { vec2 pa = p - a, ba = b - a; float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0); return length(pa - ba * h); }
 float segH(vec2 p, vec2 a, vec2 b) { vec2 ba = b - a; return clamp(dot(p - a, ba) / dot(ba, ba), 0.0, 1.0); }
 
-float outerX(float y) {
-    float dy = y - u_geo.y;
-    float k = dy < 0.0 ? u_k.x : u_k.y;
-    return u_geo.w + k * (sqrt(dy * dy + u_k.z * u_k.z) - u_k.z);
-}
 float outerSlope(float y) {
-    float dy = y - u_geo.y;
-    float k = dy < 0.0 ? u_k.x : u_k.y;
-    return k * dy / sqrt(dy * dy + u_k.z * u_k.z);
+    // Keep the endpoints calibrated to the original scale; join the two straight runs at the middle mark.
+    float extent = y < u_geo.y ? u_geo.y - u_geo.x : u_geo.z - u_geo.y;
+    float k = y < u_geo.y ? -u_k.x : u_k.y;
+    return k * (sqrt(extent * extent + u_k.z * u_k.z) - u_k.z) / extent;
+}
+float outerX(float y) {
+    return u_geo.w + outerSlope(y) * (y - u_geo.y);
 }
 // px from the outer line, inwards (perpendicular)
 float dIn(vec2 q) { return (q.x - outerX(q.y)) / sqrt(1.0 + outerSlope(q.y) * outerSlope(q.y)); }
@@ -846,7 +845,7 @@ vec4 bar(vec2 p, vec4 s, float val, float zones, vec4 c) {
     float span = length(axis);
     vec2 dir = axis / span;
     vec2 local = p - b;
-    float along = dot(local, dir);
+    float along = span * (p.y - b.y) / axis.y;
     float side = dot(local, vec2(-dir.y, dir.x));
     float ends = cov(-along) * cov(along - span);
     float body = ends * cov(abs(side) - 8.0);
@@ -911,26 +910,12 @@ void main() {
     if (abs(p.y - u_geo.z) < 3.0 && abs(p.x - u_size.x * 0.5) < u_size.x * 0.5 - outerX(u_geo.z))
         c = over(vec4(mix(BLUE_LINE, RED_LINE, step(u_size.x * 0.5, p.x)) * 0.8, cov(abs(p.y - u_geo.z) - 1.2)), c);
 
-    // bottom strip: slanted ends, blue left of the middle, red right, thin dividers
-    float sy = p.y - u_strip.y;
-    if (sy > -2.0 && sy < u_strip.z + 2.0) {
-        float xl = u_strip.x + (u_strip.z - sy) / u_strip.z * u_strip.w;     // left end leans in at the top
-        float dx = abs(p.x - u_size.x * 0.5), xe = u_size.x * 0.5 - xl;
-        float inside = cov(dx - xe) * cov(-sy) * cov(sy - u_strip.z);
-        float f = dx / xe;
-        vec3 sc = p.x < u_size.x * 0.5 ? mix(vec3(0.06, 0.2, 0.62), vec3(0.15, 0.36, 0.92), f) : mix(vec3(0.4, 0.05, 0.1), vec3(0.85, 0.1, 0.16), f);
-        c = over(vec4(sc, 0.95 * inside), c);
-        float div = cov(abs(mod(p.x - (u_strip.z - sy) * 0.45, 150.0) - 75.0) - 73.8);
-        c = over(vec4(0.02, 0.03, 0.08, 0.5 * inside * div), c);
-        c = over(vec4(1.0, 1.0, 1.0, 0.25 * inside * cov(abs(sy) - 1.0)), c);
-    }
-    // Fade outward from the two areas confirmed on the M850i. The whole tested
-    // vehicle and banner footprint stays clear, including where the two meet.
-    vec2 vehicleMargin = max(abs(p - vec2(977.5, 378.5)) - vec2(287.5, 174.5), 0.0);
-    vec2 bannerMargin = max(vec2(abs(p.x - 982.5) - 412.5, 555.0 - p.y), 0.0);
-    float vehicleFade = smoothstep(0.0, 1.0, length(vehicleMargin / vec2(145.0, 74.0)));
-    float bannerFade = smoothstep(0.0, 1.0, length(bannerMargin / vec2(95.0, 70.0)));
-    c.a *= min(vehicleFade, bannerFade);
+    // One continuous factory display below the setup row. The wings follow the
+    // auxiliary gauges, then end above BMW's speed-limit sign and status area.
+    float wingEdge = mix(330.0, 535.0, clamp((p.y - 352.0) / 198.0, 0.0, 1.0));
+    float factoryInterior = min(min(p.x, pm.x) - wingEdge, p.y - 194.0);
+    float factoryFooter = max(p.y - 608.0, min(p.y - 570.0, min(p.x, pm.x) - 410.0));
+    c.a *= cov(max(factoryInterior, factoryFooter));
     gl_FragColor = c;
 }
 `;
