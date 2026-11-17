@@ -64,7 +64,7 @@
       "w": 110,
       "h": 27,
       "text": "{{spd:0}}",
-      "font": "m_num",
+      "font": "sport_ticks",
       "color": "sblue",
       "align": "right",
       "near": [
@@ -81,7 +81,7 @@
       "w": 110,
       "h": 27,
       "text": "{{spd:1}}",
-      "font": "m_num",
+      "font": "sport_ticks",
       "color": "sblue",
       "align": "right",
       "near": [
@@ -98,7 +98,7 @@
       "w": 110,
       "h": 27,
       "text": "{{spd:2}}",
-      "font": "m_num",
+      "font": "sport_ticks",
       "color": "sblue",
       "align": "right",
       "near": [
@@ -115,7 +115,7 @@
       "w": 110,
       "h": 27,
       "text": "{{spd:3}}",
-      "font": "m_num",
+      "font": "sport_ticks",
       "color": "sblue",
       "align": "right",
       "near": [
@@ -132,7 +132,7 @@
       "w": 110,
       "h": 27,
       "text": "{{spd:4}}",
-      "font": "m_num",
+      "font": "sport_ticks",
       "color": "sblue",
       "align": "right",
       "near": [
@@ -149,7 +149,7 @@
       "w": 110,
       "h": 27,
       "text": "{{spd:5}}",
-      "font": "m_num",
+      "font": "sport_ticks",
       "color": "sblue",
       "align": "right",
       "near": [
@@ -166,7 +166,7 @@
       "w": 110,
       "h": 27,
       "text": "{{spd:6}}",
-      "font": "m_num",
+      "font": "sport_ticks",
       "color": "sblue",
       "align": "right",
       "near": [
@@ -183,7 +183,7 @@
       "w": 110,
       "h": 27,
       "text": "{{spd:7}}",
-      "font": "m_num",
+      "font": "sport_ticks",
       "color": "sblue",
       "align": "right",
       "near": [
@@ -200,7 +200,7 @@
       "w": 110,
       "h": 27,
       "text": "{{spd:8}}",
-      "font": "m_num",
+      "font": "sport_ticks",
       "color": "sblue",
       "align": "right",
       "near": [
@@ -217,7 +217,7 @@
       "w": 60,
       "h": 27,
       "text": "0",
-      "font": "m_num",
+      "font": "sport_ticks",
       "color": "spink",
       "align": "left",
       "near": [
@@ -234,7 +234,7 @@
       "w": 60,
       "h": 27,
       "text": "1",
-      "font": "m_num",
+      "font": "sport_ticks",
       "color": "spink",
       "align": "left",
       "near": [
@@ -251,7 +251,7 @@
       "w": 60,
       "h": 27,
       "text": "2",
-      "font": "m_num",
+      "font": "sport_ticks",
       "color": "spink",
       "align": "left",
       "near": [
@@ -268,7 +268,7 @@
       "w": 60,
       "h": 27,
       "text": "3",
-      "font": "m_num",
+      "font": "sport_ticks",
       "color": "spink",
       "align": "left",
       "near": [
@@ -285,7 +285,7 @@
       "w": 60,
       "h": 27,
       "text": "4",
-      "font": "m_num",
+      "font": "sport_ticks",
       "color": "spink",
       "align": "left",
       "near": [
@@ -302,7 +302,7 @@
       "w": 60,
       "h": 27,
       "text": "5",
-      "font": "m_num",
+      "font": "sport_ticks",
       "color": "spink",
       "align": "left",
       "near": [
@@ -319,7 +319,7 @@
       "w": 60,
       "h": 27,
       "text": "6",
-      "font": "m_num",
+      "font": "sport_ticks",
       "color": "spink",
       "align": "left",
       "near": [
@@ -336,7 +336,7 @@
       "w": 60,
       "h": 27,
       "text": "7",
-      "font": "m_num",
+      "font": "sport_ticks",
       "color": "spink",
       "align": "left",
       "near": [
