@@ -68,7 +68,7 @@ CLUSTER_FONTS = [
     # Sport: BMW Live Cockpit style, the wide numbers in Michroma like BMW's own
     ('s_scale', 'Michroma-Regular.ttf', 27, DIGITS, 1),
     ('sport_ticks', 'Barlow-SemiBold.ttf', 30, DIGITS),
-    ('sport_drive', 'Barlow-SemiBold.ttf', 76, DIGITS + 'PRNDSM-'),
+    ('sport_drive', 'Orbitron[wght].ttf', 72, DIGITS + 'PRNDSM-', 0, 'ExtraBold', {'0': 'O'}, '', 1.17),
     ('s_speed', 'Michroma-Regular.ttf', 74, DIGITS + '-', 3),
     ('s_hero', 'Michroma-Regular.ttf', 132, DIGITS + '-', 3),   # the big speed in the middle while no map shows (Nov 13 2026)
     ('s_gear', 'Michroma-Regular.ttf', 70, DIGITS + 'PRNDSM-', 3),
@@ -115,7 +115,7 @@ PAD = 2
 ATLAS_W = 1024
 
 
-def bake(out, name, file, size, chars, stroke=0, weight=None, subs=None, tuck=''):
+def bake(out, name, file, size, chars, stroke=0, weight=None, subs=None, tuck='', width_scale=1.0):
     """stroke: px of extra weight round every glyph (Michroma has one weight). weight: a named instance of a
     variable font (Orbitron: Regular .. Black), for the M theme's squared BMW-style gear, speed and numbers.
     subs: {char: glyph drawn for it} (Orbitron's zero is slashed; the M8's is plain, so its O stands in).
@@ -144,7 +144,9 @@ def bake(out, name, file, size, chars, stroke=0, weight=None, subs=None, tuck=''
         img = Image.new('L', (w, height), 0)
         ImageDraw.Draw(img).text((PAD - l, PAD - top + drop.get(c, 0)), glyph(c), font=font, fill=255, anchor='ls', stroke_width=stroke, stroke_fill=255)
         shift = (tab - adv) / 2 if c in DIGITS else 0
-        cells.append((c, img, round(l - PAD + shift), round(tab if c in DIGITS else adv)))
+        if width_scale != 1.0:
+            img = img.resize((round(w * width_scale), height), Image.Resampling.LANCZOS)
+        cells.append((c, img, round((l - PAD + shift) * width_scale), round((tab if c in DIGITS else adv) * width_scale)))
 
     # simple row packing
     x = y = 0
