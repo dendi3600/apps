@@ -867,6 +867,18 @@ void main() {
     vec2 pm = vec2(u_size.x - p.x, p.y);
     vec4 c = vec4(0.0, 0.0, 0.0, 1.0);
 
+    if (u_road.w < 0.5) {
+        float silhouette = max(max(u_geo.x + 8.0 - p.y, p.y - u_geo.z + 4.0), u_inner - dIn(vec2(min(p.x, pm.x), p.y)));
+        float diagonal = p.x + 0.58 * (p.y - 358.0);
+        // Broad graphite-blue facets with a narrow crimson face on the trailing edge.
+        vec3 midnight = mix(vec3(0.025, 0.052, 0.092), vec3(0.048, 0.105, 0.175),
+                            clamp((548.0 - p.y) / 380.0, 0.0, 1.0));
+        midnight += vec3(0.025, 0.058, 0.095) * (step(794.0, diagonal) - step(908.0, diagonal));
+        midnight += vec3(0.025, 0.045, 0.105) * (step(908.0, diagonal) - step(984.0, diagonal));
+        midnight = mix(midnight, vec3(0.24, 0.048, 0.09),
+                       0.7 * (step(984.0, diagonal) - step(1006.0, diagonal)));
+        c = over(vec4(midnight, cov(silhouette)), c);
+    }
     c = bracket(p, u_speed, 2.0, 2.0, u_ticks.x, BLUE_LINE, BLUE_BAND, BLUE_LIT, BLUE_IN, c);
     c = bracket(pm, u_rpm, u_redFrom, u_orange, u_ticks.y, RED_LINE, RED_BAND, RED_LIT, RED_IN, c);
     // the map window: a rounded hole cut out of the backdrop and brackets, so the map shows clean; the fuel and
@@ -891,19 +903,7 @@ void main() {
             float lane = cov(abs(abs(xw) - 0.5) * px - hw) * dash;
             c = over(vec4(0.85, 0.93, 1.0, fade * max(edge, lane)), c);
         }
-        if (u_road.w < 0.5) {
-            vec2 panel = abs(p - vec2(u_size.x * 0.5, 358.0));
-            float silhouette = max(panel.y - 190.0, panel.x + 0.66 * panel.y - 526.0);
-            float diagonal = p.x + 0.58 * (p.y - 358.0);
-            // Broad graphite-blue facets with a narrow crimson face on the trailing edge.
-            vec3 midnight = mix(vec3(0.025, 0.052, 0.092), vec3(0.048, 0.105, 0.175),
-                                clamp((548.0 - p.y) / 380.0, 0.0, 1.0));
-            midnight += vec3(0.025, 0.058, 0.095) * (step(794.0, diagonal) - step(908.0, diagonal));
-            midnight += vec3(0.025, 0.045, 0.105) * (step(908.0, diagonal) - step(984.0, diagonal));
-            midnight = mix(midnight, vec3(0.24, 0.048, 0.09),
-                           0.7 * (step(984.0, diagonal) - step(1006.0, diagonal)));
-            c = over(vec4(midnight, cov(silhouette)), c);
-        }
+
     }
     c = bar(p, u_fuelSeg, u_fuel, 0.0, c);
     c = bar(p, u_oilSeg, u_oil, 1.0, c);

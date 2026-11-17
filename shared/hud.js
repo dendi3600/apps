@@ -2552,7 +2552,14 @@ class HudApp {
 
     _update(x, now, force) {
         const w = x.w;
-        if (w.type === 'atext') {
+        if (w.type === 'icon' && w.lowFuelAt !== undefined) {
+            const fuel = this._raw('fuel');
+            const low = isNum(fuel) && fuel <= w.lowFuelAt;
+            if (!force && low === x.last) return;
+            x.last = low;
+            const ink = low ? [255, 189, 42, 255] : color(this.theme, w.color || 'fg');
+            this._blit(x, null, paintIcon(w.icon, w.w, w.h, ink));
+        } else if (w.type === 'atext') {
             if (!force && now - x.lastPaint < (w.rate || TEXT_MS)) return;
             const s = this._resolve(w.text);
             if (!force && s === x.last) return;
