@@ -107,11 +107,6 @@
       "_instances": "AndroidAutoProjectedManagerInst1",
       "projectedGuidanceActive": "rs"
     },
-    "de.bmw.infotainment.hmi.hmimediastate.HmiMediaState": {
-      "playerMetadata": "rs",
-      "trackProgress": "rs",
-      "_optional": "now playing (title, artist, progress) in the Vector layout"
-    },
     "de.bmw.infrastructure.VehicleCondition": {
       "VehicleCondition": "s",
       "_optional": "the car switching off: no new layer while it does (cluster-render's switch-off guard)"
