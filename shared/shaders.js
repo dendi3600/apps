@@ -868,14 +868,13 @@ void main() {
 
     if (u_road.w < 0.5) {
         float silhouette = max(max(u_geo.x + 8.0 - p.y, p.y - u_geo.z + 4.0), u_inner - dIn(vec2(min(p.x, pm.x), p.y)));
-        float diagonal = p.x + 0.58 * (p.y - 358.0);
-        // Broad graphite-blue facets with a narrow crimson face on the trailing edge.
         vec3 midnight = mix(vec3(0.025, 0.052, 0.092), vec3(0.048, 0.105, 0.175),
                             clamp((548.0 - p.y) / 380.0, 0.0, 1.0));
-        midnight += vec3(0.025, 0.058, 0.095) * (step(794.0, diagonal) - step(908.0, diagonal));
-        midnight += vec3(0.025, 0.045, 0.105) * (step(908.0, diagonal) - step(984.0, diagonal));
-        midnight = mix(midnight, vec3(0.24, 0.048, 0.09),
-                       0.7 * (step(984.0, diagonal) - step(1006.0, diagonal)));
+        // Compact M stripes under the speed unit, clear of the center map and fuel scale.
+        float stripe = p.x - 492.0 + (p.y - 374.0) * 0.55;
+        float badge = cov(abs(p.y - 374.0) - 7.0) * cov(-stripe) * cov(stripe - 76.0);
+        vec3 accent = mix(BLUE_LINE, BLUE_BAND, step(25.0, stripe));
+        midnight = mix(midnight, mix(accent, RED_LINE, step(50.0, stripe)), badge);
         c = over(vec4(midnight, cov(silhouette)), c);
     }
     c = bracket(p, u_speed, 2.0, 2.0, u_ticks.x, BLUE_LINE, BLUE_BAND, BLUE_LIT, BLUE_IN, c);
@@ -910,10 +909,27 @@ void main() {
     if (abs(p.y - u_geo.z) < 3.0 && abs(p.x - u_size.x * 0.5) < u_size.x * 0.5 - outerX(u_geo.z))
         c = over(vec4(mix(BLUE_LINE, RED_LINE, step(u_size.x * 0.5, p.x)) * 0.8, cov(abs(p.y - u_geo.z) - 1.2)), c);
 
-    // Only expose the native sign and Check Control banner below the gauges.
+    // bottom strip: slanted ends, blue left of the middle, red right, thin dividers
+    float sy = p.y - u_strip.y;
+    if (sy > -2.0 && sy < u_strip.z + 2.0) {
+        float xl = u_strip.x + (u_strip.z - sy) / u_strip.z * u_strip.w;     // left end leans in at the top
+        float dx = abs(p.x - u_size.x * 0.5), xe = u_size.x * 0.5 - xl;
+        float inside = cov(dx - xe) * cov(-sy) * cov(sy - u_strip.z);
+        float f = dx / xe;
+        vec3 sc = p.x < u_size.x * 0.5 ? mix(vec3(0.06, 0.2, 0.62), vec3(0.15, 0.36, 0.92), f) : mix(vec3(0.4, 0.05, 0.1), vec3(0.85, 0.1, 0.16), f);
+        c = over(vec4(sc, 0.95 * inside), c);
+        float div = cov(abs(mod(p.x - (u_strip.z - sy) * 0.45, 150.0) - 75.0) - 73.8);
+        c = over(vec4(0.02, 0.03, 0.08, 0.5 * inside * div), c);
+        c = over(vec4(1.0, 1.0, 1.0, 0.25 * inside * cov(abs(sy) - 1.0)), c);
+    }
+    // Fade outward from the two areas confirmed on the M850i. The whole tested
+    // vehicle and banner footprint stays clear, including where the two meet.
+    vec2 vehicleMargin = max(abs(p - vec2(977.5, 378.5)) - vec2(287.5, 174.5), 0.0);
+    vec2 bannerMargin = max(vec2(abs(p.x - 982.5) - 412.5, 555.0 - p.y), 0.0);
+    float vehicleFade = smoothstep(0.0, 1.0, length(vehicleMargin / vec2(145.0, 74.0)));
+    float bannerFade = smoothstep(0.0, 1.0, length(bannerMargin / vec2(95.0, 70.0)));
     float signArea = min(min(p.x - 465.0, 605.0 - p.x), p.y - 565.0);
-    float bannerArea = min(min(p.x - 570.0, 1395.0 - p.x), p.y - 555.0);
-    c.a *= cov(max(signArea, bannerArea));
+    c.a *= min(vehicleFade, bannerFade) * cov(signArea);
     gl_FragColor = c;
 }
 `;
