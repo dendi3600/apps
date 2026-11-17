@@ -1892,12 +1892,11 @@ class HudApp {
         this.nightOn = this._nightDim();
         if (this.nightOn) this.theme = dimTheme(this.theme, NIGHT_DIM);
         this.log.info('layout "' + layout.name + '", theme ' + this.theme.name + (this.layoutTheme ? '' : ' (' + this.setting('hudTheme') + ')'));
-        // full screen (Nov 14 2026): the layout's strip widgets (design/genlib.py full_screen) cover BMW's strip except a
-        // window over its gear letter, and the theme's own strip row ("stripRow" l / r) shows the clock, range and outside
-        // temperature. "Leave BMW's bottom strip clear" is gone again (0.17.7): with the gear letter uncovered BMW draws no
-        // black box (car test of 0.17.6), so the switch had nothing left to fix.
-        // Copies, since the strip row's connection is set below.
-        const shown = layout.widgets.filter((w) => !(w.toggle && !this._toggleOn(w.toggle)) && !(w.themes && w.themes.indexOf(this.themeName) < 0))
+        // Some BMW clusters mask parts of the display when a theme covers the factory strip.
+        const keepFactoryStrip = this.target === 'panel' && this.setting('keepFactoryStrip') === true;
+        const shown = layout.widgets
+            .filter((w) => !(keepFactoryStrip && w.stripRow))
+            .filter((w) => !(w.toggle && !this._toggleOn(w.toggle)) && !(w.themes && w.themes.indexOf(this.themeName) < 0))
             .map((w) => (w.stripRow ? Object.assign({}, w) : w));
         this.shown = shown;              // for a scale to find its rev bar (driver camera wings)
         this._setNeeds(shown);
