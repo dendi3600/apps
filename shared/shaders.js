@@ -864,6 +864,10 @@ vec4 bar(vec2 p, vec4 s, float val, float zones, vec4 c) {
 
 void main() {
     vec2 p = v_uv * u_size;
+    // Leave BMW's native vehicle graphic and Check Control banner visible, including their upper edges.
+    bool factoryVehicle = p.x >= 690.0 && p.x <= 1265.0 && p.y >= 204.0 && p.y <= 553.0;
+    bool factoryBanner = p.x >= 570.0 && p.x <= 1395.0 && p.y >= 555.0;
+    if (factoryVehicle || factoryBanner) { gl_FragColor = vec4(0.0); return; }
     vec2 pm = vec2(u_size.x - p.x, p.y);
     vec4 c = vec4(0.0, 0.0, 0.0, 1.0);
 
