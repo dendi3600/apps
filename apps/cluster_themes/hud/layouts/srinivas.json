@@ -5,6 +5,21 @@
   "theme": "vector",
   "widgets": [
     {
+      "id": "shift_lights",
+      "type": "lights",
+      "z": 4,
+      "x": 850,
+      "y": 210,
+      "w": 220,
+      "h": 14,
+      "count": 12,
+      "tail": 3,
+      "round": false,
+      "off": 0.1,
+      "from": 3000,
+      "conn": 2
+    },
+    {
       "class": "content",
       "color": "bg",
       "h": 660,
@@ -332,7 +347,7 @@
       "type": "text",
       "w": 160,
       "x": 880,
-      "y": 224,
+      "y": 234,
       "z": 5
     },
     {
@@ -417,7 +432,7 @@
       "type": "text",
       "w": 236,
       "x": 842,
-      "y": 252,
+      "y": 255,
       "z": 5
     },
     {

@@ -893,7 +893,9 @@ void main() {
             float facet = step(810.0, diagonal) - step(1010.0, diagonal);
             float fade = 1.0 - smoothstep(140.0, 540.0, panel.x);
             vec3 midnight = mix(vec3(0.024, 0.044, 0.077), vec3(0.039, 0.078, 0.137), facet);
-            c = over(vec4(midnight * (0.65 + 0.35 * fade), cov(silhouette)), c);
+            float centerMask = 1.0 - smoothstep(0.0, 28.0, max(abs(p.x - 917.5) - 127.5, abs(p.y - 339.5) - 54.5));
+            float rightMask = 1.0 - smoothstep(0.0, 28.0, max(abs(p.x - 1312.5) - 97.5, abs(p.y - 367.5) - 47.5));
+            c = over(vec4(midnight * (0.65 + 0.35 * fade), cov(silhouette) * (1.0 - max(centerMask, rightMask))), c);
         }
         c = bar(p, u_fuelSeg, u_fuel, 0.0, c);
         c = bar(p, u_oilSeg, u_oil, 1.0, c);
@@ -1551,13 +1553,13 @@ void main() {
         if (right && df < 0.15) rim = BLUE;
         if (right && df > 0.85) rim = RED;
         float depth = u_dial.z - r;
-        float inset = cov(abs(depth - 9.0) - 8.0) * inArc;
-        vec3 glass = mix(vec3(0.075, 0.084, 0.103), vec3(0.23, 0.25, 0.29), (1.0 - smoothstep(0.0, 15.0, depth)));
+        float inset = cov(abs(depth - 6.5) - 5.5) * inArc;
+        vec3 glass = mix(vec3(0.075, 0.084, 0.103), vec3(0.15, 0.17, 0.20), (1.0 - smoothstep(0.0, 15.0, depth)));
         c = put(c, glass, inset);
         c = put(c, rim, cov(abs(depth) - 0.85) * inArc * 0.84);
-        c = put(c, WHITE, cov(abs(depth - 17.0) - 0.55) * inArc * 0.32);
+        c = put(c, WHITE, cov(abs(depth - 13.0) - 0.55) * inArc * 0.32);
         float dv = right ? u_oil : u_fuel;
-        float mk = cov(abs(df - dv) * arcLen - 2.2) * cov(abs(depth - 9.0) - 10.0) * inArc;
+        float mk = cov(abs(df - dv) * arcLen - 2.2) * cov(abs(depth - 6.5) - 8.0) * inArc;
         c = put(c, RED, mk);
         for (int j = 0; j < 3; j++) {
             float tf = float(j) * 0.5;
