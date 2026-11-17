@@ -864,10 +864,6 @@ vec4 bar(vec2 p, vec4 s, float val, float zones, vec4 c) {
 
 void main() {
     vec2 p = v_uv * u_size;
-    // Leave BMW's native vehicle graphic and Check Control banner visible, including their upper edges.
-    bool factoryVehicle = p.x >= 690.0 && p.x <= 1265.0 && p.y >= 204.0 && p.y <= 553.0;
-    bool factoryBanner = p.x >= 570.0 && p.x <= 1395.0 && p.y >= 555.0;
-    if (factoryVehicle || factoryBanner) { gl_FragColor = vec4(0.0); return; }
     vec2 pm = vec2(u_size.x - p.x, p.y);
     vec4 c = vec4(0.0, 0.0, 0.0, 1.0);
 
@@ -928,6 +924,13 @@ void main() {
         c = over(vec4(0.02, 0.03, 0.08, 0.5 * inside * div), c);
         c = over(vec4(1.0, 1.0, 1.0, 0.25 * inside * cov(abs(sy) - 1.0)), c);
     }
+    // Fade outward from the two areas confirmed on the M850i. The whole tested
+    // vehicle and banner footprint stays clear, including where the two meet.
+    vec2 vehicleMargin = max(abs(p - vec2(977.5, 378.5)) - vec2(287.5, 174.5), 0.0);
+    vec2 bannerMargin = max(vec2(abs(p.x - 982.5) - 412.5, 555.0 - p.y), 0.0);
+    float vehicleFade = smoothstep(0.0, 1.0, length(vehicleMargin / vec2(145.0, 74.0)));
+    float bannerFade = smoothstep(0.0, 1.0, length(bannerMargin / vec2(95.0, 70.0)));
+    c.a *= min(vehicleFade, bannerFade);
     gl_FragColor = c;
 }
 `;
