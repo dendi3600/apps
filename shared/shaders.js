@@ -842,18 +842,23 @@ vec4 bracket(vec2 q, float val, float redFrom, float orange, float ticks, vec3 l
 // a two-tone slanted bar from the empty end b to the full end a, with a thin rail beside it
 vec4 bar(vec2 p, vec4 s, float val, float zones, vec4 c) {
     vec2 a = s.xy, b = s.zw;
-    float h = 1.0 - segH(p, a, b);
-    vec2 dir = normalize(a - b), nrm = vec2(-dir.y, dir.x);
-    float side = dot(p - b, nrm);
-    float along = segD(p, a, b);
-    if (along > 26.0) return c;
-    float body = cov(abs(side) - 7.0) * cov(segD(p, a, b) - 7.5);
-    vec3 col = vec3(0.92, 0.94, 0.97);
-    if (zones > 0.5 && h > 0.88) col = vec3(1.0, 0.2, 0.22);
-    if (zones > 0.5 && h < 0.1) col = vec3(0.25, 0.5, 1.0);
-    c = over(vec4(0.36, 0.38, 0.44, 0.9 * body), c);
-    c = over(vec4(col, body * step(h, val) * step(0.001, val)), c);
-    c = over(vec4(0.5, 0.52, 0.58, 0.8 * cov(abs(side + 12.0) - 1.0) * cov(segD(p, a, b) - 13.0)), c);
+    vec2 axis = a - b;
+    float span = length(axis);
+    vec2 dir = axis / span;
+    vec2 local = p - b;
+    float along = dot(local, dir);
+    float side = dot(local, vec2(-dir.y, dir.x));
+    float ends = cov(-along) * cov(along - span);
+    float body = ends * cov(abs(side) - 8.0);
+    if (body <= 0.0) return c;
+    float h = along / span;
+    vec3 ink = mix(vec3(0.27, 0.29, 0.33), vec3(0.85, 0.88, 0.91), step(h, val));
+    if (zones > 0.5 && h < 0.065) ink = BLUE_LINE;
+    if (zones > 0.5 && h > 0.935) ink = RED_LINE;
+    float joint = min(abs(along - span * 0.25), min(abs(along - span * 0.5), abs(along - span * 0.75)));
+    ink *= mix(0.20, 1.0, smoothstep(1.0, 2.0, joint));
+    ink = mix(ink, vec3(0.70), smoothstep(6.5, 8.0, abs(side)));
+    c = over(vec4(ink, body), c);
     return c;
 }
 
@@ -891,17 +896,17 @@ void main() {
             float silhouette = max(panel.y - 190.0, panel.x + 0.66 * panel.y - 526.0);
             float diagonal = p.x + 0.58 * (p.y - 358.0);
             // Broad graphite-blue facets with a narrow crimson face on the trailing edge.
-            vec3 midnight = mix(vec3(0.025, 0.052, 0.092), vec3(0.065, 0.16, 0.27),
+            vec3 midnight = mix(vec3(0.025, 0.052, 0.092), vec3(0.048, 0.105, 0.175),
                                 clamp((548.0 - p.y) / 380.0, 0.0, 1.0));
-            midnight += vec3(0.035, 0.095, 0.16) * (step(794.0, diagonal) - step(908.0, diagonal));
+            midnight += vec3(0.025, 0.058, 0.095) * (step(794.0, diagonal) - step(908.0, diagonal));
             midnight += vec3(0.025, 0.045, 0.105) * (step(908.0, diagonal) - step(984.0, diagonal));
             midnight = mix(midnight, vec3(0.24, 0.048, 0.09),
                            0.7 * (step(984.0, diagonal) - step(1006.0, diagonal)));
             c = over(vec4(midnight, cov(silhouette)), c);
         }
-        c = bar(p, u_fuelSeg, u_fuel, 0.0, c);
-        c = bar(p, u_oilSeg, u_oil, 1.0, c);
     }
+    c = bar(p, u_fuelSeg, u_fuel, 0.0, c);
+    c = bar(p, u_oilSeg, u_oil, 1.0, c);
     // the bottom line between the brackets
     if (abs(p.y - u_geo.z) < 3.0 && abs(p.x - u_size.x * 0.5) < u_size.x * 0.5 - outerX(u_geo.z))
         c = over(vec4(mix(BLUE_LINE, RED_LINE, step(u_size.x * 0.5, p.x)) * 0.8, cov(abs(p.y - u_geo.z) - 1.2)), c);

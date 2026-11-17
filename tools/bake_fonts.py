@@ -67,6 +67,7 @@ CLUSTER_FONTS = [
     ('m_badge', 'Barlow-Medium.ttf', 26, UPPER + LOWER + DIGITS + ' -'),
     # Sport: BMW Live Cockpit style, the wide numbers in Michroma like BMW's own
     ('s_scale', 'Michroma-Regular.ttf', 27, DIGITS, 1),
+    ('sport_drive', 'Orbitron[wght].ttf', 76, DIGITS + 'PRNDSM-', 0, 'Bold', {'0': 'O'}),
     ('s_speed', 'Michroma-Regular.ttf', 74, DIGITS + '-', 3),
     ('s_hero', 'Michroma-Regular.ttf', 132, DIGITS + '-', 3),   # the big speed in the middle while no map shows (Nov 13 2026)
     ('s_gear', 'Michroma-Regular.ttf', 70, DIGITS + 'PRNDSM-', 3),
