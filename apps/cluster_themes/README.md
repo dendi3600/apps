@@ -25,7 +25,7 @@ A race dash.
 <p align="center"><img src="../../docs/images/cluster-gt3.png" width="900" alt="GT3 theme"></p>
 <p align="center"><img src="../../docs/images/cluster-gt3-map.png" width="900" alt="GT3 theme with the Waze map inside"></p>
 
-### M
+### M8
 
 A current M8's cluster, traced off a photo of it and drawn on black.
 
@@ -114,13 +114,13 @@ A safety dash for hard pulls, in BMW M colours: twelve tiles in a grid (rpm, spe
 
 <p align="center"><img src="../../docs/images/cluster-dyno.png" width="900" alt="Dyno theme"></p>
 
-### M8
+### M2
 
-Twin tachometer blades frame the central gear and speed. A red inset follows each blade. Fuel and oil temperature use curved gauges with silver faces and red level markers.
+A diagonal red tachometer frames the gear and digital speed. Four live gauges show boost, coolant, oil and intake temperature on the faceted blue panel. Fuel and oil scales sit to the right. BMW's bottom status row remains visible.
 
-<p align="center"><img src="../../docs/images/cluster-m-track.png" width="900" alt="M8 cluster"></p>
+<p align="center"><img src="../../docs/images/cluster-m-track.png" width="900" alt="M2 cluster"></p>
 
-Ramp, Track, Drag, Retro 80s, Cruise, Dyno have no map window.
+Ramp, Track, Drag, Retro 80s, Cruise, Dyno and M2 have no map window.
 
 More themes are on the way.
 

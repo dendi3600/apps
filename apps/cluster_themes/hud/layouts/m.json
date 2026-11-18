@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "name": "M",
+  "name": "M8",
   "theme": "mdash",
   "slots": [
     {
@@ -69,9 +69,9 @@
         "max": 150
       },
       "mark": [
-        926,
-        66,
-        1.2
+        0,
+        0,
+        0
       ],
       "segbars": [
         {
@@ -169,9 +169,9 @@
         "max": 150
       },
       "mark": [
-        926,
-        66,
-        1.2
+        0,
+        0,
+        0
       ],
       "segbars": [
         {
@@ -249,7 +249,8 @@
       "wTop": 17,
       "wBend": 44,
       "max": 7000,
-      "toggle": "!mapUp"
+      "toggle": "!mapUp",
+      "redRail": true
     },
     {
       "id": "tach_left_map",
@@ -271,7 +272,8 @@
       "wTop": 17,
       "wBend": 44,
       "max": 7000,
-      "toggle": "mapUp"
+      "toggle": "mapUp",
+      "redRail": true
     },
     {
       "id": "tach_right",
@@ -293,7 +295,8 @@
       "wTop": 17,
       "wBend": 44,
       "max": 7000,
-      "toggle": "!mapUp"
+      "toggle": "!mapUp",
+      "redRail": true
     },
     {
       "id": "tach_right_map",
@@ -315,7 +318,8 @@
       "wTop": 17,
       "wBend": 44,
       "max": 7000,
-      "toggle": "mapUp"
+      "toggle": "mapUp",
+      "redRail": true
     },
     {
       "id": "nl0",
@@ -1430,10 +1434,10 @@
       "x": 760,
       "y": 102,
       "w": 400,
-      "h": 28,
-      "text": "{{badge}}",
-      "font": "m_badge",
-      "color": "dim",
+      "h": 38,
+      "text": "M",
+      "font": "sport_emblem_large",
+      "color": "fg",
       "align": "center"
     },
     {
