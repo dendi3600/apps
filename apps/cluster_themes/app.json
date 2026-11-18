@@ -1,8 +1,8 @@
 {
   "id": "cluster_themes",
   "title": "Cluster Themes",
-  "description": "Redraws the instrument cluster: GT3 race dash, M8 (twin tachometer), M view, Vector (with a music panel), M1, Ramp, Drag, AMG Circuit, Retro 80s, AMG Track, or M2 (diagonal tachometer), with shift lights, boost, temps, tyres, a G-meter and a 0-60 timer",
-  "version": "0.19.34",
+  "description": "Custom instrument cluster themes with live gauges and drive-mode selection.",
+  "version": "0.19.35",
   "vendor": "custom",
   "loggingId": "OAC1",
   "iconGlyph": "CLU",
@@ -109,7 +109,7 @@
       "key": "hudLayout",
       "label": "Theme (when not by drive mode)",
       "type": "choice",
-      "default": "gt3",
+      "default": "vector",
       "options": [
         [
           "sport",
@@ -128,8 +128,16 @@
           "AMG Circuit"
         ],
         [
+          "supersport",
+          "AMG Circuit 2 · Supersport"
+        ],
+        [
           "cruise",
           "AMG Track"
+        ],
+        [
+          "vector",
+          "Red sport"
         ],
         [
           "srinivas",
@@ -140,20 +148,8 @@
           "M view"
         ],
         [
-          "minimal",
-          "Ramp"
-        ],
-        [
           "off",
           "Off (BMW's own cluster)"
-        ],
-        [
-          "gt3",
-          "GT3"
-        ],
-        [
-          "vector",
-          "Vector"
         ],
         [
           "drag",
@@ -202,8 +198,16 @@
           "AMG Circuit"
         ],
         [
+          "supersport",
+          "AMG Circuit 2 · Supersport"
+        ],
+        [
           "cruise",
           "AMG Track"
+        ],
+        [
+          "vector",
+          "Red sport"
         ],
         [
           "srinivas",
@@ -214,20 +218,8 @@
           "M view"
         ],
         [
-          "minimal",
-          "Ramp"
-        ],
-        [
           "off",
           "Off (BMW's own cluster)"
-        ],
-        [
-          "gt3",
-          "GT3"
-        ],
-        [
-          "vector",
-          "Vector"
         ],
         [
           "drag",
@@ -243,7 +235,7 @@
       "key": "inSport",
       "label": "In Sport",
       "type": "choice",
-      "default": "gt3",
+      "default": "vector",
       "options": [
         [
           "sport",
@@ -262,8 +254,16 @@
           "AMG Circuit"
         ],
         [
+          "supersport",
+          "AMG Circuit 2 · Supersport"
+        ],
+        [
           "cruise",
           "AMG Track"
+        ],
+        [
+          "vector",
+          "Red sport"
         ],
         [
           "srinivas",
@@ -274,20 +274,8 @@
           "M view"
         ],
         [
-          "minimal",
-          "Ramp"
-        ],
-        [
           "off",
           "Off (BMW's own cluster)"
-        ],
-        [
-          "gt3",
-          "GT3"
-        ],
-        [
-          "vector",
-          "Vector"
         ],
         [
           "drag",
@@ -322,8 +310,16 @@
           "AMG Circuit"
         ],
         [
+          "supersport",
+          "AMG Circuit 2 · Supersport"
+        ],
+        [
           "cruise",
           "AMG Track"
+        ],
+        [
+          "vector",
+          "Red sport"
         ],
         [
           "srinivas",
@@ -334,20 +330,8 @@
           "M view"
         ],
         [
-          "minimal",
-          "Ramp"
-        ],
-        [
           "off",
           "Off (BMW's own cluster)"
-        ],
-        [
-          "gt3",
-          "GT3"
-        ],
-        [
-          "vector",
-          "Vector"
         ],
         [
           "drag",

@@ -49,25 +49,30 @@ function mask(boxW, boxH, text, opts) {
     const font = loadFont(opts.font);
     const spacing = opts.spacing || 0;
     const out = Buffer.alloc(boxW * boxH, 0);
-    const width = measure(text, opts.font, spacing);
+    const mixed = opts.trailingDigitFont && /^\d{2,}$/.test(text);
+    const tail = mixed ? loadFont(opts.trailingDigitFont) : font;
+    const width = mixed ? glyphOf(font, text[0]).advance + spacing +
+        measure(text.slice(1), opts.trailingDigitFont, spacing) : measure(text, opts.font, spacing);
     let pen = (opts.x || 0) + (opts.align === 'right' ? boxW - width : opts.align === 'center' ? Math.round((boxW - width) / 2) : 0);
     const offY = opts.offsetY || 0;
+    let face = font;
     for (const ch of String(text)) {
-        const g = glyphOf(font, ch);
+        const g = glyphOf(face, ch);
         const x0 = Math.round(pen + g.ox);       // spacing can be fractional: snap each glyph to a pixel
         for (let y = 0; y < g.h; y++) {
-            const dy = y + offY;
+            const dy = y + offY + font.metrics.baseline - face.metrics.baseline;
             if (dy < 0 || dy >= boxH) continue;
-            const srcRow = (g.y + y) * font.width + g.x;
+            const srcRow = (g.y + y) * face.width + g.x;
             const dstRow = dy * boxW;
             for (let x = 0; x < g.w; x++) {
                 const dx = x0 + x;
                 if (dx < 0 || dx >= boxW) continue;
-                const a = font.alpha[srcRow + x];
+                const a = face.alpha[srcRow + x];
                 if (a > out[dstRow + dx]) out[dstRow + dx] = a; // overlapping cells: keep the stronger ink
             }
         }
         pen += g.advance + spacing;
+        face = tail;
     }
     return out;
 }
@@ -100,7 +105,18 @@ function blur(src, w, h, r, passes) {
 }
 
 function drawText(boxW, boxH, text, opts) {
-    return tint(mask(boxW, boxH, text, opts), boxW, boxH, opts);
+    const coverage = mask(boxW, boxH, text, opts);
+    if (!opts.slope) return tint(coverage, boxW, boxH, opts);
+    const tilted = Buffer.alloc(coverage.length);
+    for (let x = 0; x < boxW; x++) {
+        const shift = Math.abs(opts.slope) * (boxW - 1) / 2 + opts.slope * (x - (boxW - 1) / 2);
+        const rows = Math.floor(shift), fraction = shift - rows;
+        for (let y = rows; y < boxH; y++) {
+            const src = (y - rows) * boxW + x;
+            tilted[y * boxW + x] = Math.round(coverage[src] * (1 - fraction) + (src >= boxW ? coverage[src - boxW] * fraction : 0));
+        }
+    }
+    return tint(tilted, boxW, boxH, opts);
 }
 
 /** Colour a coverage mask (plus optional glow) into straight RGBA. opts: color, color2 (bottom, for a gradient), glow, font. */

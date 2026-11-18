@@ -21,6 +21,13 @@ function arc(px, py, cx, cy, r, a0, a1) {          // clockwise from 12 o'clock,
 
 /** Distance (in box units) from (x, y) to the icon's ink; < 0 or < stroke half-width = ink. */
 const ICONS = {
+    // Air entering a thermometer, readable even at instrument-cluster scale.
+    intakeAir: (x, y) => Math.min(
+        seg(x, y, .12, .49, .52, .49) - .043,
+        seg(x, y, .37, .34, .52, .49) - .043,
+        seg(x, y, .37, .64, .52, .49) - .043,
+        seg(x, y, .76, .18, .76, .66) - .060,
+        ring(x, y, .76, .74, .115) - .046),
     gauge: (x, y) => Math.min(arc(x, y, 0.5, 0.55, 0.36, -0.75 * Math.PI, 0.75 * Math.PI) - 0.045, seg(x, y, 0.5, 0.55, 0.7, 0.36) - 0.045, disc(x, y, 0.5, 0.55, 0.07)),
     shock: (x, y) => Math.min(seg(x, y, 0.24, 0.78, 0.5, 0.52) - 0.11, seg(x, y, 0.5, 0.52, 0.78, 0.24) - 0.035, seg(x, y, 0.14, 0.88, 0.2, 0.82) - 0.05, seg(x, y, 0.8, 0.22, 0.86, 0.16) - 0.05),
     wheel: (x, y) => Math.min(ring(x, y, 0.5, 0.5, 0.38) - 0.055, disc(x, y, 0.5, 0.55, 0.1), seg(x, y, 0.14, 0.5, 0.42, 0.55) - 0.05, seg(x, y, 0.58, 0.55, 0.86, 0.5) - 0.05, seg(x, y, 0.5, 0.62, 0.5, 0.86) - 0.05),

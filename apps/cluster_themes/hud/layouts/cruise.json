@@ -34,41 +34,26 @@
       "type": "text",
       "z": 5,
       "x": 800,
-      "y": 225,
+      "y": 224,
       "w": 320,
       "h": 30,
       "text": "{{u:speedLc}}",
-      "font": "r_label",
-      "color": "dim",
+      "font": "s_unit",
+      "color": "fg",
       "align": "center",
-      "conn": 1
-    },
-    {
-      "id": "gear",
-      "type": "text",
-      "z": 5,
-      "x": 895,
-      "y": 398,
-      "w": 130,
-      "h": 70,
-      "text": "{{gearnum}}",
-      "font": "value",
-      "color": "dim",
-      "align": "center",
-      "hotWhen": "now",
       "conn": 1
     },
     {
       "id": "scale_-1_0",
       "type": "text",
       "text": "0",
-      "font": "head",
+      "font": "track_rpm_0",
       "color": "fg",
       "align": "center",
       "x": 675,
-      "y": 332,
+      "y": 342,
       "w": 64,
-      "h": 40,
+      "h": 19,
       "z": 4,
       "conn": 2
     },
@@ -76,13 +61,13 @@
       "id": "scale_1_0",
       "type": "text",
       "text": "0",
-      "font": "head",
+      "font": "track_rpm_0",
       "color": "fg",
       "align": "center",
       "x": 1181,
-      "y": 332,
+      "y": 342,
       "w": 64,
-      "h": 40,
+      "h": 19,
       "z": 4,
       "conn": 3
     },
@@ -90,13 +75,13 @@
       "id": "scale_-1_1",
       "type": "text",
       "text": "1",
-      "font": "head",
+      "font": "track_rpm_1",
       "color": "fg",
       "align": "center",
       "x": 608,
-      "y": 336,
+      "y": 343,
       "w": 64,
-      "h": 40,
+      "h": 22,
       "z": 4,
       "conn": 2
     },
@@ -104,13 +89,13 @@
       "id": "scale_1_1",
       "type": "text",
       "text": "1",
-      "font": "head",
+      "font": "track_rpm_1",
       "color": "fg",
       "align": "center",
       "x": 1248,
-      "y": 336,
+      "y": 343,
       "w": 64,
-      "h": 40,
+      "h": 22,
       "z": 4,
       "conn": 3
     },
@@ -118,13 +103,13 @@
       "id": "scale_-1_2",
       "type": "text",
       "text": "2",
-      "font": "scale",
+      "font": "track_rpm_2",
       "color": "fg",
       "align": "center",
       "x": 542,
-      "y": 341,
+      "y": 346,
       "w": 64,
-      "h": 40,
+      "h": 24,
       "z": 4,
       "conn": 2
     },
@@ -132,13 +117,13 @@
       "id": "scale_1_2",
       "type": "text",
       "text": "2",
-      "font": "scale",
+      "font": "track_rpm_2",
       "color": "fg",
       "align": "center",
       "x": 1314,
-      "y": 341,
+      "y": 346,
       "w": 64,
-      "h": 40,
+      "h": 24,
       "z": 4,
       "conn": 3
     },
@@ -146,13 +131,13 @@
       "id": "scale_-1_4",
       "type": "text",
       "text": "4",
-      "font": "unit",
+      "font": "track_rpm_4",
       "color": "fg",
       "align": "center",
       "x": 410,
-      "y": 345,
+      "y": 349,
       "w": 64,
-      "h": 40,
+      "h": 30,
       "z": 4,
       "conn": 2
     },
@@ -160,13 +145,13 @@
       "id": "scale_1_4",
       "type": "text",
       "text": "4",
-      "font": "unit",
+      "font": "track_rpm_4",
       "color": "fg",
       "align": "center",
       "x": 1446,
-      "y": 345,
+      "y": 349,
       "w": 64,
-      "h": 40,
+      "h": 30,
       "z": 4,
       "conn": 3
     },
@@ -174,13 +159,13 @@
       "id": "scale_-1_6",
       "type": "text",
       "text": "6",
-      "font": "v_title",
+      "font": "track_rpm_6",
       "color": "fg",
       "align": "center",
       "x": 277,
-      "y": 346,
+      "y": 353,
       "w": 64,
-      "h": 48,
+      "h": 35,
       "z": 4,
       "conn": 2
     },
@@ -188,13 +173,13 @@
       "id": "scale_1_6",
       "type": "text",
       "text": "6",
-      "font": "v_title",
+      "font": "track_rpm_6",
       "color": "fg",
       "align": "center",
       "x": 1579,
-      "y": 346,
+      "y": 353,
       "w": 64,
-      "h": 48,
+      "h": 35,
       "z": 4,
       "conn": 3
     },
@@ -202,7 +187,7 @@
       "id": "scale_-1_8",
       "type": "text",
       "text": "8",
-      "font": "v_title",
+      "font": "track_rpm_8",
       "color": [
         249,
         46,
@@ -211,9 +196,9 @@
       ],
       "align": "center",
       "x": 145,
-      "y": 351,
+      "y": 356,
       "w": 64,
-      "h": 48,
+      "h": 42,
       "z": 4,
       "conn": 2
     },
@@ -221,7 +206,7 @@
       "id": "scale_1_8",
       "type": "text",
       "text": "8",
-      "font": "v_title",
+      "font": "track_rpm_8",
       "color": [
         249,
         46,
@@ -230,9 +215,9 @@
       ],
       "align": "center",
       "x": 1711,
-      "y": 351,
+      "y": 356,
       "w": 64,
-      "h": 48,
+      "h": 42,
       "z": 4,
       "conn": 3
     },
@@ -254,8 +239,8 @@
       "type": "icon",
       "id": "pump",
       "icon": "fuelRight",
-      "x": 223,
-      "y": 592,
+      "x": 285,
+      "y": 598,
       "w": 35,
       "h": 26,
       "z": 5,
@@ -335,9 +320,9 @@
       "type": "text",
       "text": "{{range}} {{u:distLc}}",
       "font": "s_unit",
-      "x": 257,
-      "y": 591,
-      "w": 215,
+      "x": 321,
+      "y": 597,
+      "w": 128,
       "h": 32,
       "z": 5,
       "conn": 1,
@@ -401,6 +386,270 @@
         64
       ],
       "style": "trackFooter"
+    },
+    {
+      "id": "rpm_unit_left",
+      "type": "text",
+      "text": "x1000/min",
+      "font": "m_tiny",
+      "color": "dim",
+      "align": "center",
+      "x": 170,
+      "y": 409,
+      "w": 170,
+      "h": 48,
+      "z": 4,
+      "conn": 2,
+      "slope": -0.07
+    },
+    {
+      "id": "rpm_unit_right",
+      "type": "text",
+      "text": "x1000/min",
+      "font": "m_tiny",
+      "color": "dim",
+      "align": "center",
+      "x": 1580,
+      "y": 409,
+      "w": 170,
+      "h": 48,
+      "z": 4,
+      "conn": 3,
+      "slope": 0.07
+    },
+    {
+      "id": "intake_symbol",
+      "type": "icon",
+      "icon": "intakeAir",
+      "x": 754,
+      "y": 311,
+      "w": 38,
+      "h": 34,
+      "z": 5,
+      "conn": 0,
+      "color": [
+        100,
+        199,
+        255,
+        255
+      ]
+    },
+    {
+      "id": "intake_gauge",
+      "type": "meter",
+      "signal": "intake",
+      "x": 805,
+      "y": 322,
+      "w": 215,
+      "h": 12,
+      "min": -20,
+      "max": 80,
+      "style": "trackTemperature",
+      "segments": 4,
+      "gap": 2,
+      "colors": [
+        [
+          86,
+          201,
+          255
+        ],
+        [
+          86,
+          201,
+          255
+        ],
+        [
+          244,
+          54,
+          75
+        ]
+      ],
+      "trackColor": [
+        10,
+        33,
+        62
+      ],
+      "at": [
+        0.65,
+        0.83
+      ],
+      "z": 3,
+      "conn": 0
+    },
+    {
+      "id": "intake_reading",
+      "type": "text",
+      "text": "{{intake}}{{u:temp}}",
+      "font": "s_unit",
+      "x": 1039,
+      "y": 312,
+      "w": 128,
+      "h": 32,
+      "align": "left",
+      "color": [
+        100,
+        199,
+        255,
+        255
+      ],
+      "z": 5,
+      "conn": 0
+    },
+    {
+      "id": "oil_symbol",
+      "type": "icon",
+      "icon": "oilcan",
+      "x": 754,
+      "y": 348,
+      "w": 38,
+      "h": 34,
+      "z": 5,
+      "conn": 0,
+      "color": [
+        100,
+        199,
+        255,
+        255
+      ]
+    },
+    {
+      "id": "oil_gauge",
+      "type": "meter",
+      "signal": "oil",
+      "x": 805,
+      "y": 359,
+      "w": 215,
+      "h": 12,
+      "min": 40,
+      "max": 160,
+      "style": "trackTemperature",
+      "segments": 4,
+      "gap": 2,
+      "colors": [
+        [
+          86,
+          201,
+          255
+        ],
+        [
+          86,
+          201,
+          255
+        ],
+        [
+          244,
+          54,
+          75
+        ]
+      ],
+      "trackColor": [
+        10,
+        33,
+        62
+      ],
+      "at": [
+        0.65,
+        0.83
+      ],
+      "z": 3,
+      "conn": 0
+    },
+    {
+      "id": "oil_reading",
+      "type": "text",
+      "text": "{{oil}}{{u:temp}}",
+      "font": "s_unit",
+      "x": 1039,
+      "y": 349,
+      "w": 128,
+      "h": 32,
+      "align": "left",
+      "color": [
+        100,
+        199,
+        255,
+        255
+      ],
+      "z": 5,
+      "conn": 0
+    },
+    {
+      "id": "coolant_symbol",
+      "type": "icon",
+      "icon": "therm",
+      "x": 754,
+      "y": 385,
+      "w": 38,
+      "h": 34,
+      "z": 5,
+      "conn": 0,
+      "color": [
+        100,
+        199,
+        255,
+        255
+      ]
+    },
+    {
+      "id": "coolant_gauge",
+      "type": "meter",
+      "signal": "coolant",
+      "x": 805,
+      "y": 396,
+      "w": 215,
+      "h": 12,
+      "min": 40,
+      "max": 130,
+      "style": "trackTemperature",
+      "segments": 4,
+      "gap": 2,
+      "colors": [
+        [
+          86,
+          201,
+          255
+        ],
+        [
+          86,
+          201,
+          255
+        ],
+        [
+          244,
+          54,
+          75
+        ]
+      ],
+      "trackColor": [
+        10,
+        33,
+        62
+      ],
+      "at": [
+        0.65,
+        0.83
+      ],
+      "z": 3,
+      "conn": 0
+    },
+    {
+      "id": "coolant_reading",
+      "type": "text",
+      "text": "{{coolant}}{{u:temp}}",
+      "font": "s_unit",
+      "x": 1039,
+      "y": 386,
+      "w": 128,
+      "h": 32,
+      "align": "left",
+      "color": [
+        100,
+        199,
+        255,
+        255
+      ],
+      "z": 5,
+      "conn": 0
     }
   ]
 }

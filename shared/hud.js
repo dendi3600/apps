@@ -351,7 +351,7 @@ function mediaText(v) {
 /** Seconds as m:ss. */
 function clockOf(sec) { const t = Math.max(0, Math.floor(sec)); return Math.floor(t / 60) + ':' + ('0' + (t % 60)).slice(-2); }   // its speed scale: 0..200 mph by 20, 0..330 km/h by 30 (linear)
 const ROAD_DASH_M = 12;            // the Sport road: metres per dash and gap (shaders.js sdash u_road)
-const CUE_TYPES = { redlineRamp: true, lights: true, shiftbar: true, revbar: true, revarc: true, ribbon: true, mtach: true };
+const CUE_TYPES = { mtrack: true, redlineRamp: true, lights: true, shiftbar: true, revbar: true, revarc: true, ribbon: true, mtach: true };
 // the shift-light test (page.js Alerts): rpm climbs from TEST_FROM to just past the shift point, then holds
 const TEST_FROM = 1500, TEST_CLIMB_MS = 2500, TEST_HOLD_MS = 1200;
 // night colours (Cluster Themes "nightDim"): after sunset the theme's whites and greys go to this brightness
@@ -1596,6 +1596,10 @@ class HudApp {
     }
 
     _raw(name) {
+        if (name === 'horsepower') {
+            const d = this.car.data();
+            return isNum(d.torque) && isNum(d.rpm) ? Math.max(0, d.torque * d.rpm) * 1.341 / 9549 : null;
+        }
         if (name === 'boost') return this._boost();
         if (name === 'gLat' || name === 'gLong') {
             // the 150 ms average while samples come in; else the car's last reading, unless it is a bad one
@@ -1702,6 +1706,8 @@ class HudApp {
             case 'mediaArtist': return this._mediaOn() ? this.media.artist : '';
             case 'mediaElapsed': { const e = this._mediaElapsed(); return e === null ? '' : clockOf(e); }
             case 'mediaLeft': { const e = this._mediaElapsed(); return e === null ? '' : '-' + clockOf(this.media.total - e); }
+            case 'supersportMax': return us ? '200' : '300';
+            case 'supersportStep': return us ? '10' : '15';
             case 'speed2': { const v = this._raw('speed'); return fix(isNum(v) ? (us ? v : v * 0.621371) : v, 0); }   // the other unit
             case 'u:speed2Lc': return us ? 'km/h' : 'mph';
             case 'u:speed2': return us ? 'KM/H' : 'MPH';
@@ -1727,12 +1733,11 @@ class HudApp {
                 return (n > 0 ? '+' : '') + n;
             }
             case 'u:torque': return us ? 'lb-ft' : 'Nm';
+            case 'horsepower': return fix(this._raw('horsepower'), 0);
             case 'u:power': return us ? 'hp' : 'kW';
-            case 'power': {          // kW from the crank torque and rpm; hp in US units
-                const d = this.car.data(), rpm = this._raw('rpm');
-                if (!isNum(d.torque) || !isNum(rpm)) return '--';
-                const kw = Math.max(0, d.torque) * rpm / 9549;
-                return String(Math.round(us ? kw * 1.341 : kw));
+            case 'power': {          // Use the same crank torque and engine RPM sample as the horsepower meter.
+                const hp = this._raw('horsepower');
+                return fix(isNum(hp) && !us ? hp / 1.341 : hp, 0);
             }
             case 'hvSoc': { const v = this._raw('hvSoc'); return isNum(v) ? String(Math.round(v)) : '--'; }
             case 'fuelPct': { const v = this._raw('fuel'); return isNum(v) ? String(Math.round(v * 100)) : '--'; }
@@ -2290,7 +2295,7 @@ class HudApp {
             const cs = w.colors || ['fg', 'fg', 'hot'];
             c.uniform(ref, 'u_size', [w.w, w.h]);
             c.uniform(ref, 'u_continuous', [w.continuous ? 1 : 0]);
-            c.uniform(ref, 'u_tip', [w.style === 'trackFooter' ? (w.tip ? -2 : -1) : (w.tip ? 1 : 0)]);
+            c.uniform(ref, 'u_tip', [w.style === 'mInstrument' ? -3 : w.style === 'redFooter' ? -1.375 : w.style === 'trackTemperature' ? -1.25 : w.style === 'trackFooter' ? (w.tip ? -2 : -1) : (w.tip ? 1 : 0)]);
             c.uniform(ref, 'u_segs', [w.segments || 20]);
             c.uniform(ref, 'u_gap', [isNum(w.gap) ? w.gap : 4]);
             c.uniform(ref, 'u_vertical', [w.vertical ? 1 : 0]);
@@ -2648,7 +2653,7 @@ class HudApp {
                 font = f;
             }
             const buf = textRaster.drawText(w.w, w.h, s, {
-                font, offsetY, color: color(this.theme, role), align: w.align, spacing: w.spacing,
+                font, offsetY, trailingDigitFont: w.trailingDigitFont, slope: w.slope, color: color(this.theme, role), align: w.align, spacing: w.spacing,
                 color2: w.color2 && role !== 'hot' ? color(this.theme, w.color2) : null,
                 glow: w.glow ? this.theme.glow : 0,
             });
@@ -2753,7 +2758,7 @@ class HudApp {
             }
             let raw = sig ? this._raw(sig) : null;
             if (ab && isNum(raw)) raw = Math.abs(raw);
-            const v = isNum(raw) && mx !== mn ? Math.min(1, Math.max(0, (raw - mn) / (mx - mn))) : (w.style === 'trackFooter' ? -1 : 0);
+            const v = isNum(raw) && mx !== mn ? Math.min(1, Math.max(0, (raw - mn) / (mx - mn))) : (w.style === 'redFooter' || w.style === 'trackFooter' || w.style === 'trackTemperature' || w.style === 'mInstrument' ? -1 : 0);
             const q = Math.round(v * 200) / 200;
             const pk = w.peak ? this._peakHold(x, q, now, w.peak) : -1;
             const key = q + '|' + pk;
@@ -2771,15 +2776,38 @@ class HudApp {
             const value = isNum(rpm) ? Math.round(rpm / 10) / 800 : -1;
             const shiftPulse = w.type === 'amgtrack' && isNum(rpm) && rpm >= this._shift().rpm
                 ? (1 + Math.cos(now * Math.PI / 420)) / 2 : 0;
-            const stateKey = value + '|' + shiftPulse;
-            if (force || x.last !== stateKey) x.c.uniform(x.ref, 'u_state', [value, shiftPulse, 0, 0]);
+            const twin = w.style === 'supersport';
+            const speed = twin ? this._raw('speed') : null;
+            const us = this.setting('units') === 'us';
+            const speedFraction = isNum(speed) ? Math.min(1, Math.max(0, us ? speed * .621371 / 200 : speed / 300)) : -1;
+            const stateKey = value + '|' + shiftPulse + '|' + speedFraction;
+            if (force || x.last !== stateKey) x.c.uniform(x.ref, 'u_state', [value, shiftPulse, twin ? 1 : 0, speedFraction]);
             x.last = stateKey;
+        } else if (w.type === 'redsport') {
+            const d = this.car.data();
+            const fraction = (v, max) => isNum(v) ? Math.round(Math.max(0, Math.min(1, v / max)) * 1000) / 1000 : -1;
+            const hp = isNum(d.torque) && isNum(d.rpm) ? d.torque * d.rpm * 1.341 / 9549 : null;
+            const values = [fraction(this._raw('rpm'), 8000), fraction(d.torque, 800), fraction(hp, 600), 0];
+            const key = values.join('|');
+            if (!force && x.last === key) return;
+            x.last = key;
+            x.c.uniform(x.ref, 'u_state', values);
         } else if (w.type === 'mtrack') {
             const fraction = (signal, low, high) => {
                 const raw = this._raw(signal);
                 return isNum(raw) ? Math.round(500 * Math.max(0, Math.min(1, (raw-low)/(high-low)))) / 500 : -1;
             };
-            const values = [fraction('rpm', 0, 8000), fraction('oil', 50, 150), fraction('fuel', 0, 1), 0];
+            const rpm = this._raw('rpm'), shift = this._shift();
+            let lamps = 0;
+            if (isNum(rpm)) {
+                if (this._countIn()) {
+                    lamps = this.cue.now.shift ? (this.cue.blink(now) ? 8 : 0) : Math.floor(this.cue.fraction(rpm) * 8);
+                } else {
+                    // The final half-division leads into the current per-gear shift point.
+                    lamps = Math.floor(8 * Math.min(1, Math.max(0, (rpm - shift.rpm + 500) / 500)));
+                }
+            }
+            const values = [fraction('rpm', 0, 8000), fraction('oil', 50, 150), fraction('fuel', 0, 1), lamps];
             const key = values.join('|');
             if (!force && x.last === key) return;
             x.last = key;

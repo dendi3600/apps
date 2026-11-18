@@ -1,0 +1,590 @@
+{
+  "schemaVersion": 2,
+  "name": "AMG Circuit 2 \u00b7 Supersport",
+  "theme": "sportdash",
+  "widgets": [
+    {
+      "id": "rpm_face",
+      "type": "circuit",
+      "x": 0,
+      "y": 0,
+      "w": 1920,
+      "h": 660,
+      "z": 0,
+      "style": "supersport"
+    },
+    {
+      "id": "speed",
+      "type": "text",
+      "text": "{{speed}}",
+      "font": "circuit_speed",
+      "x": 231,
+      "y": 426,
+      "w": 260,
+      "h": 95,
+      "z": 5,
+      "align": "center",
+      "color": "fg",
+      "conn": 1
+    },
+    {
+      "id": "unit",
+      "type": "text",
+      "text": "{{u:speedLc}}",
+      "font": "m_unit",
+      "x": 231,
+      "y": 512,
+      "w": 260,
+      "h": 32,
+      "z": 5,
+      "align": "center",
+      "color": "fg",
+      "conn": 1
+    },
+    {
+      "id": "badge",
+      "type": "text",
+      "text": "M",
+      "font": "circuit_emblem",
+      "x": 942,
+      "y": 564,
+      "w": 128,
+      "h": 58,
+      "z": 5,
+      "align": "center",
+      "color": "fg",
+      "conn": 1
+    },
+    {
+      "type": "meter",
+      "id": "fuel_bar",
+      "x": 174,
+      "y": 619,
+      "w": 270,
+      "h": 12,
+      "z": 4,
+      "conn": 1,
+      "signal": "fuelSystemPct",
+      "min": 0,
+      "max": 1,
+      "segments": 4,
+      "gap": 4,
+      "continuous": true,
+      "style": "trackFooter",
+      "trackColor": [
+        19,
+        38,
+        64
+      ],
+      "colors": [
+        [
+          171,
+          217,
+          248
+        ],
+        [
+          171,
+          217,
+          248
+        ],
+        [
+          171,
+          217,
+          248
+        ]
+      ]
+    },
+    {
+      "type": "text",
+      "id": "fuel_empty",
+      "text": "0",
+      "x": 142,
+      "y": 606,
+      "w": 30,
+      "h": 29,
+      "z": 5,
+      "font": "head",
+      "color": "fg",
+      "conn": 1,
+      "align": "center"
+    },
+    {
+      "type": "text",
+      "id": "fuel_full",
+      "text": "1",
+      "x": 445,
+      "y": 606,
+      "w": 30,
+      "h": 29,
+      "z": 5,
+      "font": "head",
+      "color": "fg",
+      "conn": 1,
+      "align": "center"
+    },
+    {
+      "type": "icon",
+      "id": "pump",
+      "icon": "fuelRight",
+      "x": 101,
+      "y": 606,
+      "w": 35,
+      "h": 26,
+      "z": 5,
+      "conn": 1,
+      "color": "fg",
+      "lowFuelAt": 0.125
+    },
+    {
+      "id": "rpm_read",
+      "type": "text",
+      "text": "{{rpm}}",
+      "x": 1365,
+      "y": 429,
+      "font": "circuit_speed",
+      "trailingDigitFont": "supersport_rpm_tail",
+      "w": 350,
+      "h": 94,
+      "align": "center",
+      "color": "fg",
+      "z": 5,
+      "conn": 1
+    },
+    {
+      "id": "rpm_suffix",
+      "type": "text",
+      "text": "x 1/min",
+      "x": 1450,
+      "y": 515,
+      "font": "m_tiny",
+      "w": 180,
+      "h": 36,
+      "align": "center",
+      "color": "fg",
+      "z": 5,
+      "conn": 1
+    },
+    {
+      "id": "range",
+      "type": "text",
+      "text": "{{range}} {{u:distLc}}",
+      "x": 450,
+      "y": 607,
+      "font": "s_unit",
+      "w": 160,
+      "h": 36,
+      "align": "center",
+      "color": "fg",
+      "z": 5,
+      "conn": 1
+    },
+    {
+      "id": "velocity_0",
+      "type": "text",
+      "text": "0",
+      "x": 160,
+      "y": 116,
+      "font": "wing_scale_33",
+      "w": 58,
+      "h": 37,
+      "align": "center",
+      "color": "fg",
+      "z": 5,
+      "conn": 1
+    },
+    {
+      "id": "velocity_1",
+      "type": "text",
+      "text": "{{supersportStep}}",
+      "x": 193,
+      "y": 122,
+      "font": "wing_scale_33",
+      "w": 58,
+      "h": 37,
+      "align": "center",
+      "color": "fg",
+      "z": 5,
+      "conn": 1
+    },
+    {
+      "id": "velocity_2",
+      "type": "text",
+      "text": "{{supersportMax}}",
+      "x": 590,
+      "y": 205,
+      "font": "wing_scale_23",
+      "w": 58,
+      "h": 37,
+      "align": "center",
+      "color": [
+        67,
+        204,
+        255,
+        255
+      ],
+      "z": 5,
+      "conn": 1
+    },
+    {
+      "id": "rev_0",
+      "type": "text",
+      "text": "0",
+      "x": 1713,
+      "y": 116,
+      "font": "wing_scale_33",
+      "w": 42,
+      "h": 37,
+      "align": "center",
+      "color": [
+        244,
+        248,
+        255,
+        255
+      ],
+      "z": 5,
+      "conn": 1
+    },
+    {
+      "id": "rev_1",
+      "type": "text",
+      "text": "1",
+      "x": 1643,
+      "y": 130,
+      "font": "wing_scale_33",
+      "w": 58,
+      "h": 37,
+      "align": "center",
+      "color": [
+        222,
+        243,
+        255,
+        255
+      ],
+      "z": 5,
+      "conn": 1
+    },
+    {
+      "id": "rev_2",
+      "type": "text",
+      "text": "2",
+      "x": 1589,
+      "y": 143,
+      "font": "wing_scale_33",
+      "w": 58,
+      "h": 37,
+      "align": "center",
+      "color": [
+        179,
+        228,
+        252,
+        255
+      ],
+      "z": 5,
+      "conn": 1
+    },
+    {
+      "id": "rev_3",
+      "type": "text",
+      "text": "3",
+      "x": 1540,
+      "y": 159,
+      "font": "wing_scale_28",
+      "w": 58,
+      "h": 37,
+      "align": "center",
+      "color": [
+        134,
+        205,
+        241,
+        255
+      ],
+      "z": 5,
+      "conn": 1
+    },
+    {
+      "id": "rev_4",
+      "type": "text",
+      "text": "4",
+      "x": 1497,
+      "y": 169,
+      "font": "wing_scale_28",
+      "w": 58,
+      "h": 37,
+      "align": "center",
+      "color": [
+        108,
+        184,
+        225,
+        255
+      ],
+      "z": 5,
+      "conn": 1
+    },
+    {
+      "id": "rev_5",
+      "type": "text",
+      "text": "5",
+      "x": 1459,
+      "y": 178,
+      "font": "wing_scale_28",
+      "w": 58,
+      "h": 37,
+      "align": "center",
+      "color": [
+        87,
+        158,
+        203,
+        255
+      ],
+      "z": 5,
+      "conn": 1
+    },
+    {
+      "id": "rev_6",
+      "type": "text",
+      "text": "6",
+      "x": 1424,
+      "y": 191,
+      "font": "wing_scale_23",
+      "w": 58,
+      "h": 37,
+      "align": "center",
+      "color": [
+        137,
+        172,
+        194,
+        255
+      ],
+      "z": 5,
+      "conn": 1
+    },
+    {
+      "id": "rev_7",
+      "type": "text",
+      "text": "7",
+      "x": 1393,
+      "y": 198,
+      "font": "wing_scale_23",
+      "w": 58,
+      "h": 37,
+      "align": "center",
+      "color": [
+        221,
+        66,
+        78,
+        255
+      ],
+      "z": 5,
+      "conn": 1
+    },
+    {
+      "id": "rev_8",
+      "type": "text",
+      "text": "8",
+      "x": 1365,
+      "y": 205,
+      "font": "wing_scale_23",
+      "w": 58,
+      "h": 37,
+      "align": "center",
+      "color": [
+        255,
+        48,
+        65,
+        255
+      ],
+      "z": 5,
+      "conn": 2
+    },
+    {
+      "id": "power_unit",
+      "type": "text",
+      "text": "{{u:power}}",
+      "x": 818,
+      "y": 288,
+      "w": 84,
+      "h": 32,
+      "z": 5,
+      "conn": 3,
+      "align": "right",
+      "font": "s_unit",
+      "color": "fg"
+    },
+    {
+      "id": "power_reading",
+      "type": "text",
+      "text": "{{power}}",
+      "x": 1104,
+      "y": 288,
+      "w": 90,
+      "h": 32,
+      "z": 5,
+      "conn": 3,
+      "align": "left",
+      "font": "s_unit",
+      "color": "fg"
+    },
+    {
+      "id": "power_bar",
+      "type": "meter",
+      "signal": "horsepower",
+      "min": 0,
+      "max": 600,
+      "x": 918,
+      "y": 292,
+      "w": 169,
+      "h": 16,
+      "z": 3,
+      "conn": 3,
+      "segments": 4,
+      "gap": 2,
+      "style": "trackFooter",
+      "colors": [
+        [
+          221,
+          230,
+          234
+        ],
+        [
+          221,
+          230,
+          234
+        ],
+        [
+          221,
+          230,
+          234
+        ]
+      ],
+      "trackColor": [
+        20,
+        26,
+        32
+      ],
+      "continuous": true,
+      "tip": true
+    },
+    {
+      "id": "torque_unit",
+      "type": "text",
+      "text": "{{u:torque}}",
+      "x": 818,
+      "y": 352,
+      "w": 84,
+      "h": 32,
+      "z": 5,
+      "conn": 3,
+      "align": "right",
+      "font": "s_unit",
+      "color": "fg"
+    },
+    {
+      "id": "torque_reading",
+      "type": "text",
+      "text": "{{torque}}",
+      "x": 1104,
+      "y": 352,
+      "w": 90,
+      "h": 32,
+      "z": 5,
+      "conn": 3,
+      "align": "left",
+      "font": "s_unit",
+      "color": "fg"
+    },
+    {
+      "id": "torque_bar",
+      "type": "meter",
+      "signal": "torque",
+      "min": 0,
+      "max": 800,
+      "x": 918,
+      "y": 356,
+      "w": 169,
+      "h": 16,
+      "z": 3,
+      "conn": 3,
+      "segments": 4,
+      "gap": 2,
+      "style": "trackFooter",
+      "colors": [
+        [
+          221,
+          230,
+          234
+        ],
+        [
+          221,
+          230,
+          234
+        ],
+        [
+          221,
+          230,
+          234
+        ]
+      ],
+      "trackColor": [
+        20,
+        26,
+        32
+      ],
+      "continuous": true,
+      "tip": true
+    },
+    {
+      "id": "boost_label",
+      "type": "text",
+      "text": "BOOST",
+      "x": 911,
+      "y": 419,
+      "w": 190,
+      "h": 32,
+      "z": 5,
+      "conn": 3,
+      "align": "center",
+      "font": "s_unit",
+      "color": "fg"
+    },
+    {
+      "id": "boost_meter",
+      "type": "meter",
+      "signal": "boost",
+      "min": 0,
+      "max": 1.6,
+      "x": 862,
+      "y": 450,
+      "w": 288,
+      "h": 6,
+      "z": 3,
+      "conn": 3,
+      "segments": 1,
+      "gap": 0,
+      "style": "trackFooter",
+      "colors": [
+        [
+          248,
+          207,
+          178
+        ],
+        [
+          248,
+          207,
+          178
+        ],
+        [
+          248,
+          207,
+          178
+        ]
+      ],
+      "trackColor": [
+        41,
+        36,
+        40
+      ],
+      "continuous": true
+    }
+  ],
+  "packWaste": 3
+}

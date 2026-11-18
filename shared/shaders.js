@@ -1082,6 +1082,20 @@ void main() {
     vec2 p = v_uv * u_size;
     float len = u_vertical > 0.5 ? u_size.y : u_size.x;
     float x = u_vertical > 0.5 ? u_size.y - p.y : p.x;
+    if (u_tip < -2.5) {
+        float span=len-u_size.y*.65;
+        float skew=x-(u_size.y-p.y)*.65;
+        float pitch=(span+u_gap)/u_segs;
+        float edge=min(min(skew,span-skew),pitch-u_gap-mod(skew,pitch));
+        float mask=clamp(edge+.5,0.,1.);
+        float marker=clamp(max(u_peak,u_value)*span,2.5,span-2.5);
+        vec3 face=mix(vec3(.31,.33,.37),u_c1,step(skew,u_value*span)*step(0.,u_value));
+        if(u_value>=0.) face=mix(face,vec3(.99,.04,.09),1.-smoothstep(2.,3.,abs(skew-marker)));
+        float base=step(u_size.y-2.,p.y);
+        face=mix(face,mix(vec3(.54,.56,.60),vec3(.91,.035,.075),step(span*.77,skew)),base);
+        gl_FragColor=vec4(face,mix(mask,step(0.,skew)*step(skew,span),base));
+        return;
+    }
     // Negative tip mode is the thin, slanted AMG Track footer instrument.
     if (u_tip < -.5) {
         float height=u_size.y;
@@ -1095,11 +1109,18 @@ void main() {
         float frac=(floor(skew/pitch)+.5)/u_segs;
         vec3 fill=frac<u_at.x?u_c1:(frac<u_at.y?u_c2:u_c3);
         vec3 face=mix(u_track.rgb,fill,step(pos,u_value)*step(.000001,u_value));
+        vec3 rim=vec3(.45,.72,.88);
+        if(u_tip == -1.375) rim=vec3(.66,.45,.49);
+        if(u_tip == -1.25){
+            float hot=smoothstep(.78,.97,pos);
+            rim=mix(vec3(.21,.51,.76),vec3(.88,.10,.19),hot);
+            face=mix(face,vec3(.44,.025,.065),hot*(1.-step(pos,u_value)));
+        }
         if(u_tip < -1.5 && u_value>0.){
             float cursor=clamp(u_value*(len-height*.65),4.,len-height*.65-4.);
             face=mix(face,vec3(1.,.10,.15),1.-smoothstep(3.,5.,abs(skew-cursor)));
         }
-        gl_FragColor=vec4(mix(vec3(.45,.72,.88),face,interior),
+        gl_FragColor=vec4(mix(rim,face,interior),
                           outline*step(0.,skew)*step(skew,len-height*.65));
         return;
     }
@@ -1907,29 +1928,32 @@ void main(){
     float extent=p.x<410.?325.:295.;
     float tip=clamp((wing/extent-.72)/.28,0.,1.);
     float deck=241.+18.*smoothstep(83.,149.,wing)-26.*(1.-sqrt(max(0.,1.-tip*tip)));
-    vec3 col=mix(vec3(.034,.058,.112),vec3(.090,.135,.216),exp(-abs(p.y-97.)*.012));
+    bool twin=u_state.z>.5;
+    vec3 col=mix(vec3(.004,.006,.012),vec3(.026,.040,.068),exp(-abs(p.y-97.)*.016));
+    if(twin) col*=.28;
     float horizon=exp(-abs(p.y-155.)*.13)*exp(-abs(side-196.)*.011);
-    col+=vec3(.035,.31,.42)*horizon;
+    col+=vec3(.025,.35,.45)*horizon*(twin?.23:.75);
     // Curved floor courses converge at the horizon and open out near the sill.
     float floorHeight=deck-158.;
     float floorDepth=clamp((p.y-158.)/floorHeight,0.,1.);
     float wingMask=smoothstep(56.,155.,wing);
-    float course=(1.-sqrt(floorDepth))*8.;
+    // Constant vertical offsets from the sill keep the floor courses parallel through its bends.
+    float course=max(0.,deck-p.y)/14.;
     float courseEnd=1.-smoothstep(.91,1.,wing/extent+.075*course);
-    float courseLine=1.-smoothstep(.018,.105,abs(fract(course+.5)-.5));
+    float courseLine=1.-smoothstep(.009,.050,abs(fract(course+.5)-.5));
     float rib=abs(fract(d.x/(.38+floorDepth*.90)*.085+.5)-.5);
     float ribLine=(1.-smoothstep(.018,.10,rib))*smoothstep(.22,.70,floorDepth);
     float amber=wingMask*smoothstep(.74,1.,floorDepth);
     vec3 meshInk=mix(vec3(.16,.66,.83),vec3(.98,.70,.19),amber);
-    vec3 floorInk=mix(vec3(.018,.34,.47),vec3(.44,.26,.035),amber);
+    vec3 floorInk=mix(vec3(.024,.50,.67),vec3(.56,.33,.036),amber);
     float floorMask=smoothstep(158.,180.,p.y)*step(p.y,deck);
-    col+=floorMask*floorDepth*(floorInk*mix(1.4,.44,wingMask)
-         +meshInk*(.31*courseLine*courseEnd+.024*ribLine));
+    col+=floorMask*floorDepth*(floorInk*mix(twin?.48:.89,.16,wingMask)
+         +meshInk*(.81*courseLine*courseEnd+.063*ribLine));
     float rimGlow=exp(-abs(p.y-deck)*.18);
     col+=vec3(.17,.12,.025)*rimGlow;
     vec3 gold=vec3(.99,.83,.36);
     col=mix(col,gold,line(p.y-deck,.40));
-    if(p.y>deck+1.)col=mix(vec3(.035,.036,.07),vec3(.02,.28,.36),exp(-(p.y-deck)*.095-side*.009));
+    if(p.y>deck+1.)col=mix(vec3(.035,.036,.07),vec3(.025,.40,.52),exp(-(p.y-deck)*.095-side*.009));
     float skirt=smoothstep(1.,4.,p.y-deck)*(1.-smoothstep(11.,18.,p.y-deck));
     col+=vec3(.017,.045,.058)*skirt*(.5+.5*cos((d.x+p.y)*2.));
     col+=vec3(.15,.29,.33)*line(p.y-deck-3.2,.24);
@@ -1942,10 +1966,10 @@ void main(){
         col=mix(col,metal*(.72+.28*bevel),smoothstep(106.5,107.5,r)*(1.-smoothstep(114.,115.,r)));
         col=mix(col,vec3(.035,.054,.077),line(r-106.,.90));
         col=mix(col,vec3(.68,.75,.77),line(r-104.6,.33));
-        float passed=step(0.,u_state.x)*(1.-smoothstep(u_state.x-.006,u_state.x+.006,sweep));
+        float passed=(twin?0.:1.)*step(0.,u_state.x)*(1.-smoothstep(u_state.x-.006,u_state.x+.006,sweep));
         vec3 revInk=mix(vec3(.97,.67,.19),vec3(1.,.13,.17),smoothstep(.50,.80,sweep));
         col+=revInk*passed*.21*exp(-abs(r-106.)*.29);
-        col+=vec3(.48,.018,.035)*smoothstep(.80,.98,sweep)*smoothstep(60.,102.,r)*(1.-smoothstep(103.,105.,r));
+        col+=(twin?0.:1.)*vec3(.48,.018,.035)*smoothstep(.80,.98,sweep)*smoothstep(60.,102.,r)*(1.-smoothstep(103.,105.,r));
         // A swept blade has a curved leading edge and a narrow reflective face.
         float span=clamp((r-41.)/63.,0.,1.);
         float phase=fract(sweep*80.+1.45*pow(1.-span,1.6)+.5)-.5;
@@ -1954,24 +1978,26 @@ void main(){
         float glint=1.-smoothstep(.015,.095,abs(phase+width*.62));
         float active=passed*smoothstep(.02,.15,span);
         vec3 blade=mix(vec3(.27,.42,.54),vec3(.73,.82,.86),span);
-        blade=mix(blade,vec3(.89,.19,.25),smoothstep(.80,.91,sweep));
+        blade=twin?mix(vec3(.10,.13,.16),vec3(.51,.61,.65),span):mix(blade,vec3(.89,.19,.25),smoothstep(.80,.91,sweep));
         blade=mix(blade,revInk,active*.96);
-        float bladeMask=smoothstep(40.,62.,r)*(1.-smoothstep(102.5,104.,r));
+        float bladeMask=smoothstep(62.,95.,r)*(1.-smoothstep(102.5,104.,r));
+        if(twin) bladeMask*=mix(.42,.88,smoothstep(78.,103.,r));
         col=mix(col,blade,bladeMask*face*(.28+.70*span));
         col+=bladeMask*face*glint*span*mix(vec3(.33),revInk*.45,active);
 
     }
-    // The central black band cuts across the spokes; cyan light catches its upper lip.
+    // The inner face shades radially into the tips of the spokes.
     // The raised centre lip joins both dial feet at the same height.
     // The deck shoulders lead back toward the dark centre in perspective.
     float seam=segment(vec2(wing,p.y),vec2(94.,241.),vec2(37.,199.));
-    col+=vec3(.28,.48,.52)*exp(-seam*.74)*smoothstep(196.,238.,p.y);
-    float core=(1.-smoothstep(56.,92.,r))*smoothstep(155.,158.,p.y)*(1.-smoothstep(195.,211.,p.y));
-    col=mix(col,vec3(.055,.058,.087),core*.91);
+    float innerSeam=segment(vec2(wing,p.y),vec2(89.,241.),vec2(34.,199.));
+    col+=vec3(.48,.70,.72)*(exp(-seam*1.22)+.37*exp(-innerSeam*1.65))*smoothstep(197.,227.,p.y);
+    float core=(1.-smoothstep(42.,98.,r))*(1.-smoothstep(194.,221.,p.y));
+    col=mix(col,vec3(.010,.012,.022),core*.96);
     col+=vec3(.06,.30,.39)*exp(-abs(p.y-157.)*.37-side*.034);
     float a=mix(-1.98,1.98,clamp(u_state.x,0.,1.));
     vec2 dir=vec2(sin(a),-cos(a));
-    if(u_state.x>=0.){
+    if(!twin && u_state.x>=0.){
         float along=dot(d,dir);
         float needle=segment(d,dir*42.,dir*103.);
         vec3 tip=mix(vec3(.80,.09,.16),vec3(1.,.73,.29),smoothstep(44.,94.,along));
@@ -1979,6 +2005,68 @@ void main(){
         col=mix(col,tip,1.-smoothstep(.8,2.0,needle));
     }
     vec2 px=v_uv*vec2(1920.,660.);
+    {
+        // Low red dome over a narrow orange horizon, directly behind the badge.
+        vec2 b=(px-vec2(1006.,twin?610.:594.))/vec2(172.,36.);
+        float lateral=exp(-2.*b.x*b.x);
+        float dome=lateral*exp(-2.*b.y*b.y)*(1.-smoothstep(.0,.50,b.y));
+        col+=vec3(.99,.067,.025)*dome+vec3(1.,.49,.018)*lateral*exp(-abs(b.y)*7.);
+        col+=vec3(.92,.68,.16)*exp(-8.*b.x*b.x-abs(b.y)*12.);
+    }
+    if(twin && wing>100. && p.y>102. && p.y<180.){
+        bool right=p.x>410.;
+        float outer=right?235.:264.;
+        // The two slanted edges share the same offset at both depths.
+        // Solve for depth along a line of constant height, then refine the perspective.
+        float t=clamp((outer-wing)/(outer-125.),0.,1.);
+        float top=107.+27.*t, bottom=176.-9.*t;
+        float v=clamp((p.y-top)/(bottom-top),0.,1.);
+        float depthT=(outer-wing-16.*v)/(outer-125.);
+        top=107.+27.*depthT;
+        bottom=176.-9.*depthT;
+        v=(p.y-top)/max(1.,bottom-top);
+        // Rounded glass perimeter in the slanted face's own coordinates.
+        vec2 sides=vec2(min(depthT,1.-depthT)*(outer-125.),min(v,1.-v)*(bottom-top));
+        float radius=mix(3.3,1.7,clamp(depthT,0.,1.));
+        vec2 corner=radius-sides;
+        float edge=radius-length(max(corner,0.))-min(max(corner.x,corner.y),0.);
+        float coverage=smoothstep(-.5,.6,edge);
+        float fraction=right?u_state.x:u_state.w;
+        float tLive=clamp(fraction,0.,1.);
+        float cursor=tLive/(.64+.36*tLive);
+        float tClamped=clamp(depthT,0.,1.);
+        float value=.64*tClamped/(1.-.36*tClamped);
+        vec3 blue=vec3(.015,.57,.92);
+        vec3 base=blue*(1.-smoothstep(.05,.79,value));
+        if(right) base+=vec3(.50,.012,.034)*smoothstep(.67,.98,value);
+        float ticks=abs(fract(value*(right?8.:20.)+.5)-.5);
+        float lit=step(0.,fraction)*step(depthT,cursor);
+        float trail=max(cursor-depthT,0.);
+        vec3 liveInk=blue;
+        if(right){
+            liveInk=mix(blue,vec3(1.,.78,.06),smoothstep(.19,.34,tLive));
+            liveInk=mix(liveInk,vec3(1.,.035,.055),smoothstep(.72,.92,tLive));
+        }
+        vec3 plate=vec3(.005,.009,.016)+base*(.20+.17*v)+vec3(.045,.058,.075)*exp(-ticks*30.);
+        vec3 rimInk=base+vec3(.024,.048,.065);
+        plate+=rimInk*(.91*exp(-abs(edge-.7)*1.7)+.26*exp(-abs(edge-2.2)*1.4));
+        plate+=lit*(blue*.17+liveInk*.83*exp(-trail*8.));
+        // The live blade has clipped shoulders, a bright face and a narrower lower tip.
+        float span=outer-125.;
+        // Fixed cyan end caps bracket the speed scale independently of the live blade.
+        if(!right){
+            float endDistance=min(tClamped,1.-tClamped)*span;
+            plate+=vec3(.035,.66,1.)*exp(-endDistance*.56);
+        }
+        float bladeX=(depthT*span-clamp(cursor*span,2.9,span-2.9));
+        float cap=smoothstep(.015,.105,v)*(1.-smoothstep(.87,.99,v));
+        float bladeWidth=mix(.38,2.65,cap)*(1.-.30*v);
+        float bladeEdge=abs(bladeX-.8*(v-.5))-bladeWidth;
+        float face=(1.-smoothstep(-.2,.42,bladeEdge))*smoothstep(.0,.027,v)*(1.-smoothstep(.973,1.,v));
+        plate+=step(0.,fraction)*liveInk*.74*exp(-max(0.,bladeEdge)*.57);
+        plate=mix(plate,mix(vec3(.95,.99,1.),liveInk,right?.32:.09),face*step(0.,fraction));
+        col=mix(col,plate,coverage);
+    }
     vec2 edge=min(px-u_hole.xy,u_hole.xy+u_hole.zw-px);
     float window=smoothstep(0.,26.,min(edge.x,edge.y))*smoothstep(116.,121.,r)*smoothstep(0.,10.,deck-p.y);
     gl_FragColor=vec4(col,1.-window);
@@ -1993,27 +2081,45 @@ void main() {
     vec2 p = v_uv * vec2(1000.,450.);
     float x = abs(p.x-500.);
     float y = p.y-245.;
-    float wallX = x + .00073*y*y;
+    float wallX = x + .00165*y*y;
     float depth = clamp((wallX-132.)/276.,0.,1.);
     float axis = 3.+.091*(x-132.);
     float foot = 42.+.33*(x-132.);
     float wall = smoothstep(92.,145.,x)*(1.-smoothstep(425.,435.,wallX));
-    float deck = 370.+.00030*max(x-220.,0.)*max(x-220.,0.);
+    // A shallow crowned sill sweeps down over the two instruments at its outer tips.
+    float shoulder=clamp((x-175.)/325.,0.,1.);
+    float deck=361.+32.*shoulder*shoulder;
+    float lipWidth=mix(1.1,4.6,smoothstep(180.,460.,x));
     vec3 col = vec3(.034,.043,.078);
-    float blue = exp(-abs(wallX-415.)*.024)*exp(-abs(y)*.005);
-    col += vec3(.02,.37,.68)*blue;
-    col += vec3(.12,.44,.74)*exp(-abs(wallX-431.)*.95);
+    // Round the wall-to-sill junction and taper the floor to a single edge.
+    float gap=max(deck-(245.+foot),0.);
+    float seam=deck-gap*gap/(gap+9.);
+    float above=1.-smoothstep(seam-2.,seam+1.,p.y);
+    wall*=above;
+    float blue = above*exp(-abs(wallX-415.)*.024)*exp(-abs(y)*.005);
+    col += vec3(.04,.53,.98)*blue;
+    col += vec3(.18,.60,.96)*above*exp(-abs(wallX-431.)*.95);
     float ridge = 213.-34.*smoothstep(160.,365.,x)+24.*smoothstep(382.,425.,x);
     float nearRidge = 234.-17.*smoothstep(248.,316.,x)+12.*smoothstep(382.,427.,x);
     col += vec3(.018,.061,.108)*wall*smoothstep(ridge-1.,ridge+2.,p.y)*exp(-abs(p.y-ridge)*.028);
     col += vec3(.022,.080,.14)*wall*smoothstep(nearRidge-1.,nearRidge+2.,p.y)*exp(-abs(p.y-nearRidge)*.050);
     float ribs = abs(fract((wallX-132.)/67.+.5)-.5);
     col += vec3(.06,.12,.18)*exp(-ribs*95.)*wall;
-    float floorMask = smoothstep(foot-2.,foot+2.,y)*(1.-smoothstep(deck-1.,deck+2.,p.y));
+    float floorMask = smoothstep(seam-1.,seam+1.,p.y)*(1.-smoothstep(deck-1.,deck+2.,p.y));
     float floorLight = smoothstep(27.,120.,y)*exp(-x*.002);
     float tile = abs(fract(x/max(y,20.)*3.+.5)-.5);
-    col += floorMask*floorLight*vec3(.015,.47,.84)*(.65+.35*smoothstep(.0,.04,tile));
-    col += vec3(.08,.37,.69)*exp(-abs(p.y-deck)*.64);
+    col += floorMask*floorLight*vec3(.025,.66,1.15)*(.78+.22*smoothstep(.0,.04,tile));
+    float joint=smoothstep(1.,18.,deck-seam);
+    col+=vec3(.08,.33,.64)*exp(-abs(p.y-seam)*.74)*joint*smoothstep(90.,255.,x);
+    float lipY=(p.y-deck)/lipWidth;
+    float lip=smoothstep(-1.,-.64,lipY)*(1.-smoothstep(-.15,1.,lipY));
+    col=mix(col,vec3(.045,.22,.49),lip*.88);
+    col+=vec3(.095,.39,.68)*exp(-abs(p.y-deck+lipWidth*.67)*.94);
+    col+=vec3(.031,.10,.18)*exp(-abs(p.y-deck-lipWidth*.68)*.85);
+    // Perspective grooves fan out over the last section of the floor above the lip.
+    float groove=abs(fract(x/max(y,20.)*42.+.5)-.5);
+    col+=vec3(.055,.17,.25)*floorMask*smoothstep(150.,350.,x)
+         *exp(-max(deck-p.y,0.)*.052)*(1.-smoothstep(.05,.23,groove));
     float rpm = clamp(u_state.x,0.,1.);
     float cursor = 132.+276.*rpm;
     float delta = wallX-cursor;
@@ -2023,23 +2129,41 @@ void main() {
     float valid=step(0.,u_state.x);
     float active=smoothstep(118.,142.,wallX)*(1.-smoothstep(cursor,cursor+2.,wallX))*valid;
     float band=smoothstep(axis-90.,axis+7.,y)*(1.-smoothstep(foot,foot+3.,y));
-    col+=vec3(.18,.24,.34)*dotFace*wall*band;
-    col+=vec3(.93,.019,.041)*active*band*(.16+.84*dotFace);
+    float movingDots=dotFace*exp(-abs(delta)/30.)*band*wall*valid*smoothstep(0.,.035,rpm);
+    float redTail=exp(-max(-delta,0.)/67.);
+    col+=vec3(.82,.015,.045)*active*band*redTail + vec3(.96,.26,.25)*movingDots;
     col+=vec3(.48,.018,.024)*exp(-abs(delta)*.12)*band*valid;
     float line = exp(-abs(y-axis)*1.05);
-    vec3 ink = mix(vec3(.59,.79,.98),vec3(.99,.025,.09),smoothstep(.86,.91,depth));
-    col += ink*line*smoothstep(110.,135.,x)*(1.-smoothstep(404.,410.,x));
-    float trail=active*exp(-max(0.,-delta)/32.);
+    vec3 ink = mix(vec3(.78,.89,1.),vec3(1.,.07,.17),smoothstep(.958,.963,depth));
+    float endFade=1.-.53*smoothstep(398.,409.,x);
+    col += endFade*ink*(line*1.4 + smoothstep(.958,.963,depth)*exp(-abs(y-axis)*.42)) *smoothstep(110.,135.,x)*(1.-smoothstep(404.,410.,x));
+    // Both horizontal edges meet the moving curved face and trail off in perspective.
+    float trail=active*exp(-max(0.,-delta)/43.);
+    float edges=min(abs(y-axis),abs(y-foot));
+    col+=trail*(vec3(1.,.105,.025)*exp(-edges*.31)+vec3(1.,.57,.25)*exp(-edges*.98));
     float under=step(axis,y)*(1.-smoothstep(foot,foot+4.,y));
     col+=vec3(1.,.22,.045)*trail*under*(.32+1.5*exp(-max(0.,y-axis)*.19)+1.25*exp(-abs(y-foot)*.32));
     float lower=smoothstep(axis-15.,foot,y);
-    float arc=exp(-abs(delta)/mix(.75,2.0,lower))*smoothstep(axis-95.,axis-5.,y)
+    float arc=exp(-abs(delta)/mix(1.0,2.25,lower))*smoothstep(axis-118.,axis-9.,y)
               *(1.-smoothstep(foot,foot+7.,y))*valid;
-    col+=mix(vec3(.87,.025,.045),vec3(1.,.68,.47),lower)*arc*mix(.7,1.7,lower);
+    col+=mix(vec3(1.,.09,.045),vec3(1.,.73,.51),smoothstep(axis-3.,axis+5.,y))*arc*mix(1.1,1.95,lower);
     float tick = abs(fract((x-132.)/34.5+.5)-.5)*34.5;
-    col += ink*exp(-tick*1.8)*(1.-smoothstep(2.+depth*6.,4.+depth*6.,abs(y-axis)))*step(131.,x)*step(x,409.);
+    col += endFade*ink*exp(-tick*1.8)*(1.-smoothstep(2.+depth*6.,4.+depth*6.,abs(y-axis)))*step(131.,x)*step(x,409.);
     col += vec3(.12,.36,.61)*exp(-abs(y)*1.1)*exp(-x*.009);
-    col += vec3(.46,.54,.67)*exp(-abs(p.y-161.)*1.35)*smoothstep(22.,36.,x)*(1.-smoothstep(145.,180.,x));
+    // The Circuit sunset silhouette, in Track red, centered behind the M emblem.
+    vec2 badge=(p-vec2(500.,430.))/vec2(92.,22.);
+    float lateral=exp(-2.*badge.x*badge.x);
+    float dome=lateral*exp(-2.*badge.y*badge.y)*(1.-smoothstep(0.,.50,badge.y));
+    col+=vec3(1.,.019,.052)*dome+vec3(1.,.13,.06)*lateral*exp(-abs(badge.y)*7.);
+    col+=vec3(.98,.39,.23)*exp(-8.*badge.x*badge.x-abs(badge.y)*12.);
+    // Hairlines sit between each caption and the top lip of its segmented bar.
+    float footerDistance=min(abs(p.x-178.65)-68.,abs(p.x-781.25)-71.);
+    col+=vec3(.41,.67,.91)*exp(-abs(p.y-433.)*1.45)*(1.-smoothstep(-2.,1.,footerDistance));
+    // Tapered silver rules flank the speed unit, with a clear central gap.
+    float ruleT=clamp((x-25.)/141.,0.,1.);
+    float ruleY=163.-2.4*ruleT;
+    float rule=(1.-smoothstep(.38,.98,abs(p.y-ruleY)))*smoothstep(23.,31.,x)*(1.-smoothstep(155.,170.,x));
+    col=mix(col,mix(vec3(.95,.97,1.),vec3(.38,.46,.59),ruleT),rule);
     col = mix(col,vec3(.72,.028,.037)+col*.28,u_state.y*.74);
     gl_FragColor = vec4(col,1.);
 }`;
@@ -2068,8 +2192,9 @@ void main() {
     float panel = band(p.y,147.0,583.0)*cover(min(p.x-84.0-0.55*abs(p.y-405.0),
                                                   1260.0-p.x-0.55*abs(p.y-360.0)));
     vec3 blue = mix(vec3(0.045,0.107,0.25),vec3(0.12,0.28,0.56),(574.0-p.y)/419.0);
-    blue += vec3(0.035,0.065,0.11)*band(skew,485.0,553.0);
-    blue = mix(blue,vec3(0.35,0.14,0.27),0.68*band(skew,645.0,728.0));
+    float stripeFade=1.-smoothstep(294.,563.,p.y);
+    blue += vec3(0.035,0.065,0.11)*stripeFade*band(skew,485.0,553.0);
+    blue = mix(blue,vec3(0.35,0.14,0.27),0.68*stripeFade*band(skew,645.0,728.0));
     blue *= 1.0-0.83*band(skew,875.0,1234.0)*band(p.y,261.0,398.0);
     blue *= 1.0-0.75*max(band(skew,868.0,873.0),band(skew,1234.0,1239.0));
     // Etched facet seams follow the blue panel and stop at its dark gear recess.
@@ -2091,15 +2216,127 @@ void main() {
     c=mix(c,vec3(.028,.012,.025),rail*band(x,-28.,-7.));
     c=mix(c,vec3(.92,.07,.14),rail*band(x,-7.,1.));
     float dash=cover(1.7-abs(fract(t*16.+.5)-.5)*30.75);
-    vec3 dashInk=t>.86?vec3(1.,.12,.14):(t>.74?vec3(1.,.72,.14):vec3(.64,.14,.20));
+    vec3 dashInk=vec3(.35,.045,.09);
     c=mix(c,dashInk,rail*band(x,-19.,-7.)*dash);
     c=mix(c,vec3(.99,.94,.93),rail*band(x,-103.,-29.)*cover(1.8-abs(t-u_state.x)*492.));
     c = mix(c,vec3(0.95,0.19,0.28),max(band(p.y,120.0,123.0)*band(p.x,1270.0,1478.0),
                                          band(p.y,613.0,616.0)*band(p.x,900.0,1192.0)));
+    // Fixed scale inserts, alongside the 6.5 and 7 thousand rpm graduations.
+    float insertX=band(x,-21.,-13.);
+    c=mix(c,vec3(1.,.78,.09),insertX*band(p.y,202.,217.));
+    c=mix(c,vec3(.95,.09,.12),insertX*band(p.y,124.,184.));
+    // Mirrored shift-light banks above the panel, clear of the driver camera.
+    float bankX=abs(p.x-960.)-(88.-p.y)*.48;
+    float cell=floor((bankX-238.)/44.);
+    float lamp=band(p.y,76.,91.)*band(bankX,238.,589.)*band(mod(bankX-238.,44.),2.,42.);
+    float litCells=u_state.w;
+    vec3 lampInk=cell<1.?vec3(.52,.54,.57):(cell<2.?vec3(.98,.04,.09):vec3(1.,.76,.045));
+    c=mix(c,lampInk,lamp*step(8.-cell,litCells));
     c = gauge(c,p,1415.0,u_state.y,true);
-    c = gauge(c,p,1580.0,u_state.z,false);
+    c = gauge(c,p,1604.0,u_state.z,false);
     gl_FragColor = vec4(c,1.0);
 }
 `;
 
-module.exports = { amgtrack: AMGTRACK, circuit: CIRCUIT, mtrack: MTRACK, shiftbar: SHIFTBAR, arc: ARC, revbar: REVBAR, lights: LIGHTS, fill: FILL, box: BOX, grid: GRID, segbar: SEGBAR, mdash: MDASH, mtach: MTACH, sdash: SDASH, boxes: BOXES, atext: ATEXT, meter: METER, gmeter: GMETER, revarc: REVARC, tiles: TILES, ribbon: RIBBON, deco: DECO, mview: MVIEW, vdash: VDASH };
+const REDSPORT = `precision highp float;
+varying vec2 v_uv;
+uniform vec4 u_state;
+const float PI=3.14159265;
+float ink(float d){return 1.-smoothstep(-.55,.55,d);}
+float band(float r,float inner,float outer){return ink(max(inner-r,r-outer));}
+float segment(vec2 p,vec2 a,vec2 b){vec2 v=b-a;return length(p-a-v*clamp(dot(p-a,v)/dot(v,v),0.,1.));}
+float rounded(vec2 p,vec2 halfSize,float radius){vec2 q=abs(p)-halfSize+radius;return length(max(q,0.))+min(max(q.x,q.y),0.)-radius;}
+vec3 side(vec3 c,vec2 q,float amount){
+ float r=length(q),a=mod(atan(q.x,-q.y)+PI*2.-PI*1.20,PI*2.);
+ float span=PI*1.60,visible=step(a,span)*smoothstep(.008,.021,abs(a-PI*.30));
+ c=mix(c,vec3(.032,.042,.062),.48*ink(r-143.));
+ vec3 rim=mix(vec3(.14,.17,.21),vec3(.45,.48,.52),.5-.5*q.y/145.);
+ c=mix(c,rim,visible*(band(r,142.,143.8)+band(r,135.,136.4)));
+ float fill=step(span*(1.-clamp(amount,0.,1.)),a)*step(.001,amount);
+ c=mix(c,vec3(.86,.018,.105),visible*band(r,137.,141.)*fill);
+ float tip=PI*1.20+span*(1.-clamp(amount,0.,1.));
+ vec2 n=vec2(sin(tip),-cos(tip));
+ return mix(c,vec3(1.,.55,.56),ink(segment(q,n*132.,n*147.)-1.8)*step(0.,amount));
+}
+void main(){
+ vec2 p=v_uv*vec2(1920.,660.),q=(p-vec2(960.,378.))/1.072;
+ float r=length(q), ax=abs(q.x);
+ vec3 c=vec3(.009,.014,.025);
+ float shoulder=exp(-pow(max(ax-195.,0.)/86.,2.));
+ float top=174.-35.*shoulder, bottom=550.+29.*shoulder;
+ float panel=smoothstep(top-1.,top+1.,p.y)*(1.-smoothstep(bottom-1.,bottom+1.,p.y));
+ float sideFade=1.-smoothstep(700.,935.,ax);
+ c+=vec3(.057,.073,.095)*panel*sideFade*(.65+.35*exp(-abs(p.y-top)/110.));
+ c+=sideFade*(vec3(.57,.66,.75)*exp(-abs(p.y-top)*.63)+vec3(.16,.23,.32)*exp(-abs(p.y-bottom)*.52));
+ float sweep=exp(-pow(abs(ax-252.)/242.,2.));
+ c+=vec3(.16,.16,.17)*sweep*panel*(.55+.45*exp(-abs(p.y-top)/140.));
+ c+=vec3(.20,.21,.23)*exp(-abs(r-254.)/16.)*panel;
+ c=side(c,p-vec2(407.,322.),u_state.y);
+ c=side(c,p-vec2(1513.,322.),u_state.z);
+ float metal=.32+.44*max(0.,-q.y/max(r,1.))+.14*cos(atan(q.y,q.x)*3.);
+ c=mix(c,vec3(.025,.028,.035),ink(r-251.));
+ c=mix(c,vec3(.85,.90,.96)*metal,band(r,239.,249.));
+ c+=vec3(.63,.65,.69)*exp(-abs(r-248.)*1.9)*(.60-.38*q.y/max(r,1.));
+ c=mix(c,vec3(.055,.044,.054),band(r,228.,239.));
+ float a=mod(atan(-q.x,q.y)+2.*PI,2.*PI),span=1.5*PI;
+ float sector=step(a,span),high=step(span*.875,a);
+ float outer=smoothstep(145.,228.,r);
+ float inner=exp(-abs(r-113.)/21.);
+ float pool=.13+.65*outer+.40*inner+.19*cos(a*2.-1.4);
+ vec3 enamel=mix(vec3(.018,.009,.022),vec3(.89,.008,.078),clamp(pool,0.,1.));
+ enamel=mix(enamel,vec3(.97,.008,.051)*(.72+.28*outer),.85*high);
+ c=mix(c,mix(vec3(.030,.031,.042),enamel,sector),band(r,107.,228.));
+ c=mix(c,vec3(.99,.019,.088),band(r,220.,228.)*sector);
+ float stepA=span/8.;
+ float toTick=abs(mod(a+stepA*.5,stepA)-stepA*.5)*r;
+ float ticks=ink(abs(toTick-2.5)-1.35)*band(r,209.,231.)*sector;
+ float pin=length(vec2((mod(a+stepA*.125,stepA*.25)-stepA*.125)*r,r-235.));
+ c=mix(c,vec3(.90,.90,.93),max(ticks,ink(pin-1.6)*sector));
+ c=mix(c,vec3(.79,.028,.084),band(r,112.,116.));
+ c=mix(c,vec3(.24,.26,.29)*(.92-.42*q.y/max(1.,r)),band(r,103.,111.));
+ c=mix(c,vec3(.76,.78,.80),band(r,108.8,110.)*.85);
+ // Alternating rows of small diagonal carbon tows on a convex center cap.
+ vec2 uv=mat2(.985,.174,-.174,.985)*q;
+ float row=floor(uv.y/4.8);
+ vec2 weave=vec2(fract(uv.x/10.+.5*mod(row,2.)),fract(uv.y/4.8));
+ float tow=sin(PI*weave.x)*sin(PI*weave.y);
+ float strand=.5+.5*cos(weave.y*PI*5.);
+ float shade=.32+.68*clamp(.55-.0021*(q.x+q.y),0.,1.);
+ vec3 carbon=(vec3(.058,.073,.089)+vec3(.14,.16,.18)*tow*(.5+.5*strand))*shade;
+ c=mix(c,carbon,ink(r-103.));
+ // Raised pivot casts a short, down-right shadow. Needle is tapered to its tip.
+ c*=1.-.63*exp(-length(q-vec2(4.,8.))*.067);
+ if(u_state.x>=0.){
+ float ang=span*clamp(u_state.x,0.,1.);
+ vec2 dir=vec2(-sin(ang),cos(ang));
+ float t=dot(q,dir),crossD=abs(dot(q,vec2(dir.y,-dir.x)));
+ float edge=max(crossD-mix(5.2,.85,clamp(t/214.,0.,1.)),max(-t,t-215.));
+ c+=vec3(.58,.005,.024)*exp(-max(edge,0.)*.16)*smoothstep(9.,32.,t);
+ c=mix(c,vec3(.99,.055,.12),ink(edge));
+ c=mix(c,vec3(1.,.78,.68),ink(edge+2.2));
+ }
+ vec2 hub=q/18.;float h=length(hub);
+ c=mix(c,vec3(.019,.019,.030),ink(r-21.));
+ float bevel=.53-.40*hub.y-.27*hub.x;
+ c=mix(c,vec3(.93,.91,.96)*bevel,band(r,14.8,19.));
+ c=mix(c,mix(vec3(.037,.032,.046),vec3(.43,.39,.44),exp(-2.6*length(hub-vec2(-.34,-.48)))),ink(r-15.));
+ // The socket follows the needle beyond the rim of the pivot.
+ if(u_state.x>=0.){
+  float angle=span*clamp(u_state.x,0.,1.);
+  vec2 n=vec2(-sin(angle),cos(angle));
+  float width=mix(6.,3.6,smoothstep(5.,29.,dot(q,n)));
+  float socket=segment(q,n*5.,n*28.);
+  c=mix(c,vec3(.48,.36,.39),ink(socket-width));
+  c=mix(c,vec3(.95,.08,.15),ink(socket-width+1.7));
+ }
+ // Smoked glass speed plaque overlaps the unused lower-right quadrant.
+ vec2 glass=q-vec2(125.,99.);glass.x+=.20*glass.y;
+ float edge=rounded(glass,vec2(120.,44.),8.);
+ c=mix(c,vec3(.56,.63,.71)*(.74-.24*glass.y/44.),(ink(edge)-ink(edge+2.3))*.78);
+ vec3 pane=mix(vec3(.021,.029,.046),vec3(.112,.139,.18),pow(clamp(.5-glass.y/88.,0.,1.),1.6));
+ c=mix(c,pane,ink(edge+2.3)*.57);
+ gl_FragColor=vec4(c,1.);
+}
+`;
+
+module.exports = { redsport: REDSPORT, amgtrack: AMGTRACK, circuit: CIRCUIT, mtrack: MTRACK, shiftbar: SHIFTBAR, arc: ARC, revbar: REVBAR, lights: LIGHTS, fill: FILL, box: BOX, grid: GRID, segbar: SEGBAR, mdash: MDASH, mtach: MTACH, sdash: SDASH, boxes: BOXES, atext: ATEXT, meter: METER, gmeter: GMETER, revarc: REVARC, tiles: TILES, ribbon: RIBBON, deco: DECO, mview: MVIEW, vdash: VDASH };
