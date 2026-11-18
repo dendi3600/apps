@@ -1794,17 +1794,17 @@ void main(){
     float sweep=clamp((angle+1.98)/3.96,0.,1.);
     float side=abs(d.x);
     float deck=243.+18.*smoothstep(100.,170.,side)-30.*pow(clamp((side-238.)/77.,0.,1.),2.);
-    vec3 col=mix(vec3(.034,.033,.079),vec3(.112,.109,.191),exp(-abs(p.y-97.)*.012));
+    vec3 col=mix(vec3(.051,.050,.069),vec3(.108,.102,.137),exp(-abs(p.y-97.)*.012));
     float horizon=exp(-abs(p.y-155.)*.13)*exp(-abs(side-196.)*.011);
-    col+=vec3(.045,.58,.69)*horizon;
+    col+=vec3(.018,.10,.14)*horizon*exp(-side*.010);
     float depth=clamp((p.y-170.)/80.,0.,1.);
-    float arch=13.*pow(side/190.,2.);
-    float rows=abs(fract((p.y+arch)*.15)-.5);
+    float arch=20.*pow(side/190.,2.);
+    float rows=abs(fract((p.y+arch)*.20)-.5);
     float cols=abs(fract(d.x/(1.+depth*.65)*.065)-.5);
     float mesh=(1.-smoothstep(.025,.14,rows))+.5*(1.-smoothstep(.02,.13,cols));
-    col+=depth*exp(-side*.006)*vec3(.015,.37,.48)*(1.+mesh*.8);
+    col+=depth*exp(-side*.006)*vec3(.055,.31,.39)*(.70+mesh*.42);
     float rimGlow=exp(-abs(p.y-deck)*.18);
-    col+=vec3(.48,.34,.10)*rimGlow;
+    col+=vec3(.25,.16,.035)*rimGlow;
     col=mix(col,vec3(.99,.85,.48),line(p.y-deck,.60));
     if(p.y>deck+1.)col=mix(vec3(.035,.036,.07),vec3(.02,.28,.36),exp(-(p.y-deck)*.095-side*.009));
     if(abs(angle)<1.99){
@@ -1814,18 +1814,33 @@ void main(){
         col=mix(col,mix(vec3(.12,.19,.23),vec3(.82,.86,.84),sin(bevel*3.14159)),smoothstep(105.,106.,r)*(1.-smoothstep(113.,114.,r)));
         float active=step(0.,u_state.x)*(1.-smoothstep(u_state.x-.006,u_state.x+.006,sweep));
         vec3 revInk=mix(vec3(.97,.67,.19),vec3(1.,.13,.17),smoothstep(.73,.91,sweep));
-        col+=revInk*active*.62*exp(-abs(r-106.)*.29);
+        col+=revInk*active*.21*exp(-abs(r-106.)*.29);
         col+=vec3(.48,.018,.035)*smoothstep(.80,.98,sweep)*smoothstep(60.,102.,r)*(1.-smoothstep(103.,105.,r));
         float tick=abs(fract(sweep*80.+.5)-.5);
         float major=abs(fract(sweep*8.+.5)-.5);
         float inner=mix(97.,89.,1.-smoothstep(.012,.025,major));
         vec3 ink=sweep>.84?vec3(.90,.22,.29):vec3(.87,.91,.94);
         col=mix(col,ink,(1.-smoothstep(.07,.22,tick))*smoothstep(inner-1.,inner,r)*(1.-smoothstep(104.,105.,r)));
-        col+=ink*.49*(1.-smoothstep(.04,.45,tick))*smoothstep(40.,95.,r)*(1.-smoothstep(102.,106.,r));
+        col+=ink*.30*(1.-smoothstep(.04,.45,tick))*smoothstep(40.,95.,r)*(1.-smoothstep(102.,106.,r));
     }
+    // The central black band cuts across the spokes; cyan light catches its upper lip.
+    float core=(1.-smoothstep(56.,92.,r))*smoothstep(155.,158.,p.y)*(1.-smoothstep(195.,211.,p.y));
+    col=mix(col,vec3(.055,.058,.087),core*.91);
+    col+=vec3(.06,.30,.39)*exp(-abs(p.y-157.)*.37-side*.034);
     float a=mix(-1.98,1.98,clamp(u_state.x,0.,1.));
     vec2 dir=vec2(sin(a),-cos(a));
-    if(u_state.x>=0.)col=mix(col,vec3(1.,.16,.19),1.-smoothstep(1.,2.1,segment(d,dir*43.,dir*105.)));
+    if(u_state.x>=0.){
+        float along=dot(d,dir);
+        float needle=segment(d,dir*25.,dir*103.);
+        vec3 tip=mix(vec3(.80,.09,.16),vec3(1.,.73,.29),smoothstep(44.,94.,along));
+        col+=tip*.23*exp(-needle*.50);
+        col=mix(col,tip,1.-smoothstep(.8,2.0,needle));
+    }
+    // Fine separators behind the real drive and engine values in the left panel.
+    if(p.x>120. && p.x<275. && p.y>142. && p.y<214.){
+        float lines=max(line(p.y-166.,.23),line(p.y-191.,.23));
+        col=mix(col,vec3(.46,.46,.52),max(lines,line(p.x-196.,.24))*.60);
+    }
     // Fixed circuit diagram, matching the reference's Ricardo Tormo panel.
     float track=100.;
     track=min(track,segment(p,vec2(579.,191.),vec2(580.,184.)));
@@ -1856,7 +1871,7 @@ void main(){
     col=mix(col,vec3(.92,.97,1.),1.-smoothstep(.7,1.35,track));
     vec2 px=v_uv*vec2(1920.,660.);
     vec2 edge=min(px-u_hole.xy,u_hole.xy+u_hole.zw-px);
-    float window=smoothstep(0.,3.,min(edge.x,edge.y));
+    float window=smoothstep(0.,26.,min(edge.x,edge.y))*smoothstep(116.,121.,r)*smoothstep(0.,10.,deck-p.y);
     gl_FragColor=vec4(col,1.-window);
 }`;
 
