@@ -768,10 +768,10 @@ uniform vec4 u_strip;     // bottom strip: left end x, top y, height, slant px
 uniform float u_topEnd;   // the top lines run from the bracket to this x (left; mirrored on the right)
 uniform vec4 u_road;      // the road in the middle (BMW's own Sport view draws one): horizon y, px scale, dash phase 0..1, on
 
-const vec3 BLUE_LINE = vec3(0.36, 0.62, 1.0);
-const vec3 BLUE_BAND = vec3(0.13, 0.3, 0.78);
+const vec3 BLUE_LINE = vec3(0.24, 0.66, 0.99);
+const vec3 BLUE_BAND = vec3(0.105, 0.285, 0.48);
 const vec3 BLUE_LIT = vec3(0.62, 0.86, 1.0);
-const vec3 BLUE_IN = vec3(0.2, 0.45, 0.98);
+const vec3 BLUE_IN = vec3(0.20, 0.58, 0.94);
 const vec3 RED_LINE = vec3(0.95, 0.12, 0.16);
 const vec3 RED_BAND = vec3(0.33, 0.06, 0.1);
 const vec3 RED_LIT = vec3(0.93, 0.1, 0.15);
@@ -812,18 +812,23 @@ vec4 bracket(vec2 q, float val, float redFrom, float orange, float ticks, vec3 l
     float t = (u_scale.x - q.y) / (u_scale.x - u_scale.y);    // 0 at the scale's 0
     bool inY = q.y > u_geo.x + 5.0 && q.y < u_geo.z - 4.0;
     // the band: lit up to the value, white marker on top
-    float inB = (inY ? 1.0 : 0.0) * cov(-(d - 5.0)) * cov(d - 5.0 - u_w);
+    float laneEnd = u_inner - u_w;
+    float lane = inY ? cov(2.0 - d) * cov(d - laneEnd) : 0.0;
+    c = over(vec4(0.025, 0.033, 0.052, lane), c);
+    float inB = (inY ? 1.0 : 0.0) * cov(laneEnd - d) * cov(d - u_inner);
     if (inB > 0.0) {
-        vec3 col = band;
+        vec3 col = band * mix(0.80, 1.02, clamp((d - laneEnd) / u_w, 0.0, 1.0));
         float a = 0.96;
-        if (t <= val) col = mix(lit, mix(lit, vec3(1.0), 0.25), clamp((d - 5.0) / u_w, 0.0, 1.0)) * mix(0.8, 1.0, clamp(t / max(val, 0.01), 0.0, 1.0));
+        if (t <= val) col = mix(lit, mix(lit, vec3(1.0), 0.25), clamp((d - laneEnd) / u_w, 0.0, 1.0)) * mix(0.8, 1.0, clamp(t / max(val, 0.01), 0.0, 1.0));
         c = over(vec4(col, a * inB), c);
         float yv = u_scale.x - val * (u_scale.x - u_scale.y);
         if (val > 0.002) c = over(vec4(1.0, 1.0, 1.0, inB * cov(abs(q.y - yv) - 2.0)), c);
-        // marks at every label, on the band's outer half
+    }
+    if (lane > 0.0) {
+        // Numbered ticks and redline marks sit in the recessed black lane.
         float kk = floor(t * ticks + 0.5);
         float yk = u_scale.x - kk / ticks * (u_scale.x - u_scale.y);
-        if (kk >= 0.0 && kk <= ticks && d > 7.0 && d < 19.0) c = over(vec4(line, 0.9 * cov(abs(q.y - yk) - 1.2)), c);
+        if (kk >= 0.0 && kk <= ticks && d > 6.5 && d < laneEnd - 2.0) c = over(vec4(line, 0.9 * cov(abs(q.y - yk) - 1.2)), c);
         // redline: yellow dashes, then a solid red line, on the outer edge of the band
         if (redFrom < 1.5 && d > 8.0 && d < 13.0) {
             if (t >= redFrom && t <= 1.02) c = over(vec4(1.0, 0.2, 0.2, 1.0), c);
@@ -831,7 +836,7 @@ vec4 bracket(vec2 q, float val, float redFrom, float orange, float ticks, vec3 l
         }
     }
     // the outer line, its top run and its bottom run
-    float o = cov(abs(d - 1.0) - 1.8) * cov(u_geo.x - q.y) * cov(q.y - u_geo.z);
+    float o = cov(abs(d - 2.0) - 3.6) * cov(u_geo.x - q.y) * cov(q.y - u_geo.z);
     vec2 tl = vec2(outerX(u_geo.x), u_geo.x), bl = vec2(outerX(u_geo.z), u_geo.z);
     o = max(o, cov(segD(q, tl, vec2(u_topEnd, u_geo.x)) - 2.2));
     o = max(o, cov(segD(q, bl, bl + vec2(u_inner + 40.0, 0.0)) - 2.2));
