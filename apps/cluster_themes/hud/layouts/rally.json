@@ -152,7 +152,7 @@
       "text": "{{speed}}",
       "font": "circuit_speed",
       "x": 876,
-      "y": 394,
+      "y": 423,
       "w": 260,
       "h": 95,
       "z": 5,
@@ -165,9 +165,9 @@
       "type": "text",
       "text": "{{u:speedLc}}",
       "font": "m_unit",
-      "x": 946,
-      "y": 366,
-      "w": 120,
+      "x": 876,
+      "y": 393,
+      "w": 260,
       "h": 32,
       "z": 5,
       "align": "center",
@@ -179,52 +179,10 @@
       "type": "text",
       "text": "M",
       "font": "circuit_emblem",
-      "x": 952,
-      "y": 552,
-      "w": 108,
-      "h": 49,
-      "z": 5,
-      "align": "center",
-      "color": "fg",
-      "conn": 1
-    },
-    {
-      "id": "gear",
-      "type": "text",
-      "text": "{{gearnum}}",
-      "font": "value",
-      "x": 1565,
-      "y": 530,
-      "w": 140,
-      "h": 68,
-      "z": 5,
-      "align": "center",
-      "color": "fg",
-      "conn": 2
-    },
-    {
-      "id": "clock",
-      "type": "text",
-      "text": "{{time}}",
-      "font": "head",
-      "x": 1505,
-      "y": 90,
-      "w": 180,
-      "h": 40,
-      "z": 5,
-      "align": "center",
-      "color": "fg",
-      "conn": 2
-    },
-    {
-      "id": "ambient",
-      "type": "text",
-      "text": "{{ambientN}}{{u:temp}}",
-      "font": "head",
-      "x": 297,
-      "y": 90,
-      "w": 180,
-      "h": 40,
+      "x": 942,
+      "y": 548,
+      "w": 128,
+      "h": 58,
       "z": 5,
       "align": "center",
       "color": "fg",
@@ -236,7 +194,7 @@
       "text": "BOOST",
       "font": "head",
       "x": 140,
-      "y": 174,
+      "y": 226,
       "w": 225,
       "h": 32,
       "z": 5,
@@ -250,7 +208,7 @@
       "text": "{{boost}} {{u:boost}}",
       "font": "s_unit",
       "x": 347,
-      "y": 174,
+      "y": 226,
       "w": 225,
       "h": 32,
       "z": 5,
@@ -265,24 +223,43 @@
       "min": 0,
       "max": 1.6,
       "x": 112,
-      "y": 209,
+      "y": 261,
       "w": 478,
       "h": 17,
       "z": 3,
       "conn": 3,
       "segments": 4,
-      "gap": 4,
+      "gap": 2,
       "colors": [
-        "arc",
-        "fg",
-        "hot"
+        [
+          76,
+          151,
+          193
+        ],
+        [
+          99,
+          170,
+          203
+        ],
+        [
+          120,
+          186,
+          214
+        ]
       ],
       "at": [
         0.72,
         0.93
       ],
       "tip": true,
-      "continuous": true
+      "continuous": true,
+      "trackColor": [
+        43,
+        96,
+        137,
+        235
+      ],
+      "style": "trackFooter"
     },
     {
       "id": "power_label",
@@ -290,7 +267,7 @@
       "text": "POWER",
       "font": "head",
       "x": 140,
-      "y": 260,
+      "y": 312,
       "w": 225,
       "h": 32,
       "z": 5,
@@ -304,7 +281,7 @@
       "text": "{{power}} {{u:power}}",
       "font": "s_unit",
       "x": 347,
-      "y": 260,
+      "y": 312,
       "w": 225,
       "h": 32,
       "z": 5,
@@ -319,23 +296,43 @@
       "min": 0,
       "max": 100,
       "x": 175,
-      "y": 295,
+      "y": 347,
       "w": 300,
-      "h": 7,
+      "h": 10,
       "z": 3,
       "conn": 3,
       "segments": 4,
-      "gap": 4,
+      "gap": 2,
       "colors": [
-        "arc",
-        "fg",
-        "hot"
+        [
+          76,
+          151,
+          193
+        ],
+        [
+          99,
+          170,
+          203
+        ],
+        [
+          120,
+          186,
+          214
+        ]
       ],
       "at": [
         0.72,
         0.93
       ],
-      "continuous": true
+      "continuous": true,
+      "tip": true,
+      "trackColor": [
+        43,
+        96,
+        137,
+        235
+      ],
+      "style": "trackFooter"
     },
     {
       "id": "torque_label",
@@ -343,7 +340,7 @@
       "text": "TORQUE",
       "font": "head",
       "x": 140,
-      "y": 346,
+      "y": 398,
       "w": 225,
       "h": 32,
       "z": 5,
@@ -357,7 +354,7 @@
       "text": "{{torque}} {{u:torque}}",
       "font": "s_unit",
       "x": 347,
-      "y": 346,
+      "y": 398,
       "w": 225,
       "h": 32,
       "z": 5,
@@ -372,23 +369,43 @@
       "min": 0,
       "max": 100,
       "x": 175,
-      "y": 381,
+      "y": 433,
       "w": 300,
-      "h": 7,
+      "h": 10,
       "z": 3,
       "conn": 3,
       "segments": 4,
-      "gap": 4,
+      "gap": 2,
       "colors": [
-        "arc",
-        "fg",
-        "hot"
+        [
+          76,
+          151,
+          193
+        ],
+        [
+          99,
+          170,
+          203
+        ],
+        [
+          120,
+          186,
+          214
+        ]
       ],
       "at": [
         0.72,
         0.93
       ],
-      "continuous": true
+      "continuous": true,
+      "tip": true,
+      "trackColor": [
+        43,
+        96,
+        137,
+        235
+      ],
+      "style": "trackFooter"
     },
     {
       "type": "meter",
@@ -444,7 +461,8 @@
       "h": 26,
       "z": 5,
       "conn": 1,
-      "color": "fg"
+      "color": "fg",
+      "lowFuelAt": 0.125
     }
   ],
   "mapLive": true

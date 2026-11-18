@@ -841,7 +841,8 @@
       "y": 606,
       "w": 24,
       "h": 28,
-      "color": "dim"
+      "color": "dim",
+      "lowFuelAt": 0.125
     },
     {
       "id": "oil_icon",

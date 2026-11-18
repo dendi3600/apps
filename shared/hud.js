@@ -1609,6 +1609,12 @@ class HudApp {
         }
         if (name === 'rpm' && isNum(this.rpmF)) return this.rpmF;
         if (name === 'hvSoc') return isNum(this.hvSoc) && Date.now() - this.hvSocAt < HV_STALE_MS ? this.hvSoc : this.car.data().demo ? 64 : null;
+        // M8 pointer: only a fresh ECU percentage can place it on the live scale.
+        if (name === 'fuelSystemPct') {
+            const d = this.car.data();
+            if (d.demo) return d.demoShow || this.setting('demo') === 'on' ? 0.62 : null;
+            return isNum(this.fuelObd) && Date.now() - this.fuelObdAt < FUEL_STALE_MS ? this.fuelObd / 100 : null;
+        }
         if (name === 'fuel' || name === 'range' || name === 'ambient') {
             // the kit's demo drive has none of these: made-up but steady values while it runs
             const demo = this.car.data().demo;
@@ -1618,6 +1624,9 @@ class HudApp {
             }
             if (name === 'range') return isNum(this.rangeKm) ? this.rangeKm : demo ? 368 : null;
             return isNum(this.ambient) ? this.ambient : demo ? 24 : null;
+        }
+        if (name === 'sportPowerPct') {
+            return Date.now() - (this.sportAt || 0) < FRESH_MS ? this.sportPower : null;
         }
         if (name === 'torquePct' || name === 'powerPct') {
             // the car's own sport display % while it sends one, else from the crank torque and app.json
@@ -1790,6 +1799,7 @@ class HudApp {
                 return ((h % 12) || 12) + ':' + pad2(m);
             }
             default:
+                if (tok.indexOf('bar:') === 0) { const v = Number(tok.slice(4)); return us ? String(Math.round(v * 14.5038)) : v.toFixed(1); }
                 if (tok.indexOf('spd:') === 0) { const v = SPEED_SCALE[us ? 'us' : 'metric'][Number(tok.slice(4))]; return v === undefined ? '' : String(v); }   // speed scale labels
                 if (tok.indexOf('temp:') === 0) { const c = Number(tok.slice(5)); return isNum(c) ? String(us ? Math.round((c * 9 / 5 + 32) / 10) * 10 : Math.round(c)) : '--'; }   // gauge labels: °F to the 10
                 if (tok.indexOf('setup:') === 0) { const s = this._setup(); return s ? s[tok.slice(6)] || '' : '--'; }
@@ -2280,7 +2290,7 @@ class HudApp {
             const cs = w.colors || ['fg', 'fg', 'hot'];
             c.uniform(ref, 'u_size', [w.w, w.h]);
             c.uniform(ref, 'u_continuous', [w.continuous ? 1 : 0]);
-            c.uniform(ref, 'u_tip', [w.tip ? 1 : 0]);
+            c.uniform(ref, 'u_tip', [w.style === 'trackFooter' ? (w.tip ? -2 : -1) : (w.tip ? 1 : 0)]);
             c.uniform(ref, 'u_segs', [w.segments || 20]);
             c.uniform(ref, 'u_gap', [isNum(w.gap) ? w.gap : 4]);
             c.uniform(ref, 'u_vertical', [w.vertical ? 1 : 0]);
@@ -2604,6 +2614,7 @@ class HudApp {
             if (!force && now - x.lastPaint < (w.rate || TEXT_MS)) return;
             let s = (w.navHide && this.navShown) || smartTemps.hidden(this, w) || !this._shownNow(w) ? '' : this._resolve(w.text);   // nav turn showing / "showWhen"
             let role = w.color || 'fg';
+            if (w.text && w.text.indexOf('{{fuelPct}}') >= 0) { const fuel = this._raw('fuel'); if (isNum(fuel) && fuel <= .125) role = [255, 189, 42, 255]; }
             if (w.colorBy === 'verdict' && this.score.last) role = VERDICT[this.score.last.verdict] || role;
             if (w.near && this._nearMark(w.near[0]) === w.near[1]) role = w.nearColor || 'fg';
             // a readout slot goes red / blue at the shift point only while it shows engine speed or the shift point
@@ -2742,19 +2753,27 @@ class HudApp {
             }
             let raw = sig ? this._raw(sig) : null;
             if (ab && isNum(raw)) raw = Math.abs(raw);
-            const v = isNum(raw) && mx !== mn ? Math.min(1, Math.max(0, (raw - mn) / (mx - mn))) : 0;
+            const v = isNum(raw) && mx !== mn ? Math.min(1, Math.max(0, (raw - mn) / (mx - mn))) : (w.style === 'trackFooter' ? -1 : 0);
             const q = Math.round(v * 200) / 200;
             const pk = w.peak ? this._peakHold(x, q, now, w.peak) : -1;
             const key = q + '|' + pk;
             if (!force && key === x.last) return;
             x.last = key;
+            if (sig === 'fuel' || sig === 'fuelSystemPct') {
+                const low = isNum(raw) && raw <= .125;
+                const cs = w.colors || ['fg', 'fg', 'hot'];
+                cs.forEach((role, i) => x.c.uniform(x.ref, 'u_c' + (i + 1), low ? [1, .75, .10] : rgb(color(this.theme, role))));
+            }
             x.c.uniform(x.ref, 'u_value', [q]);
             if (w.peak) x.c.uniform(x.ref, 'u_peak', [pk > q ? pk : -1]);
-        } else if (w.type === 'circuit') {
+        } else if (w.type === 'circuit' || w.type === 'amgtrack') {
             const rpm = this._raw('rpm');
             const value = isNum(rpm) ? Math.round(rpm / 10) / 800 : -1;
-            if (force || x.last !== value) x.c.uniform(x.ref, 'u_state', [value, 0, 0, 0]);
-            x.last = value;
+            const shiftPulse = w.type === 'amgtrack' && isNum(rpm) && rpm >= this._shift().rpm
+                ? (1 + Math.cos(now * Math.PI / 420)) / 2 : 0;
+            const stateKey = value + '|' + shiftPulse;
+            if (force || x.last !== stateKey) x.c.uniform(x.ref, 'u_state', [value, shiftPulse, 0, 0]);
+            x.last = stateKey;
         } else if (w.type === 'mtrack') {
             const fraction = (signal, low, high) => {
                 const raw = this._raw(signal);
@@ -2772,7 +2791,7 @@ class HudApp {
             const vals = [
                 q(isNum(sp) ? scaleFrac(us ? sp * 0.621371 : sp, SPEED_SCALE[us ? 'us' : 'metric']) : 0),
                 q(isNum(rpm) ? rpm / (w.rpmMax || 8000) : 0),
-                q(isNum(fuel) ? fuel : 0),
+                q(isNum(fuel) ? fuel : -1),
                 q(isNum(oil) ? (oil - 50) / 100 : 0),
             ];
             // the road's dashes: one dash and gap per ROAD_DASH_M metres driven, 1/64 steps (so standing still writes nothing)
@@ -2817,7 +2836,7 @@ class HudApp {
             const sp = this._raw('speed'), rpm = this._raw('rpm'), fuel = this._raw('fuel'), oil = this._raw('oil');
             const q = (v) => Math.round(Math.min(1, Math.max(0, v)) * 1000) / 1000;
             const vals = [q(isNum(sp) ? (us ? sp * 0.621371 : sp) / MVIEW_SPEED[us ? 'us' : 'metric'] : 0),
-                q(isNum(rpm) ? rpm / MVIEW_RPM : 0), q(isNum(fuel) ? fuel : 0), q(isNum(oil) ? (oil - 50) / 100 : 0)];
+                q(isNum(rpm) ? rpm / MVIEW_RPM : 0), q(isNum(fuel) ? fuel : -1), q(isNum(oil) ? (oil - 50) / 100 : 0)];
             const key = vals.join('|');
             if (!force && key === x.last) return;
             x.last = key;
@@ -2829,7 +2848,7 @@ class HudApp {
         } else if (w.type === 'mdash') {
             const vals = x.gauges.map(([u, G]) => {
                 const v = G.signal ? this._raw(G.signal) : null;
-                return [u, G, isNum(v) ? Math.round(Math.min(1, Math.max(0, (v - G.min) / (G.max - G.min))) * 200) / 200 : 0];
+                return [u, G, isNum(v) ? Math.round(Math.min(1, Math.max(0, (v - G.min) / (G.max - G.min))) * 200) / 200 : -1];
             });
             // the setup level bars: the segment at round(signal) is lit (1-based; 0 = none)
             const lit = [0, 1, 2, 3].map((i) => {
@@ -2844,10 +2863,15 @@ class HudApp {
         } else if (w.type === 'mtach') {
             const rpm = this._raw('rpm'), sp = this._shift();
             const v = isNum(rpm) ? Math.min(1, Math.max(0, rpm / (w.max || 8000))) : 0;
-            const key = Math.round(v * 600) + '|' + sp.now;
+            // A decaying envelope retains light briefly as the live marker moves.
+            const elapsed = Math.max(0, now - (x.trailTime || now));
+            x.trail = isNum(x.trail) && isNum(rpm) ? v + (x.trail-v)*Math.exp(-elapsed/210) : v;
+            x.trailTime = now;
+            const key = [Math.round(v*600), Math.round(x.trail*600), sp.now].join('|');
             if (!force && key === x.last) return;
             x.last = key;
             x.c.uniform(x.ref, 'u_value', [v]);
+            x.c.uniform(x.ref, 'u_trail', [x.trail]);
             x.c.uniform(x.ref, 'u_shiftNow', [sp.now ? 1 : 0]);
         } else if (w.type === 'segbar') {
             const v = this._raw(w.signal);

@@ -651,7 +651,8 @@
       "w": 22,
       "h": 26,
       "color": "dim",
-      "toggle": "mapUp"
+      "toggle": "mapUp",
+      "lowFuelAt": 0.125
     },
     {
       "id": "mfuel",

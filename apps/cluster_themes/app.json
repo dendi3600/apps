@@ -1,8 +1,8 @@
 {
   "id": "cluster_themes",
   "title": "Cluster Themes",
-  "description": "Redraws the instrument cluster: GT3 race dash, M8 (twin tachometer), M view, Vector (with a music panel), M1, Ramp, Track, Drag, AMG Circuit, Retro 80s, Cruise, Dyno (BMW-coloured readout tiles) or M2 (diagonal tachometer), with shift lights, boost, temps, tyres, a G-meter and a 0-60 timer",
-  "version": "0.19.33",
+  "description": "Redraws the instrument cluster: GT3 race dash, M8 (twin tachometer), M view, Vector (with a music panel), M1, Ramp, Drag, AMG Circuit, Retro 80s, AMG Track, or M2 (diagonal tachometer), with shift lights, boost, temps, tyres, a G-meter and a 0-60 timer",
+  "version": "0.19.34",
   "vendor": "custom",
   "loggingId": "OAC1",
   "iconGlyph": "CLU",
@@ -124,20 +124,24 @@
           "M8"
         ],
         [
-          "mview",
-          "M view"
-        ],
-        [
           "rally",
           "AMG Circuit"
         ],
         [
-          "minimal",
-          "Ramp"
+          "cruise",
+          "AMG Track"
         ],
         [
           "srinivas",
           "Srinivas"
+        ],
+        [
+          "mview",
+          "M view"
+        ],
+        [
+          "minimal",
+          "Ramp"
         ],
         [
           "off",
@@ -152,24 +156,12 @@
           "Vector"
         ],
         [
-          "track",
-          "Track"
-        ],
-        [
           "drag",
           "Drag"
         ],
         [
           "retro80s",
           "Retro 80s"
-        ],
-        [
-          "cruise",
-          "Cruise"
-        ],
-        [
-          "dyno",
-          "Dyno"
         ],
         [
           "grid",
@@ -206,20 +198,24 @@
           "M8"
         ],
         [
-          "mview",
-          "M view"
-        ],
-        [
           "rally",
           "AMG Circuit"
         ],
         [
-          "minimal",
-          "Ramp"
+          "cruise",
+          "AMG Track"
         ],
         [
           "srinivas",
           "Srinivas"
+        ],
+        [
+          "mview",
+          "M view"
+        ],
+        [
+          "minimal",
+          "Ramp"
         ],
         [
           "off",
@@ -234,24 +230,12 @@
           "Vector"
         ],
         [
-          "track",
-          "Track"
-        ],
-        [
           "drag",
           "Drag"
         ],
         [
           "retro80s",
           "Retro 80s"
-        ],
-        [
-          "cruise",
-          "Cruise"
-        ],
-        [
-          "dyno",
-          "Dyno"
         ]
       ]
     },
@@ -274,20 +258,24 @@
           "M8"
         ],
         [
-          "mview",
-          "M view"
-        ],
-        [
           "rally",
           "AMG Circuit"
         ],
         [
-          "minimal",
-          "Ramp"
+          "cruise",
+          "AMG Track"
         ],
         [
           "srinivas",
           "Srinivas"
+        ],
+        [
+          "mview",
+          "M view"
+        ],
+        [
+          "minimal",
+          "Ramp"
         ],
         [
           "off",
@@ -302,24 +290,12 @@
           "Vector"
         ],
         [
-          "track",
-          "Track"
-        ],
-        [
           "drag",
           "Drag"
         ],
         [
           "retro80s",
           "Retro 80s"
-        ],
-        [
-          "cruise",
-          "Cruise"
-        ],
-        [
-          "dyno",
-          "Dyno"
         ]
       ]
     },
@@ -342,20 +318,24 @@
           "M8"
         ],
         [
-          "mview",
-          "M view"
-        ],
-        [
           "rally",
           "AMG Circuit"
         ],
         [
-          "minimal",
-          "Ramp"
+          "cruise",
+          "AMG Track"
         ],
         [
           "srinivas",
           "Srinivas"
+        ],
+        [
+          "mview",
+          "M view"
+        ],
+        [
+          "minimal",
+          "Ramp"
         ],
         [
           "off",
@@ -370,24 +350,12 @@
           "Vector"
         ],
         [
-          "track",
-          "Track"
-        ],
-        [
           "drag",
           "Drag"
         ],
         [
           "retro80s",
           "Retro 80s"
-        ],
-        [
-          "cruise",
-          "Cruise"
-        ],
-        [
-          "dyno",
-          "Dyno"
         ]
       ]
     },

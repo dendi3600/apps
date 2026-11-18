@@ -65,6 +65,12 @@
     <div class="bar">
       <label class="chk"><input type="checkbox" id="outlines" checked> layer outlines</label>
       <label class="chk"><input type="checkbox" id="road"> <span id="backdropName">backdrop</span></label>
+      <label>Assistance preview <select id="assistExample"><option value="">Off</option><option value="Lane assist">Lane assist · example</option><option value="Hands on wheel">Hands-on reminder · example</option></select></label>
+      <label id="assistPlacement" hidden>Position for this theme <select id="assistPosition">
+        <option value="top">Upper center</option><option value="left">Upper left</option>
+        <option value="right">Upper right</option><option value="center">Center</option>
+        <option value="bottom">Lower center</option>
+      </select></label>
       <label class="chk" title="What the driver sees: the hood hides the top corners of the cluster and BMW draws its gear box and belt light over us; on the HUD only a window is visible through the windshield. Measured from car photos, Nov 5 2026 (shared/visible.js)."><input type="checkbox" id="carview" checked> car view</label>
       <span id="fps"></span>
     </div>
@@ -211,6 +217,25 @@
   // what the driver sees, from the server's hello (shared/visible.js, measured from car photos Nov 5 2026)
   let geo = null;
   let settingVals = {};            // the app's settings as last sent (the car view's camera notch follows one)
+  const assistExample = document.getElementById('assistExample');
+  const assistPosition = document.getElementById('assistPosition');
+  const assistPlacement = document.getElementById('assistPlacement');
+  const assistAnchors = { top: [.5, .197], left: [.25, .25], right: [.75, .25], center: [.5, .45], bottom: [.5, .76] };
+  let assistTheme = '';
+  function assistKey() {
+    return 'cluster-bench.assist.' + assistTheme + '.' + assistExample.value;
+  }
+  function updateAssistPosition() {
+    assistPlacement.hidden = !assistExample.value || !assistTheme || view !== 'panel';
+    const saved = localStorage.getItem(assistKey());
+    assistPosition.value = Object.prototype.hasOwnProperty.call(assistAnchors, saved) ? saved : ({ M1: 'bottom', M8: 'bottom', M2: 'top', 'AMG Track': 'right' }[assistTheme] || 'top');
+    dirty = true;
+  }
+  assistExample.addEventListener('change', updateAssistPosition);
+  assistPosition.addEventListener('change', () => {
+    if (assistTheme && assistExample.value) localStorage.setItem(assistKey(), assistPosition.value);
+    dirty = true;
+  });
   function hoodY(x) {
     const H = geo.HOOD;
     if (x <= H[0][0]) return H[0][1];
@@ -342,6 +367,19 @@
         });
       }
       if (document.getElementById('carview').checked) drawCarView();
+      const assist = document.getElementById('assistExample').value;
+      if (assist && assistTheme && view === 'panel') {
+        ctx.save();
+        ctx.font = 'bold 24px sans-serif'; ctx.textAlign = 'center';
+        const anchor = assistAnchors[assistPosition.value];
+        ctx.translate(VW*anchor[0], VH*anchor[1]);
+        ctx.fillStyle = '#152133'; ctx.fillRect(-214,0,428,66);
+        ctx.fillStyle = assist === 'Lane assist' ? '#9ae4af' : '#ffd285';
+        ctx.fillText(assist,0,28);
+        ctx.font = '16px sans-serif'; ctx.fillStyle = '#d7dee9';
+        ctx.fillText('Simulated placement',0,52);
+        ctx.restore();
+      }
       if (/[?&]dbg=1/.test(location.search)) { ctx.fillStyle = '#ff0'; ctx.font = '20px monospace'; ctx.fillText('msgs ' + dbgN + ' last ' + dbgLast + ' images ' + images.size + ' px ' + dbgPx + ' reads ' + dbgReads + ' buf ' + dbgBuf + ' err ' + dbgErr, 20, VH - 20); }
       frames++;
     }
@@ -349,7 +387,7 @@
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-  ['outlines', 'road', 'carview'].forEach((id) => document.getElementById(id).addEventListener('change', () => { dirty = true; }));
+  ['outlines', 'road', 'carview', 'assistExample'].forEach((id) => document.getElementById(id).addEventListener('change', () => { dirty = true; }));
   const capEl = document.getElementById('cap');
   capEl.addEventListener('change', () => fetch('/cap', { method: 'POST', body: JSON.stringify({ cap: Number(capEl.value) || 0 }) }));
 
@@ -437,6 +475,9 @@
       renderSettings(m);
     } else if (m.t === 'status') {
       document.getElementById('status').textContent = m.s;
+      const match = /:\s*([^:,]+?) theme,/.exec(m.s);
+      assistTheme = match ? match[1] : '';
+      updateAssistPosition();
     } else if (m.t === 'app') {
       const a = document.getElementById('appState');
       a.textContent = 'app: ' + m.state; a.className = 'pill ' + (m.state === 'running' ? 'ok' : 'bad');
