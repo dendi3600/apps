@@ -1,8 +1,8 @@
 {
   "id": "cluster_themes",
   "title": "Cluster Themes",
-  "description": "Redraws the instrument cluster: GT3 race dash, M8 (twin tachometer), M view, Vector (with a music panel), M1, Ramp, Track, Drag, M Circuit, Retro 80s, Cruise, Dyno (BMW-coloured readout tiles) or M2 (diagonal tachometer), with shift lights, boost, temps, tyres, a G-meter and a 0-60 timer",
-  "version": "0.19.29",
+  "description": "Redraws the instrument cluster: GT3 race dash, M8 (twin tachometer), M view, Vector (with a music panel), M1, Ramp, Track, Drag, AMG Circuit, Retro 80s, Cruise, Dyno (BMW-coloured readout tiles) or M2 (diagonal tachometer), with shift lights, boost, temps, tyres, a G-meter and a 0-60 timer",
+  "version": "0.19.30",
   "vendor": "custom",
   "loggingId": "OAC1",
   "iconGlyph": "CLU",
@@ -112,12 +112,12 @@
       "default": "gt3",
       "options": [
         [
-          "off",
-          "Off (BMW's own cluster)"
+          "sport",
+          "M1"
         ],
         [
-          "gt3",
-          "GT3"
+          "ribbon",
+          "M2"
         ],
         [
           "m",
@@ -128,16 +128,28 @@
           "M view"
         ],
         [
-          "vector",
-          "Vector"
-        ],
-        [
-          "sport",
-          "M1"
+          "rally",
+          "AMG Circuit"
         ],
         [
           "minimal",
           "Ramp"
+        ],
+        [
+          "srinivas",
+          "Srinivas"
+        ],
+        [
+          "off",
+          "Off (BMW's own cluster)"
+        ],
+        [
+          "gt3",
+          "GT3"
+        ],
+        [
+          "vector",
+          "Vector"
         ],
         [
           "track",
@@ -146,10 +158,6 @@
         [
           "drag",
           "Drag"
-        ],
-        [
-          "rally",
-          "M Circuit"
         ],
         [
           "retro80s",
@@ -162,14 +170,6 @@
         [
           "dyno",
           "Dyno"
-        ],
-        [
-          "ribbon",
-          "M2"
-        ],
-        [
-          "srinivas",
-          "Srinivas"
         ],
         [
           "grid",
@@ -194,12 +194,12 @@
       "default": "off",
       "options": [
         [
-          "off",
-          "Off (BMW's own cluster)"
+          "sport",
+          "M1"
         ],
         [
-          "gt3",
-          "GT3"
+          "ribbon",
+          "M2"
         ],
         [
           "m",
@@ -210,16 +210,28 @@
           "M view"
         ],
         [
-          "vector",
-          "Vector"
-        ],
-        [
-          "sport",
-          "M1"
+          "rally",
+          "AMG Circuit"
         ],
         [
           "minimal",
           "Ramp"
+        ],
+        [
+          "srinivas",
+          "Srinivas"
+        ],
+        [
+          "off",
+          "Off (BMW's own cluster)"
+        ],
+        [
+          "gt3",
+          "GT3"
+        ],
+        [
+          "vector",
+          "Vector"
         ],
         [
           "track",
@@ -228,10 +240,6 @@
         [
           "drag",
           "Drag"
-        ],
-        [
-          "rally",
-          "M Circuit"
         ],
         [
           "retro80s",
@@ -244,14 +252,6 @@
         [
           "dyno",
           "Dyno"
-        ],
-        [
-          "ribbon",
-          "M2"
-        ],
-        [
-          "srinivas",
-          "Srinivas"
         ]
       ]
     },
@@ -262,12 +262,12 @@
       "default": "gt3",
       "options": [
         [
-          "off",
-          "Off (BMW's own cluster)"
+          "sport",
+          "M1"
         ],
         [
-          "gt3",
-          "GT3"
+          "ribbon",
+          "M2"
         ],
         [
           "m",
@@ -278,16 +278,28 @@
           "M view"
         ],
         [
-          "vector",
-          "Vector"
-        ],
-        [
-          "sport",
-          "M1"
+          "rally",
+          "AMG Circuit"
         ],
         [
           "minimal",
           "Ramp"
+        ],
+        [
+          "srinivas",
+          "Srinivas"
+        ],
+        [
+          "off",
+          "Off (BMW's own cluster)"
+        ],
+        [
+          "gt3",
+          "GT3"
+        ],
+        [
+          "vector",
+          "Vector"
         ],
         [
           "track",
@@ -296,10 +308,6 @@
         [
           "drag",
           "Drag"
-        ],
-        [
-          "rally",
-          "M Circuit"
         ],
         [
           "retro80s",
@@ -312,14 +320,6 @@
         [
           "dyno",
           "Dyno"
-        ],
-        [
-          "ribbon",
-          "M2"
-        ],
-        [
-          "srinivas",
-          "Srinivas"
         ]
       ]
     },
@@ -330,12 +330,12 @@
       "default": "off",
       "options": [
         [
-          "off",
-          "Off (BMW's own cluster)"
+          "sport",
+          "M1"
         ],
         [
-          "gt3",
-          "GT3"
+          "ribbon",
+          "M2"
         ],
         [
           "m",
@@ -346,16 +346,28 @@
           "M view"
         ],
         [
-          "vector",
-          "Vector"
-        ],
-        [
-          "sport",
-          "M1"
+          "rally",
+          "AMG Circuit"
         ],
         [
           "minimal",
           "Ramp"
+        ],
+        [
+          "srinivas",
+          "Srinivas"
+        ],
+        [
+          "off",
+          "Off (BMW's own cluster)"
+        ],
+        [
+          "gt3",
+          "GT3"
+        ],
+        [
+          "vector",
+          "Vector"
         ],
         [
           "track",
@@ -364,10 +376,6 @@
         [
           "drag",
           "Drag"
-        ],
-        [
-          "rally",
-          "M Circuit"
         ],
         [
           "retro80s",
@@ -380,14 +388,6 @@
         [
           "dyno",
           "Dyno"
-        ],
-        [
-          "ribbon",
-          "M2"
-        ],
-        [
-          "srinivas",
-          "Srinivas"
         ]
       ]
     },

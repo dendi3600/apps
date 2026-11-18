@@ -1731,6 +1731,8 @@ class HudApp {
             case 'torque': { const v = this._raw('torque'); return fix(isNum(v) ? (us ? v * 0.737562 : v) : v, 0); }
             case 'torquePct': case 'powerPct': { const v = this._raw(tok); return isNum(v) ? String(Math.min(100, Math.round(v))) : '--'; }
             case 'boostHi': return us ? '20' : '1.4';
+            case 'boostScaleMid': return us ? '14.5' : '1.0';
+            case 'boostScaleMax': return us ? '29' : '2.0';
             case 'boostMid': return us ? '10' : '0.7';
             case 'ampmLc': return this._token('ampm').toLowerCase();
             case 'gLat': case 'gLong': { const v = this._raw(tok); return isNum(v) ? Math.abs(v).toFixed(2) : '--'; }
@@ -2277,6 +2279,7 @@ class HudApp {
         } else if (w.type === 'meter') {
             const cs = w.colors || ['fg', 'fg', 'hot'];
             c.uniform(ref, 'u_size', [w.w, w.h]);
+            c.uniform(ref, 'u_tip', [w.tip ? 1 : 0]);
             c.uniform(ref, 'u_segs', [w.segments || 20]);
             c.uniform(ref, 'u_gap', [isNum(w.gap) ? w.gap : 4]);
             c.uniform(ref, 'u_vertical', [w.vertical ? 1 : 0]);

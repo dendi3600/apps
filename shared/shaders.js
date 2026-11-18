@@ -574,35 +574,19 @@ vec4 gauge(vec2 p, vec4 g, float zones, vec4 c) {
     vec2 q = (p - g.xy) / k;
     if (q.x < -140.0 || q.x > 70.0 || q.y < -22.0 || q.y > 140.0) return c;
     float v = clamp(g.w, 0.0, 1.0);
-    // the shared end cuts: the top at y -10, the bottom along a ray from the bezel's centre
-    vec2 qb = q - vec2(-13.0, 11.0);
-    float ae = radians(zones > 0.5 ? 100.0 : 75.0);
-    float ends = min(q.y + 10.0, dot(qb, vec2(-sin(ae), cos(ae))));            // positive on the dial's side of both cuts
-    // the bezel: double-edged and hatched
-    float rb = length(qb);
-    float bez = rIn(min(rb - 112.5, 124.0 - rb), ends, 2.0);
-    if (bez > -1.5) {
-        float ab = atan(qb.y, qb.x);
-        float hatch = step(0.5, fract(ab * 30.0));
-        float edge = cov(abs(bez) * k - 0.8);
-        c = over(vec4(0.8, 0.82, 0.88, min(1.0, cov(-bez * k) * (0.4 + 0.35 * hatch) + 0.7 * edge)), c);
-    }
-    // the glass
-    float dOut = 120.0 - length(q);
-    float dIn = length(q - vec2(57.0, -68.0)) - 180.0;
-    float inside = rIn(min(dOut, dIn), ends, 2.0);
-    if (inside > -1.5) {
-        float f = clamp(dOut / max(dOut + max(dIn, 0.0), 1.0), 0.0, 1.0);        // 0 at the outer edge, 1 at the inner
-        float yv = zones > 0.5 ? mix(97.0, 7.0, v) : mix(100.0, 2.0, v);
-        float lit = clamp((q.y - yv) * k + 0.5, 0.0, 1.0);                        // below the level line
-        vec4 dark = vec4(0.55, 0.57, 0.63, 0.16);
-        vec4 bright = vec4(mix(vec3(0.96, 0.97, 0.99), vec3(0.55, 0.57, 0.63), f), mix(1.0, 0.55, f));
-        vec4 glass = mix(dark, bright, lit);
-        float a = cov(-inside * k);
-        c = over(vec4(glass.rgb, glass.a * a), c);
-        c = over(vec4(0.85, 0.87, 0.92, 0.45 * cov(abs(inside * k) - 0.6) * (1.0 - lit)), c);   // the unlit glass's outline
-        c = over(vec4(u_red, a * cov(abs(q.y - yv) * k - 1.2)), c);                              // the level, inside the glass only
-    }
+    // Three short tangent runs form the tapered gauge; its marker crosses the rail.
+    float y=clamp(q.y,0.,105.);
+    float center=-113.+.26*y+.64*max(y-24.,0.)+.72*max(y-72.,0.);
+    float width=mix(4.,9.,smoothstep(0.,65.,y));
+    float dx=q.x-center;
+    float cap=min(q.y,105.-q.y);
+    float mask=cov(-min(width-abs(dx),cap)*k);
+    float pointer=mix(100.,3.,v);
+    vec3 glass=mix(vec3(.055,.066,.084),vec3(.44,.48,.54),smoothstep(pointer,pointer+6.,y));
+    glass*=mix(.53,1.,clamp(.5+dx/(2.*width),0.,1.));
+    c=over(vec4(glass,mask),c);
+    c=over(vec4(.72,.77,.81,.85*cov(abs(dx+width)-1.)*cov(-cap)),c);
+    c=over(vec4(u_red,cov(abs(q.y-pointer)-2.8)*cov(abs(dx)-width-2.)),c);
     return c;
 }
 
@@ -834,7 +818,7 @@ vec4 bracket(vec2 q, float val, float redFrom, float orange, float ticks, vec3 l
         if (kk >= 0.0 && kk <= ticks && d > 6.5 && d < laneEnd - 2.0) c = over(vec4(line, 0.9 * cov(abs(q.y - yk) - 1.2)), c);
         // redline: yellow dashes, then a solid red line, on the outer edge of the band
         if (redFrom < 1.5 && d > 8.0 && d < 13.0) {
-            if (t >= redFrom && t <= 1.02) c = over(vec4(1.0, 0.2, 0.2, 1.0), c);
+            if (t >= redFrom && t <= (orange > 1.5 ? val : 1.02)) c = over(vec4(1.0, 0.2, 0.2, 1.0), c);
             else if (t >= orange && t < redFrom && mod(q.y, 16.0) < 7.0) c = over(vec4(1.0, 0.85, 0.1, 1.0), c);
         }
     }
@@ -1004,6 +988,7 @@ uniform vec3 u_c2;
 uniform vec3 u_c3;
 uniform vec2 u_at;
 uniform vec4 u_track;
+uniform float u_tip;
 uniform float u_peak;
 uniform vec3 u_peakC;
 
@@ -1021,6 +1006,7 @@ void main() {
     float lit = (i + 0.5) / u_segs <= u_value + 0.5 / u_segs ? 1.0 : 0.0;
     if (u_value <= 0.0) lit = 0.0;
     if (u_peak >= 0.0 && i == floor(min(u_peak, 0.9999) * u_segs) && lit < 0.5) { gl_FragColor = vec4(u_peakC, a); return; }
+    if (u_tip > .5 && u_value > 0. && abs(x-clamp(u_value,0.,1.)*len)<4.) c=vec3(1.,.085,.12);
     if (lit > 0.5) gl_FragColor = vec4(c, a);
     else gl_FragColor = vec4(u_track.rgb, u_track.a * a);
 }
@@ -1815,8 +1801,9 @@ void main(){
     float cols=abs(fract(d.x/(1.+depth*.65)*.065)-.5);
     float mesh=(1.-smoothstep(.025,.14,rows))+.5*(1.-smoothstep(.02,.13,cols));
     col+=depth*exp(-side*.006)*vec3(.055,.31,.39)*(.70+mesh*.42);
+    col+=vec3(.18,.13,.007)*smoothstep(110.,170.,side)*exp(-abs(p.y-deck+6.)*.12);
     float rimGlow=exp(-abs(p.y-deck)*.18);
-    col+=vec3(.25,.16,.035)*rimGlow;
+    col+=vec3(.39,.26,.035)*rimGlow;
     col=mix(col,vec3(.99,.85,.48),line(p.y-deck,.60));
     if(p.y>deck+1.)col=mix(vec3(.035,.036,.07),vec3(.02,.28,.36),exp(-(p.y-deck)*.095-side*.009));
     float skirt=smoothstep(1.,4.,p.y-deck)*(1.-smoothstep(11.,18.,p.y-deck));
@@ -1824,11 +1811,11 @@ void main(){
     col+=vec3(.15,.29,.33)*line(p.y-deck-3.2,.24);
     if(abs(angle)<1.99){
         col=mix(col,vec3(.86,.72,.42),line(r-116.,.55));
-        col=mix(col,vec3(.72,.80,.85),line(r-111.,2.1));
+        col=mix(col,vec3(.35,.70,.89),line(r-111.,2.1));
         float bevel=clamp((r-105.)/9.,0.,1.);
-        col=mix(col,mix(vec3(.12,.19,.23),vec3(.82,.86,.84),sin(bevel*3.14159)),smoothstep(105.,106.,r)*(1.-smoothstep(113.,114.,r)));
+        col=mix(col,mix(vec3(.12,.19,.23),vec3(.49,.76,.93),sin(bevel*3.14159)),smoothstep(105.,106.,r)*(1.-smoothstep(113.,114.,r)));
         float passed=step(0.,u_state.x)*(1.-smoothstep(u_state.x-.006,u_state.x+.006,sweep));
-        vec3 revInk=mix(vec3(.97,.67,.19),vec3(1.,.13,.17),smoothstep(.73,.91,sweep));
+        vec3 revInk=mix(vec3(.97,.67,.19),vec3(1.,.13,.17),smoothstep(.50,.80,sweep));
         col+=revInk*passed*.21*exp(-abs(r-106.)*.29);
         col+=vec3(.48,.018,.035)*smoothstep(.80,.98,sweep)*smoothstep(60.,102.,r)*(1.-smoothstep(103.,105.,r));
         float tick=abs(fract(sweep*80.+.5)-.5);

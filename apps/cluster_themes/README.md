@@ -90,11 +90,11 @@ A full-width shift bar and a 0 to 60 mph timer (0 to 100 km/h in metric). Stop f
 
 <p align="center"><img src="../../docs/images/cluster-drag.png" width="900" alt="Drag theme"></p>
 
-### M Circuit
+### AMG Circuit
 
-The illuminated ticks follow the tachometer needle. Boost, power and torque occupy the left panel. The right panel shows a circuit outline or the live map when available.
+The illuminated ticks follow the tachometer needle. Boost, power and torque occupy the left panel. The right panel opens onto the live Waze map when enabled and available.
 
-<p align="center"><img src="../../docs/images/cluster-m-circuit.png" width="900" alt="M Circuit cluster"></p>
+<p align="center"><img src="../../docs/images/cluster-m-circuit.png" width="900" alt="AMG Circuit cluster"></p>
 
 ### Retro 80s
 
