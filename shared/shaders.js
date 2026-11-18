@@ -1779,4 +1779,48 @@ void main() {
 }
 `;
 
-module.exports = { shiftbar: SHIFTBAR, arc: ARC, revbar: REVBAR, lights: LIGHTS, fill: FILL, box: BOX, grid: GRID, segbar: SEGBAR, mdash: MDASH, mtach: MTACH, sdash: SDASH, boxes: BOXES, atext: ATEXT, meter: METER, gmeter: GMETER, revarc: REVARC, tiles: TILES, ribbon: RIBBON, deco: DECO, mview: MVIEW, vdash: VDASH };
+const MTRACK = `precision highp float;
+varying vec2 v_uv;
+uniform vec4 u_state; // RPM, oil and fuel fractions; negative means unavailable
+float cover(float edge) { return clamp(edge + 0.5, 0.0, 1.0); }
+float band(float v, float a, float b) { return cover(min(v-a,b-v)); }
+vec3 gauge(vec3 base, vec2 p, float foot, float level, bool oil) {
+    float t = (598.0-p.y)/166.0;
+    float x = p.x-foot-96.0*t;
+    float mask = band(p.y,432.0,598.0)*band(x,0.0,14.0);
+    vec3 ink = t <= level ? vec3(0.90,0.93,0.97) : vec3(0.25,0.28,0.34);
+    if (oil && t < 0.065) ink = vec3(0.16,0.55,0.97);
+    if (oil && t > 0.935) ink = vec3(0.88,0.12,0.21);
+    ink *= mix(0.24,1.0,smoothstep(0.0,1.4,abs(fract(t*4.0+0.5)-0.5)*41.5));
+    return mix(base,ink,mask);
+}
+void main() {
+    vec2 p = v_uv * vec2(1920.0,660.0);
+    vec3 c = vec3(0.011,0.014,0.024);
+    float skew = p.x + 0.55*(p.y-170.0);
+    float panel = band(p.y,155.0,574.0)*cover(min(p.x-105.0-0.55*abs(p.y-405.0),
+                                                  1240.0-p.x-0.55*abs(p.y-360.0)));
+    vec3 blue = mix(vec3(0.045,0.107,0.25),vec3(0.12,0.28,0.56),(574.0-p.y)/419.0);
+    blue += vec3(0.035,0.065,0.11)*band(skew,485.0,553.0);
+    blue = mix(blue,vec3(0.35,0.14,0.27),0.68*band(skew,645.0,728.0));
+    blue *= 1.0-0.83*band(skew,875.0,1234.0)*band(p.y,261.0,398.0);
+    blue *= 1.0-0.75*max(band(skew,868.0,873.0),band(skew,1234.0,1239.0));
+    c = mix(c,blue,panel);
+    float t = (614.0-p.y)/492.0;
+    float x = p.x-(1192.0+286.0*t);
+    float rail = band(p.y,122.0,614.0);
+    c = mix(c,vec3(0.21,0.047,0.076),rail*band(x,-104.0,0.0));
+    c = mix(c,vec3(0.68,0.055,0.13),rail*band(x,-101.0,0.0)*step(t,u_state.x));
+    c = mix(c,vec3(0.99,0.16,0.26),rail*band(x,-8.0,1.0));
+    c = mix(c,vec3(0.90,0.45,0.50),rail*band(x,-105.0,-103.0));
+    c = mix(c,vec3(0.94,0.27,0.38),rail*band(x,-33.0,-8.0)*cover(1.6-abs(fract(t*8.0+0.5)-0.5)*61.5));
+    c = mix(c,vec3(0.85,0.90,0.96),rail*band(x,-103.0,0.0)*cover(1.7-abs(t-u_state.x)*492.0));
+    c = mix(c,vec3(0.95,0.19,0.28),max(band(p.y,120.0,123.0)*band(p.x,1270.0,1478.0),
+                                         band(p.y,613.0,616.0)*band(p.x,900.0,1192.0)));
+    c = gauge(c,p,1415.0,u_state.y,true);
+    c = gauge(c,p,1580.0,u_state.z,false);
+    gl_FragColor = vec4(c,1.0);
+}
+`;
+
+module.exports = { mtrack: MTRACK, shiftbar: SHIFTBAR, arc: ARC, revbar: REVBAR, lights: LIGHTS, fill: FILL, box: BOX, grid: GRID, segbar: SEGBAR, mdash: MDASH, mtach: MTACH, sdash: SDASH, boxes: BOXES, atext: ATEXT, meter: METER, gmeter: GMETER, revarc: REVARC, tiles: TILES, ribbon: RIBBON, deco: DECO, mview: MVIEW, vdash: VDASH };

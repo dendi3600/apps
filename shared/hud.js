@@ -2717,6 +2717,16 @@ class HudApp {
             x.last = key;
             x.c.uniform(x.ref, 'u_value', [q]);
             if (w.peak) x.c.uniform(x.ref, 'u_peak', [pk > q ? pk : -1]);
+        } else if (w.type === 'mtrack') {
+            const fraction = (signal, low, high) => {
+                const raw = this._raw(signal);
+                return isNum(raw) ? Math.round(500 * Math.max(0, Math.min(1, (raw-low)/(high-low)))) / 500 : -1;
+            };
+            const values = [fraction('rpm', 0, 8000), fraction('oil', 50, 150), fraction('fuel', 0, 1), 0];
+            const key = values.join('|');
+            if (!force && x.last === key) return;
+            x.last = key;
+            x.c.uniform(x.ref, 'u_state', values);
         } else if (w.type === 'sdash') {
             const us = this.setting('units') === 'us';
             const sp = this._raw('speed'), rpm = this._raw('rpm'), fuel = this._raw('fuel'), oil = this._raw('oil');
