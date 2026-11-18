@@ -1782,6 +1782,7 @@ void main() {
 const CIRCUIT = `precision highp float;
 varying vec2 v_uv;
 uniform vec4 u_state;
+uniform vec4 u_hole;
 float line(float d,float w){return 1.0-smoothstep(w,w+0.35,abs(d));}
 float segment(vec2 p,vec2 a,vec2 b){
     vec2 v=b-a; return length(p-a-v*clamp(dot(p-a,v)/dot(v,v),0.0,1.0));
@@ -1791,25 +1792,36 @@ void main(){
     vec2 d=p-vec2(410.,188.);
     float r=length(d), angle=atan(d.x,-d.y);
     float sweep=clamp((angle+1.98)/3.96,0.,1.);
-    float floorY=261.-17.*smoothstep(92.,153.,abs(d.x)*-1.+245.)-35.*pow(clamp((abs(d.x)-235.)/100.,0.,1.),2.);
-    vec3 col=mix(vec3(.035,.04,.08),vec3(.06,.09,.16),clamp(p.y/270.,0.,1.));
-    float glow=exp(-abs(p.y-156.)*.13)*exp(-abs(abs(d.x)-196.)*.019);
-    col+=vec3(.01,.50,.63)*glow;
-    float floorMask=smoothstep(159.,218.,p.y);
-    col+=floorMask*exp(-abs(d.x)*.012)*vec3(.0,.42,.57);
-    float grid=abs(fract(55./max(.18,(p.y-137.)*.016))-.5);
-    col+=floorMask*vec3(.03,.10,.13)*(1.-smoothstep(.01,.09,grid));
-    col=mix(col,vec3(.88,.71,.31),line(p.y-floorY,.52));
-    if(p.y>floorY)col*=.27;
+    float side=abs(d.x);
+    float deck=243.+18.*smoothstep(100.,170.,side)-30.*pow(clamp((side-238.)/77.,0.,1.),2.);
+    vec3 col=mix(vec3(.034,.033,.079),vec3(.112,.109,.191),exp(-abs(p.y-97.)*.012));
+    float horizon=exp(-abs(p.y-155.)*.13)*exp(-abs(side-196.)*.011);
+    col+=vec3(.045,.58,.69)*horizon;
+    float depth=clamp((p.y-170.)/80.,0.,1.);
+    float arch=13.*pow(side/190.,2.);
+    float rows=abs(fract((p.y+arch)*.15)-.5);
+    float cols=abs(fract(d.x/(1.+depth*.65)*.065)-.5);
+    float mesh=(1.-smoothstep(.025,.14,rows))+.5*(1.-smoothstep(.02,.13,cols));
+    col+=depth*exp(-side*.006)*vec3(.015,.37,.48)*(1.+mesh*.8);
+    float rimGlow=exp(-abs(p.y-deck)*.18);
+    col+=vec3(.48,.34,.10)*rimGlow;
+    col=mix(col,vec3(.99,.85,.48),line(p.y-deck,.60));
+    if(p.y>deck+1.)col=mix(vec3(.035,.036,.07),vec3(.02,.28,.36),exp(-(p.y-deck)*.095-side*.009));
     if(abs(angle)<1.99){
         col=mix(col,vec3(.86,.72,.42),line(r-116.,.55));
         col=mix(col,vec3(.72,.80,.85),line(r-111.,2.1));
+        float bevel=clamp((r-105.)/9.,0.,1.);
+        col=mix(col,mix(vec3(.12,.19,.23),vec3(.82,.86,.84),sin(bevel*3.14159)),smoothstep(105.,106.,r)*(1.-smoothstep(113.,114.,r)));
+        float active=step(0.,u_state.x)*(1.-smoothstep(u_state.x-.006,u_state.x+.006,sweep));
+        vec3 revInk=mix(vec3(.97,.67,.19),vec3(1.,.13,.17),smoothstep(.73,.91,sweep));
+        col+=revInk*active*.62*exp(-abs(r-106.)*.29);
+        col+=vec3(.48,.018,.035)*smoothstep(.80,.98,sweep)*smoothstep(60.,102.,r)*(1.-smoothstep(103.,105.,r));
         float tick=abs(fract(sweep*80.+.5)-.5);
         float major=abs(fract(sweep*8.+.5)-.5);
         float inner=mix(97.,89.,1.-smoothstep(.012,.025,major));
         vec3 ink=sweep>.84?vec3(.90,.22,.29):vec3(.87,.91,.94);
         col=mix(col,ink,(1.-smoothstep(.07,.22,tick))*smoothstep(inner-1.,inner,r)*(1.-smoothstep(104.,105.,r)));
-        col+=ink*.20*(1.-smoothstep(.04,.45,tick))*smoothstep(49.,98.,r)*(1.-smoothstep(102.,106.,r));
+        col+=ink*.49*(1.-smoothstep(.04,.45,tick))*smoothstep(40.,95.,r)*(1.-smoothstep(102.,106.,r));
     }
     float a=mix(-1.98,1.98,clamp(u_state.x,0.,1.));
     vec2 dir=vec2(sin(a),-cos(a));
@@ -1842,7 +1854,10 @@ void main(){
     track=min(track,segment(p,vec2(588.,194.),vec2(582.,196.)));
     track=min(track,segment(p,vec2(582.,196.),vec2(579.,191.)));
     col=mix(col,vec3(.92,.97,1.),1.-smoothstep(.7,1.35,track));
-    gl_FragColor=vec4(col,1.);
+    vec2 px=v_uv*vec2(1920.,660.);
+    vec2 edge=min(px-u_hole.xy,u_hole.xy+u_hole.zw-px);
+    float window=smoothstep(0.,3.,min(edge.x,edge.y));
+    gl_FragColor=vec4(col,1.-window);
 }`;
 
 const MTRACK = `precision highp float;

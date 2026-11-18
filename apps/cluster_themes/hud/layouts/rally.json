@@ -10,7 +10,15 @@
       "y": 0,
       "w": 1920,
       "h": 660,
-      "z": 0
+      "z": 0,
+      "holeWhen": "mapUp",
+      "holeInset": 0,
+      "hole": [
+        1375,
+        158,
+        475,
+        405
+      ]
     },
     {
       "id": "rpm0",
@@ -218,7 +226,8 @@
       "h": 40,
       "z": 5,
       "align": "center",
-      "color": "fg"
+      "color": "fg",
+      "toggle": "!mapUp"
     },
     {
       "id": "lap",
@@ -231,7 +240,8 @@
       "h": 32,
       "z": 5,
       "align": "center",
-      "color": "fg"
+      "color": "fg",
+      "toggle": "!mapUp"
     },
     {
       "id": "lap_value",
@@ -244,7 +254,8 @@
       "h": 32,
       "z": 5,
       "align": "center",
-      "color": "fg"
+      "color": "fg",
+      "toggle": "!mapUp"
     },
     {
       "id": "length",
@@ -257,7 +268,8 @@
       "h": 32,
       "z": 5,
       "align": "center",
-      "color": "fg"
+      "color": "fg",
+      "toggle": "!mapUp"
     },
     {
       "id": "length_value",
@@ -270,7 +282,8 @@
       "h": 32,
       "z": 5,
       "align": "center",
-      "color": "fg"
+      "color": "fg",
+      "toggle": "!mapUp"
     },
     {
       "id": "boost_label",
