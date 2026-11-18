@@ -291,7 +291,7 @@ const CLAIM_MS = 1000;
 
 const BOOST_SCALE = { factor: 0.01, offset: 0, invalid: 255 }; // see header comment
 // the widget types drawn as pixels (image layers, packed into sheets unless "own": true); the rest are shaders
-const IMAGE_TYPES = { text: true, scale: true, stripe: true, badge: true, gridlabels: true, icon: true, swatchimg: true, nav: true, garland: true };
+const IMAGE_TYPES = { redlineRamp: true, text: true, scale: true, stripe: true, badge: true, gridlabels: true, icon: true, swatchimg: true, nav: true, garland: true };
 const STATUS_ASK_MS = 2000;      // after a rebuild: ask cluster-render for its own status text
 // an image layer is "stalled" until its first pixels reach cluster-render, which after a rebuild takes a second or two
 // through the upload budget: normal. Only one still stalled this long is logged as a problem (and its recovery)
@@ -351,7 +351,7 @@ function mediaText(v) {
 /** Seconds as m:ss. */
 function clockOf(sec) { const t = Math.max(0, Math.floor(sec)); return Math.floor(t / 60) + ':' + ('0' + (t % 60)).slice(-2); }   // its speed scale: 0..200 mph by 20, 0..330 km/h by 30 (linear)
 const ROAD_DASH_M = 12;            // the Sport road: metres per dash and gap (shaders.js sdash u_road)
-const CUE_TYPES = { lights: true, shiftbar: true, revbar: true, revarc: true, ribbon: true, mtach: true };
+const CUE_TYPES = { redlineRamp: true, lights: true, shiftbar: true, revbar: true, revarc: true, ribbon: true, mtach: true };
 // the shift-light test (page.js Alerts): rpm climbs from TEST_FROM to just past the shift point, then holds
 const TEST_FROM = 1500, TEST_CLIMB_MS = 2500, TEST_HOLD_MS = 1200;
 // night colours (Cluster Themes "nightDim"): after sunset the theme's whites and greys go to this brightness
@@ -2082,7 +2082,7 @@ class HudApp {
         else {
             c = this._clientAt(this._connOf(w));
             const base = { target: this.target, klass: w.class || 'content', z: w.z || 0, x: w.x, y: w.y, w: w.w, h: w.h };
-            if (IMAGE_TYPES[w.type]) ref = c.image(Object.assign({ iw: w.w, ih: w.h }, w.type === 'nav' ? this._navImage(w) : null, base));
+            if (IMAGE_TYPES[w.type]) ref = c.image(Object.assign({ iw: w.w, ih: w.h }, w.type === 'nav' ? this._navImage(w) : w.type === 'redlineRamp' ? { iw: 400, ih: 130, sampling: 'bilinear' } : null, base));
             else ref = c.effect(Object.assign({ fs: w.type === 'swatch' ? calibration.SWATCH : shaders[w.type] }, base));
             if (!ref) { this.log.warn('widget "' + w.id + '": layer refused'); return; }
             this.placed.push({ c, ref, x: w.x, y: w.y, w: w.w, h: w.h });
@@ -2553,7 +2553,33 @@ class HudApp {
 
     _update(x, now, force) {
         const w = x.w;
-        if (w.type === 'icon' && w.lowFuelAt !== undefined) {
+        if (w.type === 'redlineRamp') {
+            const renderer = require('./hud-draw');
+            if (!x.cv) x.cv = new (require('./kit/canvas').Canvas)(renderer.IW, renderer.IH);
+            const d = this.car.data(), rpm = this._raw('rpm'), sp = this._shift();
+            const cue = this._countIn() ? this.cue.now : {
+                from: Math.min(3000, sp.rpm - 500), at: sp.rpm, shift: sp.now, limiter: this.cue.now.limiter
+            };
+            const redline = this.setting('redline'), speed = this._token('speed'), unit = this._token('u:speedLc');
+            const mode = d.stage === 'D' ? this._program(d) : null;
+            const blink = (cue.shift || cue.limiter) && this.cue.blink(now);
+            const key = [rpm, d.gear, d.stage, mode, speed, unit, redline, cue.from, cue.at, cue.shift, cue.limiter, blink].join('|');
+            if (!force && key === x.last) return;
+            x.last = key;
+            renderer.drawHud(x.cv, {
+                d: { rpm: rpm, gear: d.gear, stage: d.stage }, max: Math.max(8000, Math.ceil(redline / 1000) * 1000),
+                cue: cue, redline: redline, blink: blink, mode: mode,
+                opts: { style: 'ramp', lights: true, dim: true, gear: true, gearFont: 'square' },
+                readouts: [{ label: unit, value: speed }]
+            });
+            const pixels = Buffer.from(x.cv.d);
+            if (!x.px || force) x.c.pixels(x.ref, null, pixels);
+            else {
+                const delta = changes(x.px, pixels, renderer.IW, renderer.IH);
+                if (delta) x.c.pixels(x.ref, [delta.rect], delta.px);
+            }
+            x.px = pixels;
+        } else if (w.type === 'icon' && w.lowFuelAt !== undefined) {
             const fuel = this._raw('fuel');
             const low = isNum(fuel) && fuel <= w.lowFuelAt;
             if (!force && low === x.last) return;

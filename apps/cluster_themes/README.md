@@ -72,11 +72,11 @@ A race-sim style dash with angled frames and a music panel.
 
 <p align="center"><img src="../../docs/images/cluster-vector.png" width="900" alt="Vector theme"></p>
 
-### Minimal
+### Ramp
 
-Just the speed, big, with the gear and drive mode beside it, a thin fuel line under it (the reserve end is red), and oil and coolant in small print.
+Redline’s G80 Ramp renderer draws the rev rail, red needle, eight shift lights, squared gear and speed. The original image is scaled uniformly above the cluster footer.
 
-<p align="center"><img src="../../docs/images/cluster-minimal.png" width="900" alt="Minimal theme"></p>
+<p align="center"><img src="../../docs/images/cluster-minimal.png" width="900" alt="Ramp theme"></p>
 
 ### Track
 
@@ -120,7 +120,7 @@ A diagonal red tachometer frames the gear and digital speed. Four live gauges sh
 
 <p align="center"><img src="../../docs/images/cluster-m-track.png" width="900" alt="M Track cluster"></p>
 
-Minimal, Track, Drag, Rally, Retro 80s, Cruise, Dyno and M Track have no map window.
+Ramp, Track, Drag, Rally, Retro 80s, Cruise, Dyno and M Track have no map window.
 
 More themes are on the way.
 
@@ -136,7 +136,7 @@ More themes are on the way.
 - **Theme**, and one per drive mode.
 - **Readouts:** pick which car sensor each GT3, M, Track, Drag, Rally, Retro 80s or Dyno readout shows (speed, rpm, boost, temperatures, tyres, fuel, g, power and more). Plug-in hybrids can also show **Hybrid battery**, the high-voltage battery's charge in % (not yet checked on a hybrid).
 - **Show Waze map inside the theme:** GT3, Sport and M open a window in the middle and Waze on Cluster draws its map in it, above BMW's own map view, so nothing shows twice. When the map goes away the theme fills back in. While it is on, Waze's map on the HUD is off. Needs robertnisipeanu's Waze on Cluster; turning it off gives Waze its usual place back.
-- **Badge:** the model name, like "BMW X3 M40i", as text in the theme's font (GT3 top left, Sport, M and Minimal top centre, where BMW puts its own). Off by default.
+- **Badge:** the model name, like "BMW X3 M40i", as text in the theme's font (GT3 top left, Sport and M top centre, where BMW puts its own). Off by default.
 - **Warnings:** oil, coolant and boost limits. A readout over its limit flashes red (oil 130°C and coolant 115°C by default, boost off).
 - **Test the shift lights:** runs the rpm up to the shift point for about 4 seconds while the car stands.
 - **Play demo:** the button at the top of the page plays a 60-second show on the cluster while the car stands (a pull through the gears with graded shifts, the limiter, braking, corners, boost, the oil warning once), with a DEMO tag. It stops at the end, on Stop, or as soon as the car moves, and nothing from it is kept.
