@@ -536,7 +536,7 @@
       "color": "fg"
     },
     {
-      "id": "oil_unit",
+      "id": "oil_scale_unit",
       "type": "text",
       "x": 1424,
       "y": 464,
