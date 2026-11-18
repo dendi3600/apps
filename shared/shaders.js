@@ -672,6 +672,7 @@ uniform vec2 u_size;
 uniform float u_side;
 uniform vec4 u_geoA;      // y at 0 rpm, y at max, y of the bend, outer-edge x at the bend (layer px, left frame)
 uniform vec3 u_geoB;      // slope above the bend, slope below it, bend roundness px
+uniform float u_redRail;
 uniform vec3 u_wid;       // blade width at 0 rpm, at max, extra at the bend
 uniform float u_ticks;    // max / 1000
 uniform float u_value;    // 0..1
@@ -707,6 +708,7 @@ void main() {
         float yn = y0 - u_value * (y0 - y8);
         vec4 g = vec4(0.62, 0.67, 0.74, mix(0.42, 0.06, across));          // empty glass (bright at the outer edge, as the M8's)
         if (p.y > yn) g = u_shiftNow > 0.5 ? vec4(u_red * 0.8, 0.6) : vec4(mix(vec3(0.86, 0.88, 0.92), vec3(0.6, 0.63, 0.68), across), mix(0.34, 0.22, across));
+        g = over(vec4(u_red, u_redRail * .85 * cov(abs(d-6.0)-1.8)),g);
         // the foot: the bottom 20 px as an outlined grey block, as the M8 draws it
         if (p.y > y0 - 20.0) g = over(vec4(0.7, 0.72, 0.78, 0.22), g);
         g = over(vec4(0.9, 0.92, 0.95, 0.7 * cov(min(abs(p.y - (y0 - 19.0)), abs(p.y - (y0 - 1.5))) - 0.8)), g);
@@ -754,6 +756,7 @@ uniform float u_w;        // band width
 uniform float u_inner;    // the inner line's distance from the outer line
 uniform vec2 u_scale;     // y of the scale's 0 and of its top mark
 uniform vec2 u_ticks;     // marks left (speed), right (rpm)
+uniform float u_speedMark;
 uniform float u_speed;    // 0..1 along the scale
 uniform float u_rpm;      // 0..1
 uniform float u_redFrom;  // 0..1 (the redline)
@@ -883,13 +886,17 @@ void main() {
         vec3 midnight = mix(vec3(0.025, 0.052, 0.092), vec3(0.048, 0.105, 0.175),
                             clamp((548.0 - p.y) / 380.0, 0.0, 1.0));
         // Compact M stripes under the speed unit, clear of the center map and fuel scale.
+        float facet = p.x + .54*p.y;
+        midnight += vec3(.024,.063,.12)*step(0.,sin(facet*.012));
+        midnight += vec3(.046,.085,.14)*cov(abs(mod(facet,324.)-162.)-1.0);
+        midnight *= 1.-.55*cov(abs(p.y-280.)-39.)*cov(abs(p.x-510.)-100.);
         float stripe = p.x - 492.0 + (p.y - 374.0) * 0.55;
         float badge = cov(abs(p.y - 374.0) - 7.0) * cov(-stripe) * cov(stripe - 76.0);
         vec3 accent = mix(BLUE_LINE, BLUE_BAND, step(25.0, stripe));
         midnight = mix(midnight, mix(accent, RED_LINE, step(50.0, stripe)), badge);
         c = over(vec4(midnight, cov(silhouette)), c);
     }
-    c = bracket(p, u_speed, 2.0, 2.0, u_ticks.x, BLUE_LINE, BLUE_BAND, BLUE_LIT, BLUE_IN, c);
+    c = bracket(p, u_speed, u_speed > u_speedMark ? u_speedMark : 2.0, 2.0, u_ticks.x, BLUE_LINE, BLUE_BAND, BLUE_LIT, BLUE_IN, c);
     c = bracket(pm, u_rpm, u_redFrom, u_orange, u_ticks.y, RED_LINE, RED_BAND, RED_LIT, RED_IN, c);
     // the map window: a rounded hole cut out of the backdrop and brackets, so the map shows clean; the fuel and
     // oil bars come off while it is open (they ran across the map, car photos Nov 7 2026), the bottom strip stays

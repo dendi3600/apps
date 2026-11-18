@@ -1,8 +1,8 @@
 {
   "id": "cluster_themes",
   "title": "Cluster Themes",
-  "description": "Redraws the instrument cluster: GT3 race dash, M-style, M view, Vector (with a music panel), M1, Ramp, Track, Drag, M Circuit, Retro 80s, Cruise, Dyno (BMW-coloured readout tiles) or M2 (diagonal tachometer), with shift lights, boost, temps, tyres, a G-meter and a 0-60 timer",
-  "version": "0.19.27",
+  "description": "Redraws the instrument cluster: GT3 race dash, M-style, M view, Vector (with a music panel), M1, Ramp, Track, Drag, M Circuit, Retro 80s, Cruise, Dyno (BMW-coloured readout tiles) or M8 (twin tachometer), with shift lights, boost, temps, tyres, a G-meter and a 0-60 timer",
+  "version": "0.19.28",
   "vendor": "custom",
   "loggingId": "OAC1",
   "iconGlyph": "CLU",
@@ -165,7 +165,7 @@
         ],
         [
           "ribbon",
-          "M2"
+          "M8"
         ],
         [
           "srinivas",
@@ -247,7 +247,7 @@
         ],
         [
           "ribbon",
-          "M2"
+          "M8"
         ],
         [
           "srinivas",
@@ -315,7 +315,7 @@
         ],
         [
           "ribbon",
-          "M2"
+          "M8"
         ],
         [
           "srinivas",
@@ -383,7 +383,7 @@
         ],
         [
           "ribbon",
-          "M2"
+          "M8"
         ],
         [
           "srinivas",
@@ -928,12 +928,12 @@
           "230i"
         ],
         [
-          "M235i",
-          "M235i"
+          "M835i",
+          "M835i"
         ],
         [
-          "M240i",
-          "M240i"
+          "M840i",
+          "M840i"
         ],
         [
           "320i",
@@ -1084,8 +1084,8 @@
           "iX M60"
         ],
         [
-          "M2",
-          "M2"
+          "M8",
+          "M8"
         ],
         [
           "M3",

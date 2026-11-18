@@ -378,7 +378,7 @@ const FUEL_OBD = { obd: '2F', bytes: 1, at: 0, factor: 100 / 255, offset: 0, min
 const FUEL_EVERY_MS = 10000, FUEL_RETRY_MS = 300000, FUEL_STALE_MS = 60000;
 const HV_EVERY_MS = 5000, HV_RETRY_MS = 60000, HV_STALE_MS = 20000;
 // BMW's speed scale: even steps to 120 mph (180 km/h), then wider ones to 200 mph (320 km/h)
-const SPEED_SCALE = { us: [0, 20, 40, 60, 80, 100, 120, 160, 200], metric: [0, 30, 60, 90, 120, 150, 180, 250, 320] };
+const SPEED_SCALE = { us: [0, 20, 40, 60, 80, 100, 120, 160, 200], metric: [0, 30, 60, 90, 120, 150, 180, 230, 280] };
 /** speed (display unit) -> 0..1 along a scale of evenly spaced labels */
 function scaleFrac(v, marks) {
     if (!(v > 0)) return 0;
@@ -2213,6 +2213,7 @@ class HudApp {
             c.uniform(ref, 'u_side', [right ? 1 : -1]);
             c.uniform(ref, 'u_geoA', [w.y0 - w.y, w.y8 - w.y, w.ym - w.y, right ? w.x + w.w - w.xm : w.xm - w.x]);
             c.uniform(ref, 'u_geoB', [w.kTop, w.kBot, w.round || 40]);
+            c.uniform(ref, 'u_redRail', [w.redRail ? 1 : 0]);
             c.uniform(ref, 'u_wid', [w.wBot, w.wTop, w.wBend || 0]);
             c.uniform(ref, 'u_ticks', [max / 1000]);
             c.uniform(ref, 'u_orange', [orange]);
@@ -2782,6 +2783,7 @@ class HudApp {
             x.last = key;
             if (w.road) x.c.uniform(x.ref, 'u_road', [w.road[0], w.road[1], vals[4], 1]);
             x.c.uniform(x.ref, 'u_speed', [vals[0]]);
+            x.c.uniform(x.ref, 'u_speedMark', [scaleFrac(us ? 80 * 0.621371 : 80, SPEED_SCALE[us ? 'us' : 'metric'])]);
             x.c.uniform(x.ref, 'u_rpm', [vals[1]]);
             x.c.uniform(x.ref, 'u_fuel', [vals[2]]);
             x.c.uniform(x.ref, 'u_oil', [vals[3]]);
@@ -2816,6 +2818,7 @@ class HudApp {
             if (!force && key === x.last) return;
             x.last = key;
             x.c.uniform(x.ref, 'u_speed', [vals[0]]);
+            x.c.uniform(x.ref, 'u_speedMark', [scaleFrac(us ? 80 * 0.621371 : 80, SPEED_SCALE[us ? 'us' : 'metric'])]);
             x.c.uniform(x.ref, 'u_rpm', [vals[1]]);
             x.c.uniform(x.ref, 'u_fuel', [vals[2]]);
             x.c.uniform(x.ref, 'u_oil', [vals[3]]);
