@@ -2717,6 +2717,11 @@ class HudApp {
             x.last = key;
             x.c.uniform(x.ref, 'u_value', [q]);
             if (w.peak) x.c.uniform(x.ref, 'u_peak', [pk > q ? pk : -1]);
+        } else if (w.type === 'circuit') {
+            const rpm = this._raw('rpm');
+            const value = isNum(rpm) ? Math.round(rpm / 10) / 800 : -1;
+            if (force || x.last !== value) x.c.uniform(x.ref, 'u_state', [value, 0, 0, 0]);
+            x.last = value;
         } else if (w.type === 'mtrack') {
             const fraction = (signal, low, high) => {
                 const raw = this._raw(signal);

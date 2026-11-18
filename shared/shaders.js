@@ -1779,6 +1779,72 @@ void main() {
 }
 `;
 
+const CIRCUIT = `precision highp float;
+varying vec2 v_uv;
+uniform vec4 u_state;
+float line(float d,float w){return 1.0-smoothstep(w,w+0.35,abs(d));}
+float segment(vec2 p,vec2 a,vec2 b){
+    vec2 v=b-a; return length(p-a-v*clamp(dot(p-a,v)/dot(v,v),0.0,1.0));
+}
+void main(){
+    vec2 p=v_uv*vec2(620.,227.)+vec2(85.,54.);
+    vec2 d=p-vec2(410.,188.);
+    float r=length(d), angle=atan(d.x,-d.y);
+    float sweep=clamp((angle+1.98)/3.96,0.,1.);
+    float floorY=261.-17.*smoothstep(92.,153.,abs(d.x)*-1.+245.)-35.*pow(clamp((abs(d.x)-235.)/100.,0.,1.),2.);
+    vec3 col=mix(vec3(.035,.04,.08),vec3(.06,.09,.16),clamp(p.y/270.,0.,1.));
+    float glow=exp(-abs(p.y-156.)*.13)*exp(-abs(abs(d.x)-196.)*.019);
+    col+=vec3(.01,.50,.63)*glow;
+    float floorMask=smoothstep(159.,218.,p.y);
+    col+=floorMask*exp(-abs(d.x)*.012)*vec3(.0,.42,.57);
+    float grid=abs(fract(55./max(.18,(p.y-137.)*.016))-.5);
+    col+=floorMask*vec3(.03,.10,.13)*(1.-smoothstep(.01,.09,grid));
+    col=mix(col,vec3(.88,.71,.31),line(p.y-floorY,.52));
+    if(p.y>floorY)col*=.27;
+    if(abs(angle)<1.99){
+        col=mix(col,vec3(.86,.72,.42),line(r-116.,.55));
+        col=mix(col,vec3(.72,.80,.85),line(r-111.,2.1));
+        float tick=abs(fract(sweep*80.+.5)-.5);
+        float major=abs(fract(sweep*8.+.5)-.5);
+        float inner=mix(97.,89.,1.-smoothstep(.012,.025,major));
+        vec3 ink=sweep>.84?vec3(.90,.22,.29):vec3(.87,.91,.94);
+        col=mix(col,ink,(1.-smoothstep(.07,.22,tick))*smoothstep(inner-1.,inner,r)*(1.-smoothstep(104.,105.,r)));
+        col+=ink*.20*(1.-smoothstep(.04,.45,tick))*smoothstep(49.,98.,r)*(1.-smoothstep(102.,106.,r));
+    }
+    float a=mix(-1.98,1.98,clamp(u_state.x,0.,1.));
+    vec2 dir=vec2(sin(a),-cos(a));
+    if(u_state.x>=0.)col=mix(col,vec3(1.,.16,.19),1.-smoothstep(1.,2.1,segment(d,dir*43.,dir*105.)));
+    // Fixed circuit diagram, matching the reference's Ricardo Tormo panel.
+    float track=100.;
+    track=min(track,segment(p,vec2(579.,191.),vec2(580.,184.)));
+    track=min(track,segment(p,vec2(580.,184.),vec2(587.,175.)));
+    track=min(track,segment(p,vec2(587.,175.),vec2(600.,167.)));
+    track=min(track,segment(p,vec2(600.,167.),vec2(608.,164.)));
+    track=min(track,segment(p,vec2(608.,164.),vec2(608.,160.)));
+    track=min(track,segment(p,vec2(608.,160.),vec2(604.,157.)));
+    track=min(track,segment(p,vec2(604.,157.),vec2(609.,151.)));
+    track=min(track,segment(p,vec2(609.,151.),vec2(612.,151.)));
+    track=min(track,segment(p,vec2(612.,151.),vec2(611.,157.)));
+    track=min(track,segment(p,vec2(611.,157.),vec2(616.,158.)));
+    track=min(track,segment(p,vec2(616.,158.),vec2(621.,155.)));
+    track=min(track,segment(p,vec2(621.,155.),vec2(620.,149.)));
+    track=min(track,segment(p,vec2(620.,149.),vec2(625.,143.)));
+    track=min(track,segment(p,vec2(625.,143.),vec2(624.,136.)));
+    track=min(track,segment(p,vec2(624.,136.),vec2(629.,128.)));
+    track=min(track,segment(p,vec2(629.,128.),vec2(634.,127.)));
+    track=min(track,segment(p,vec2(634.,127.),vec2(642.,144.)));
+    track=min(track,segment(p,vec2(642.,144.),vec2(642.,151.)));
+    track=min(track,segment(p,vec2(642.,151.),vec2(639.,156.)));
+    track=min(track,segment(p,vec2(639.,156.),vec2(627.,160.)));
+    track=min(track,segment(p,vec2(627.,160.),vec2(616.,169.)));
+    track=min(track,segment(p,vec2(616.,169.),vec2(607.,179.)));
+    track=min(track,segment(p,vec2(607.,179.),vec2(588.,194.)));
+    track=min(track,segment(p,vec2(588.,194.),vec2(582.,196.)));
+    track=min(track,segment(p,vec2(582.,196.),vec2(579.,191.)));
+    col=mix(col,vec3(.92,.97,1.),1.-smoothstep(.7,1.35,track));
+    gl_FragColor=vec4(col,1.);
+}`;
+
 const MTRACK = `precision highp float;
 varying vec2 v_uv;
 uniform vec4 u_state; // RPM, oil and fuel fractions; negative means unavailable
@@ -1823,4 +1889,4 @@ void main() {
 }
 `;
 
-module.exports = { mtrack: MTRACK, shiftbar: SHIFTBAR, arc: ARC, revbar: REVBAR, lights: LIGHTS, fill: FILL, box: BOX, grid: GRID, segbar: SEGBAR, mdash: MDASH, mtach: MTACH, sdash: SDASH, boxes: BOXES, atext: ATEXT, meter: METER, gmeter: GMETER, revarc: REVARC, tiles: TILES, ribbon: RIBBON, deco: DECO, mview: MVIEW, vdash: VDASH };
+module.exports = { circuit: CIRCUIT, mtrack: MTRACK, shiftbar: SHIFTBAR, arc: ARC, revbar: REVBAR, lights: LIGHTS, fill: FILL, box: BOX, grid: GRID, segbar: SEGBAR, mdash: MDASH, mtach: MTACH, sdash: SDASH, boxes: BOXES, atext: ATEXT, meter: METER, gmeter: GMETER, revarc: REVARC, tiles: TILES, ribbon: RIBBON, deco: DECO, mview: MVIEW, vdash: VDASH };

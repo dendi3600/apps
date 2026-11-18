@@ -31,6 +31,7 @@ const TYPES = {
     sdash: ['geo', 'k', 'band', 'ticks', 'fuelSeg', 'oilSeg', 'strip', 'topEnd'],
     mview: ['path', 'scale', 'dial', 'dialAng', 'line'],
     vdash: ['tach', 'segs'],
+    circuit: [],
     mtrack: [],
     mtach: ['side', 'y0', 'y8', 'ym', 'xm', 'kTop', 'kBot', 'wBot', 'wTop'],
     icon: ['icon'],
