@@ -574,19 +574,19 @@ vec4 gauge(vec2 p, vec4 g, float zones, vec4 c) {
     vec2 q = (p - g.xy) / k;
     if (q.x < -140.0 || q.x > 70.0 || q.y < -22.0 || q.y > 140.0) return c;
     float v = clamp(g.w, 0.0, 1.0);
-    // Three short tangent runs form the tapered gauge; its marker crosses the rail.
-    float y=clamp(q.y,0.,105.);
-    float center=-111.+.37*y+.0056*y*y+8.*exp(-y*.09);
-    float width=4.+9.*smoothstep(23.,82.,y)-3.*smoothstep(91.,105.,y);
-    float dx=q.x-center;
-    float cap=min(q.y,105.-q.y);
-    float mask=cov(-min(width-abs(dx),cap)*k);
-    float pointer=mix(100.,3.,v);
-    vec3 glass=mix(vec3(.055,.066,.084),vec3(.62,.65,.70),smoothstep(pointer,pointer+6.,y));
-    glass*=mix(.53,1.,clamp(.5+dx/(2.*width),0.,1.));
-    c=over(vec4(glass,mask),c);
-    c=over(vec4(.72,.77,.81,.85*cov(abs(dx+width)-1.)*cov(-cap)),c);
-    c=over(vec4(u_red,cov(abs(q.y-pointer+.27*dx)-3.6)*cov(abs(dx)-width-2.)),c);
+    // A curved glass well and separate metal rim, with a radial red pointer.
+    vec2 arm=q-vec2(-2.,-6.);
+    float angle=atan(arm.y,-arm.x);
+    float t=clamp(angle/1.54,0.,1.);
+    float radius=length(arm);
+    float width=mix(5.,16.,smoothstep(.18,.90,t));
+    float edge=min(angle,1.54-angle)*110.;
+    float well=cov(-min(min(113.-radius,radius-113.+width*2.),edge)*k);
+    float level=(1.-v)*1.54;
+    vec3 silver=mix(vec3(.74,.77,.80),vec3(.20,.22,.26),clamp((113.-radius)/(2.*width),0.,1.));
+    c=over(vec4(mix(vec3(.055,.063,.076),silver,smoothstep(level-.015,level+.015,angle)),well),c);
+    c=over(vec4(.57,.60,.64,cov(abs(radius-115.)-1.4)*cov(-edge)),c);
+    c=over(vec4(u_red,well*cov(abs(angle-level)*110.-3.4)),c);
     return c;
 }
 
@@ -799,10 +799,12 @@ vec4 bracket(vec2 q, float val, float redFrom, float orange, float ticks, vec3 l
     float t = (u_scale.x - q.y) / (u_scale.x - u_scale.y);    // 0 at the scale's 0
     bool inY = q.y > u_geo.x + 5.0 && q.y < u_geo.z - 4.0;
     // the band: lit up to the value, white marker on top
+    float shoulder = .27*u_w*(1.-smoothstep(u_geo.y-44.,u_geo.y+42.,q.y));
+    float railEnd=u_inner+shoulder;
     float laneEnd = u_inner - u_w;
     float lane = inY ? cov(2.0 - d) * cov(d - laneEnd) : 0.0;
     c = over(vec4(0.025, 0.033, 0.052, lane), c);
-    float inB = (inY ? 1.0 : 0.0) * cov(laneEnd - d) * cov(d - u_inner);
+    float inB = (inY ? 1.0 : 0.0) * cov(laneEnd - d) * cov(d - railEnd);
     if (inB > 0.0) {
         vec3 col = band * mix(0.80, 1.02, clamp((d - laneEnd) / u_w, 0.0, 1.0));
         float a = 0.96;
@@ -837,8 +839,8 @@ vec4 bracket(vec2 q, float val, float redFrom, float orange, float ticks, vec3 l
     c = over(vec4(line, 0.35 * exp(-abs(d) / 5.0) * (inY ? 1.0 : 0.0) * step(d, 0.0)), c);
     c = over(vec4(line, o), c);
     // the inner line: down the bracket from its top run to the bottom
-    float il = (q.y > yTopI && q.y <= u_geo.z) ? cov(abs(d - u_inner) - 1.6) : 0.0;
-    float xi = outerX(yTopI) + u_inner * sqrt(1.0 + outerSlope(yTopI) * outerSlope(yTopI));
+    float il = (q.y > yTopI && q.y <= u_geo.z) ? cov(abs(d - railEnd) - 1.6) : 0.0;
+    float xi = outerX(yTopI) + (u_inner+.27*u_w) * sqrt(1.0 + outerSlope(yTopI) * outerSlope(yTopI));
     il = max(il, cov(segD(q, vec2(xi, yTopI), vec2(u_topEnd - 14.0, yTopI)) - 1.6));
     c = over(vec4(inner, 0.95 * il), c);
     return c;
@@ -1003,6 +1005,10 @@ void main() {
     vec2 p = v_uv * u_size;
     float len = u_vertical > 0.5 ? u_size.y : u_size.x;
     float x = u_vertical > 0.5 ? u_size.y - p.y : p.x;
+    if (u_tip>.5 && u_value>0.) {
+        float delta=x-clamp(u_value*len,5.,len-5.);
+        if(abs(delta)<5.) { gl_FragColor=vec4(1.,.10,.15,1.); return; }
+    }
     float slot = (len + u_gap) / u_segs;
     float i = floor(x / slot);
     float fx = x - i * slot;
@@ -1014,7 +1020,6 @@ void main() {
     if (u_continuous > .5) lit=step(x,u_value*len);
     if (u_value <= 0.0) lit = 0.0;
     if (u_peak >= 0.0 && i == floor(min(u_peak, 0.9999) * u_segs) && lit < 0.5) { gl_FragColor = vec4(u_peakC, a); return; }
-    if (u_tip > .5 && u_value > 0. && abs(x-clamp(u_value,0.,1.)*len)<4.) c=vec3(1.,.085,.12);
     if (lit > 0.5) gl_FragColor = vec4(c, a);
     else gl_FragColor = vec4(u_track.rgb, u_track.a * a);
 }
@@ -1810,7 +1815,7 @@ void main(){
     float cols=abs(fract(d.x/(1.+depth*.65)*.065)-.5);
     float mesh=(1.-smoothstep(.025,.14,rows))+.5*(1.-smoothstep(.02,.13,cols));
     col+=depth*exp(-side*.006)*vec3(.055,.31,.39)*(.70+mesh*.42);
-    col+=vec3(.18,.13,.007)*smoothstep(110.,170.,side)*exp(-abs(p.y-deck+6.)*.12);
+    col+=vec3(.18,.13,.007)*smoothstep(110.,170.,side)*exp(-max(deck-p.y,0.)*.14)*step(p.y,deck);
     float rimGlow=exp(-abs(p.y-deck)*.18);
     col+=vec3(.39,.26,.035)*rimGlow;
     col=mix(col,vec3(.99,.85,.48),line(p.y-deck,.60));
@@ -1840,8 +1845,8 @@ void main(){
     }
     // The central black band cuts across the spokes; cyan light catches its upper lip.
     // The raised centre lip joins both dial feet at the same height.
-    float lip=231.+10.*smoothstep(45.,91.,wing);
-    col+=vec3(.73,.54,.14)*line(p.y-lip,.53)*smoothstep(38.,54.,wing)*(1.-smoothstep(90.,96.,wing));
+    float lip=241.-8.*(1.-smoothstep(44.,91.,wing));
+    col+=vec3(.46,.35,.12)*exp(-abs(p.y-lip)*.52)*smoothstep(42.,76.,wing)*(1.-smoothstep(89.,96.,wing));
     float core=(1.-smoothstep(56.,92.,r))*smoothstep(155.,158.,p.y)*(1.-smoothstep(195.,211.,p.y));
     col=mix(col,vec3(.055,.058,.087),core*.91);
     col+=vec3(.06,.30,.39)*exp(-abs(p.y-157.)*.37-side*.034);

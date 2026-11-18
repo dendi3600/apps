@@ -150,7 +150,7 @@
       "id": "speed",
       "type": "text",
       "text": "{{speed}}",
-      "font": "s_speed",
+      "font": "circuit_speed",
       "x": 876,
       "y": 394,
       "w": 260,
