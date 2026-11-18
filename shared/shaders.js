@@ -576,8 +576,8 @@ vec4 gauge(vec2 p, vec4 g, float zones, vec4 c) {
     float v = clamp(g.w, 0.0, 1.0);
     // Three short tangent runs form the tapered gauge; its marker crosses the rail.
     float y=clamp(q.y,0.,105.);
-    float center=-113.+.18*y+.0079*y*y;
-    float width=mix(4.,15.,smoothstep(16.,96.,y));
+    float center=-111.+.37*y+.0056*y*y+8.*exp(-y*.09);
+    float width=4.+9.*smoothstep(23.,82.,y)-3.*smoothstep(91.,105.,y);
     float dx=q.x-center;
     float cap=min(q.y,105.-q.y);
     float mask=cov(-min(width-abs(dx),cap)*k);
@@ -807,10 +807,6 @@ vec4 bracket(vec2 q, float val, float redFrom, float orange, float ticks, vec3 l
         vec3 col = band * mix(0.80, 1.02, clamp((d - laneEnd) / u_w, 0.0, 1.0));
         float a = 0.96;
         if (t <= val) col = mix(lit, mix(lit, vec3(1.0), 0.25), clamp((d - laneEnd) / u_w, 0.0, 1.0)) * mix(0.8, 1.0, clamp(t / max(val, 0.01), 0.0, 1.0));
-        if (orange > 1.5 && val > redFrom && t >= redFrom && t <= val)
-            col = mix(vec3(.65,.025,.095),vec3(1.,.16,.24),clamp((d-laneEnd)/u_w,0.,1.));
-        if (orange > 1.5 && val > redFrom && abs(t-redFrom)*(u_scale.x-u_scale.y)<1.8)
-            col = vec3(1.,.84,.83);
         c = over(vec4(col, a * inB), c);
         float yv = u_scale.x - val * (u_scale.x - u_scale.y);
         if (val > 0.002) c = over(vec4(1.0, 1.0, 1.0, inB * cov(abs(q.y - yv) - 2.0)), c);
@@ -821,7 +817,14 @@ vec4 bracket(vec2 q, float val, float redFrom, float orange, float ticks, vec3 l
         float yk = u_scale.x - kk / ticks * (u_scale.x - u_scale.y);
         if (kk >= 0.0 && kk <= ticks && d > 6.5 && d < laneEnd - 2.0) c = over(vec4(line, 0.9 * cov(abs(q.y - yk) - 1.2)), c);
         // redline: yellow dashes, then a solid red line, on the outer edge of the band
-        if (redFrom < 1.5 && d > 8.0 && d < 13.0) {
+        if (orange > 1.5 && val > redFrom) {
+            float startY=mix(u_scale.x,u_scale.y,redFrom);
+            float tipY=mix(u_scale.x,u_scale.y,val);
+            float width=mix(2.3,6.2,smoothstep(redFrom,1.,t));
+            float stroke=cov(abs(d-9.)-width)*cov(tipY-q.y)*cov(q.y-startY);
+            float foot=cov(abs(q.y-startY)-1.4)*cov(abs(d-12.)-5.8);
+            c=over(vec4(1.,.19,.22,max(stroke,foot)),c);
+        } else if (redFrom < 1.5 && d > 8.0 && d < 13.0) {
             if (t >= redFrom && t <= (orange > 1.5 ? val : 1.02)) c = over(vec4(1.0, 0.2, 0.2, 1.0), c);
             else if (t >= orange && t < redFrom && mod(q.y, 16.0) < 7.0) c = over(vec4(1.0, 0.85, 0.1, 1.0), c);
         }
@@ -1796,7 +1799,8 @@ void main(){
     float r=length(d), angle=atan(d.x,-d.y);
     float sweep=clamp((angle+1.98)/3.96,0.,1.);
     float side=abs(d.x);
-    float deck=243.+18.*smoothstep(100.,170.,side)-30.*pow(clamp((side-238.)/77.,0.,1.),2.);
+    float wing=abs(p.x-410.);
+    float deck=241.+18.*smoothstep(83.,149.,wing)-29.*smoothstep(217.,328.,wing);
     vec3 col=mix(vec3(.051,.050,.069),vec3(.108,.102,.137),exp(-abs(p.y-97.)*.012));
     float horizon=exp(-abs(p.y-155.)*.13)*exp(-abs(side-196.)*.011);
     col+=vec3(.018,.10,.14)*horizon*exp(-side*.010);
@@ -1835,9 +1839,9 @@ void main(){
         col+=ink*.30*(1.-smoothstep(.04,.45,tick))*smoothstep(40.,95.,r)*(1.-smoothstep(102.,106.,r));
     }
     // The central black band cuts across the spokes; cyan light catches its upper lip.
-    float shoulder=abs(d.x);
-    float lip=213.+.38*(shoulder-55.)+.003*(shoulder-55.)*(shoulder-55.);
-    col+=vec3(.80,.57,.12)*line(p.y-lip,.55)*smoothstep(50.,68.,shoulder)*(1.-smoothstep(94.,100.,shoulder));
+    // The raised centre lip joins both dial feet at the same height.
+    float lip=231.+10.*smoothstep(45.,91.,wing);
+    col+=vec3(.73,.54,.14)*line(p.y-lip,.53)*smoothstep(38.,54.,wing)*(1.-smoothstep(90.,96.,wing));
     float core=(1.-smoothstep(56.,92.,r))*smoothstep(155.,158.,p.y)*(1.-smoothstep(195.,211.,p.y));
     col=mix(col,vec3(.055,.058,.087),core*.91);
     col+=vec3(.06,.30,.39)*exp(-abs(p.y-157.)*.37-side*.034);
