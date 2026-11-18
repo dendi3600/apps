@@ -576,17 +576,17 @@ vec4 gauge(vec2 p, vec4 g, float zones, vec4 c) {
     float v = clamp(g.w, 0.0, 1.0);
     // Three short tangent runs form the tapered gauge; its marker crosses the rail.
     float y=clamp(q.y,0.,105.);
-    float center=-113.+.26*y+.64*max(y-24.,0.)+.72*max(y-72.,0.);
-    float width=mix(4.,9.,smoothstep(0.,65.,y));
+    float center=-113.+.18*y+.0079*y*y;
+    float width=mix(4.,15.,smoothstep(16.,96.,y));
     float dx=q.x-center;
     float cap=min(q.y,105.-q.y);
     float mask=cov(-min(width-abs(dx),cap)*k);
     float pointer=mix(100.,3.,v);
-    vec3 glass=mix(vec3(.055,.066,.084),vec3(.44,.48,.54),smoothstep(pointer,pointer+6.,y));
+    vec3 glass=mix(vec3(.055,.066,.084),vec3(.62,.65,.70),smoothstep(pointer,pointer+6.,y));
     glass*=mix(.53,1.,clamp(.5+dx/(2.*width),0.,1.));
     c=over(vec4(glass,mask),c);
     c=over(vec4(.72,.77,.81,.85*cov(abs(dx+width)-1.)*cov(-cap)),c);
-    c=over(vec4(u_red,cov(abs(q.y-pointer)-2.8)*cov(abs(dx)-width-2.)),c);
+    c=over(vec4(u_red,cov(abs(q.y-pointer+.27*dx)-3.6)*cov(abs(dx)-width-2.)),c);
     return c;
 }
 
@@ -807,6 +807,10 @@ vec4 bracket(vec2 q, float val, float redFrom, float orange, float ticks, vec3 l
         vec3 col = band * mix(0.80, 1.02, clamp((d - laneEnd) / u_w, 0.0, 1.0));
         float a = 0.96;
         if (t <= val) col = mix(lit, mix(lit, vec3(1.0), 0.25), clamp((d - laneEnd) / u_w, 0.0, 1.0)) * mix(0.8, 1.0, clamp(t / max(val, 0.01), 0.0, 1.0));
+        if (orange > 1.5 && val > redFrom && t >= redFrom && t <= val)
+            col = mix(vec3(.65,.025,.095),vec3(1.,.16,.24),clamp((d-laneEnd)/u_w,0.,1.));
+        if (orange > 1.5 && val > redFrom && abs(t-redFrom)*(u_scale.x-u_scale.y)<1.8)
+            col = vec3(1.,.84,.83);
         c = over(vec4(col, a * inB), c);
         float yv = u_scale.x - val * (u_scale.x - u_scale.y);
         if (val > 0.002) c = over(vec4(1.0, 1.0, 1.0, inB * cov(abs(q.y - yv) - 2.0)), c);
@@ -873,7 +877,6 @@ void main() {
         float facet = p.x + .54*p.y;
         midnight += vec3(.024,.063,.12)*step(0.,sin(facet*.012));
         midnight += vec3(.046,.085,.14)*cov(abs(mod(facet,324.)-162.)-1.0);
-        midnight *= 1.-.55*cov(abs(p.y-280.)-39.)*cov(abs(p.x-510.)-100.);
         float stripe = p.x - 492.0 + (p.y - 374.0) * 0.55;
         float badge = cov(abs(p.y - 374.0) - 7.0) * cov(-stripe) * cov(stripe - 76.0);
         vec3 accent = mix(BLUE_LINE, BLUE_BAND, step(25.0, stripe));
@@ -988,6 +991,7 @@ uniform vec3 u_c2;
 uniform vec3 u_c3;
 uniform vec2 u_at;
 uniform vec4 u_track;
+uniform float u_continuous;
 uniform float u_tip;
 uniform float u_peak;
 uniform vec3 u_peakC;
@@ -1004,6 +1008,7 @@ void main() {
     float f = (i + 0.5) / u_segs;
     vec3 c = f < u_at.x ? u_c1 : (f < u_at.y ? u_c2 : u_c3);
     float lit = (i + 0.5) / u_segs <= u_value + 0.5 / u_segs ? 1.0 : 0.0;
+    if (u_continuous > .5) lit=step(x,u_value*len);
     if (u_value <= 0.0) lit = 0.0;
     if (u_peak >= 0.0 && i == floor(min(u_peak, 0.9999) * u_segs) && lit < 0.5) { gl_FragColor = vec4(u_peakC, a); return; }
     if (u_tip > .5 && u_value > 0. && abs(x-clamp(u_value,0.,1.)*len)<4.) c=vec3(1.,.085,.12);
@@ -1787,7 +1792,7 @@ float segment(vec2 p,vec2 a,vec2 b){
 }
 void main(){
     vec2 p=v_uv*vec2(620.,227.)+vec2(85.,54.);
-    vec2 d=p-vec2(410.,188.);
+    vec2 d=(p-vec2(410.,200.))/0.85;
     float r=length(d), angle=atan(d.x,-d.y);
     float sweep=clamp((angle+1.98)/3.96,0.,1.);
     float side=abs(d.x);
@@ -1830,6 +1835,9 @@ void main(){
         col+=ink*.30*(1.-smoothstep(.04,.45,tick))*smoothstep(40.,95.,r)*(1.-smoothstep(102.,106.,r));
     }
     // The central black band cuts across the spokes; cyan light catches its upper lip.
+    float shoulder=abs(d.x);
+    float lip=213.+.38*(shoulder-55.)+.003*(shoulder-55.)*(shoulder-55.);
+    col+=vec3(.80,.57,.12)*line(p.y-lip,.55)*smoothstep(50.,68.,shoulder)*(1.-smoothstep(94.,100.,shoulder));
     float core=(1.-smoothstep(56.,92.,r))*smoothstep(155.,158.,p.y)*(1.-smoothstep(195.,211.,p.y));
     col=mix(col,vec3(.055,.058,.087),core*.91);
     col+=vec3(.06,.30,.39)*exp(-abs(p.y-157.)*.37-side*.034);

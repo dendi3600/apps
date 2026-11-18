@@ -2279,6 +2279,7 @@ class HudApp {
         } else if (w.type === 'meter') {
             const cs = w.colors || ['fg', 'fg', 'hot'];
             c.uniform(ref, 'u_size', [w.w, w.h]);
+            c.uniform(ref, 'u_continuous', [w.continuous ? 1 : 0]);
             c.uniform(ref, 'u_tip', [w.tip ? 1 : 0]);
             c.uniform(ref, 'u_segs', [w.segments || 20]);
             c.uniform(ref, 'u_gap', [isNum(w.gap) ? w.gap : 4]);
