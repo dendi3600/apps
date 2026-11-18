@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "name": "M Track",
+  "name": "M2",
   "theme": "sportdash",
   "widgets": [
     {
@@ -574,13 +574,13 @@
     {
       "id": "emblem",
       "type": "text",
-      "x": 168,
-      "y": 598,
-      "w": 68,
-      "h": 31,
+      "x": 160,
+      "y": 594,
+      "w": 84,
+      "h": 38,
       "z": 5,
       "text": "M",
-      "font": "sport_emblem",
+      "font": "sport_emblem_large",
       "align": "left",
       "color": "fg"
     }

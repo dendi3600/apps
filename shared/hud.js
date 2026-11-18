@@ -1718,6 +1718,7 @@ class HudApp {
                 return (n > 0 ? '+' : '') + n;
             }
             case 'u:torque': return us ? 'lb-ft' : 'Nm';
+            case 'u:power': return us ? 'hp' : 'kW';
             case 'power': {          // kW from the crank torque and rpm; hp in US units
                 const d = this.car.data(), rpm = this._raw('rpm');
                 if (!isNum(d.torque) || !isNum(rpm)) return '--';

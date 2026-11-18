@@ -31,7 +31,8 @@
       "h": 38,
       "z": 5,
       "align": "center",
-      "color": "fg"
+      "color": "fg",
+      "conn": 1
     },
     {
       "id": "rpm1",
@@ -44,7 +45,8 @@
       "h": 38,
       "z": 5,
       "align": "center",
-      "color": "fg"
+      "color": "fg",
+      "conn": 1
     },
     {
       "id": "rpm2",
@@ -57,7 +59,8 @@
       "h": 38,
       "z": 5,
       "align": "center",
-      "color": "fg"
+      "color": "fg",
+      "conn": 1
     },
     {
       "id": "rpm3",
@@ -70,7 +73,8 @@
       "h": 38,
       "z": 5,
       "align": "center",
-      "color": "fg"
+      "color": "fg",
+      "conn": 1
     },
     {
       "id": "rpm4",
@@ -83,7 +87,8 @@
       "h": 38,
       "z": 5,
       "align": "center",
-      "color": "fg"
+      "color": "fg",
+      "conn": 1
     },
     {
       "id": "rpm5",
@@ -96,7 +101,8 @@
       "h": 38,
       "z": 5,
       "align": "center",
-      "color": "fg"
+      "color": "fg",
+      "conn": 1
     },
     {
       "id": "rpm6",
@@ -109,7 +115,8 @@
       "h": 38,
       "z": 5,
       "align": "center",
-      "color": "fg"
+      "color": "fg",
+      "conn": 1
     },
     {
       "id": "rpm7",
@@ -122,7 +129,8 @@
       "h": 38,
       "z": 5,
       "align": "center",
-      "color": "fg"
+      "color": "fg",
+      "conn": 1
     },
     {
       "id": "rpm8",
@@ -135,7 +143,8 @@
       "h": 38,
       "z": 5,
       "align": "center",
-      "color": "fg"
+      "color": "fg",
+      "conn": 1
     },
     {
       "id": "speed",
@@ -148,7 +157,8 @@
       "h": 95,
       "z": 5,
       "align": "center",
-      "color": "fg"
+      "color": "fg",
+      "conn": 1
     },
     {
       "id": "unit",
@@ -161,20 +171,22 @@
       "h": 32,
       "z": 5,
       "align": "center",
-      "color": "fg"
+      "color": "fg",
+      "conn": 1
     },
     {
       "id": "badge",
       "type": "text",
       "text": "M",
-      "font": "sport_emblem",
-      "x": 961,
-      "y": 570,
-      "w": 90,
-      "h": 32,
+      "font": "sport_emblem_large",
+      "x": 964,
+      "y": 567,
+      "w": 84,
+      "h": 38,
       "z": 5,
       "align": "center",
-      "color": "fg"
+      "color": "fg",
+      "conn": 1
     },
     {
       "id": "gear",
@@ -182,12 +194,13 @@
       "text": "{{gearnum}}",
       "font": "value",
       "x": 1565,
-      "y": 555,
+      "y": 530,
       "w": 140,
       "h": 68,
       "z": 5,
       "align": "center",
-      "color": "fg"
+      "color": "fg",
+      "conn": 2
     },
     {
       "id": "clock",
@@ -195,12 +208,13 @@
       "text": "{{time}}",
       "font": "head",
       "x": 1505,
-      "y": 52,
+      "y": 90,
       "w": 180,
       "h": 40,
       "z": 5,
       "align": "center",
-      "color": "fg"
+      "color": "fg",
+      "conn": 2
     },
     {
       "id": "ambient",
@@ -208,26 +222,28 @@
       "text": "{{ambientN}}{{u:temp}}",
       "font": "head",
       "x": 297,
-      "y": 52,
+      "y": 90,
       "w": 180,
       "h": 40,
       "z": 5,
       "align": "center",
-      "color": "fg"
+      "color": "fg",
+      "conn": 1
     },
     {
       "id": "circuit_name",
       "type": "text",
       "text": "Circuit Ricardo Tormo",
       "font": "s_unit",
-      "x": 1319,
-      "y": 113,
-      "w": 540,
+      "x": 1404,
+      "y": 156,
+      "w": 340,
       "h": 40,
       "z": 5,
       "align": "center",
       "color": "fg",
-      "toggle": "!mapUp"
+      "toggle": "!mapUp",
+      "conn": 2
     },
     {
       "id": "lap",
@@ -241,7 +257,8 @@
       "z": 5,
       "align": "center",
       "color": "fg",
-      "toggle": "!mapUp"
+      "toggle": "!mapUp",
+      "conn": 2
     },
     {
       "id": "lap_value",
@@ -255,7 +272,8 @@
       "z": 5,
       "align": "center",
       "color": "fg",
-      "toggle": "!mapUp"
+      "toggle": "!mapUp",
+      "conn": 2
     },
     {
       "id": "length",
@@ -269,7 +287,8 @@
       "z": 5,
       "align": "center",
       "color": "fg",
-      "toggle": "!mapUp"
+      "toggle": "!mapUp",
+      "conn": 2
     },
     {
       "id": "length_value",
@@ -283,19 +302,49 @@
       "z": 5,
       "align": "center",
       "color": "fg",
+      "toggle": "!mapUp",
+      "conn": 2
+    },
+    {
+      "id": "track_outline",
+      "type": "text",
+      "text": "M",
+      "font": "circuit_trace",
+      "x": 1520,
+      "y": 204,
+      "w": 218,
+      "h": 219,
+      "z": 5,
+      "conn": 2,
+      "color": "fg",
       "toggle": "!mapUp"
     },
     {
       "id": "boost_label",
       "type": "text",
       "text": "BOOST",
-      "font": "s_unit",
-      "x": 294,
-      "y": 160,
-      "w": 125,
-      "h": 35,
+      "font": "head",
+      "x": 140,
+      "y": 174,
+      "w": 225,
+      "h": 32,
       "z": 5,
-      "align": "center",
+      "conn": 3,
+      "align": "left",
+      "color": "fg"
+    },
+    {
+      "id": "boost_value",
+      "type": "text",
+      "text": "{{boost}} {{u:boost}}",
+      "font": "s_unit",
+      "x": 347,
+      "y": 174,
+      "w": 225,
+      "h": 32,
+      "z": 5,
+      "conn": 3,
+      "align": "right",
       "color": "fg"
     },
     {
@@ -304,89 +353,127 @@
       "signal": "boost",
       "min": 0,
       "max": 1.6,
-      "x": 127,
-      "y": 206,
-      "w": 465,
-      "h": 19,
-      "z": 3
+      "x": 140,
+      "y": 209,
+      "w": 432,
+      "h": 8,
+      "z": 3,
+      "conn": 3,
+      "segments": 12,
+      "gap": 2,
+      "colors": [
+        "arc",
+        "fg",
+        "hot"
+      ],
+      "at": [
+        0.72,
+        0.93
+      ]
     },
     {
-      "id": "left_label_0",
-      "type": "text",
-      "text": "DRIVE",
-      "font": "head",
-      "x": 110,
-      "y": 268,
-      "w": 220,
-      "h": 36,
-      "z": 5,
-      "align": "center",
-      "color": "fg"
-    },
-    {
-      "id": "left_value_0",
-      "type": "text",
-      "text": "{{mode}}",
-      "font": "head",
-      "x": 352,
-      "y": 268,
-      "w": 220,
-      "h": 36,
-      "z": 5,
-      "align": "center",
-      "color": "fg"
-    },
-    {
-      "id": "left_label_1",
-      "type": "text",
-      "text": "GEAR",
-      "font": "head",
-      "x": 110,
-      "y": 340,
-      "w": 220,
-      "h": 36,
-      "z": 5,
-      "align": "center",
-      "color": "fg"
-    },
-    {
-      "id": "left_value_1",
-      "type": "text",
-      "text": "{{gearnum}}",
-      "font": "head",
-      "x": 352,
-      "y": 340,
-      "w": 220,
-      "h": 36,
-      "z": 5,
-      "align": "center",
-      "color": "fg"
-    },
-    {
-      "id": "left_label_2",
+      "id": "power_label",
       "type": "text",
       "text": "POWER",
       "font": "head",
-      "x": 110,
-      "y": 412,
-      "w": 220,
-      "h": 36,
+      "x": 140,
+      "y": 260,
+      "w": 225,
+      "h": 32,
       "z": 5,
-      "align": "center",
+      "conn": 3,
+      "align": "left",
       "color": "fg"
     },
     {
-      "id": "left_value_2",
+      "id": "power_value",
       "type": "text",
-      "text": "{{powerPct}}%",
-      "font": "head",
-      "x": 352,
-      "y": 412,
-      "w": 220,
-      "h": 36,
+      "text": "{{power}} {{u:power}}",
+      "font": "s_unit",
+      "x": 347,
+      "y": 260,
+      "w": 225,
+      "h": 32,
       "z": 5,
-      "align": "center",
+      "conn": 3,
+      "align": "right",
       "color": "fg"
+    },
+    {
+      "id": "power_bar",
+      "type": "meter",
+      "signal": "powerPct",
+      "min": 0,
+      "max": 100,
+      "x": 140,
+      "y": 295,
+      "w": 432,
+      "h": 8,
+      "z": 3,
+      "conn": 3,
+      "segments": 12,
+      "gap": 2,
+      "colors": [
+        "arc",
+        "fg",
+        "hot"
+      ],
+      "at": [
+        0.72,
+        0.93
+      ]
+    },
+    {
+      "id": "torque_label",
+      "type": "text",
+      "text": "TORQUE",
+      "font": "head",
+      "x": 140,
+      "y": 346,
+      "w": 225,
+      "h": 32,
+      "z": 5,
+      "conn": 3,
+      "align": "left",
+      "color": "fg"
+    },
+    {
+      "id": "torque_value",
+      "type": "text",
+      "text": "{{torque}} {{u:torque}}",
+      "font": "s_unit",
+      "x": 347,
+      "y": 346,
+      "w": 225,
+      "h": 32,
+      "z": 5,
+      "conn": 3,
+      "align": "right",
+      "color": "fg"
+    },
+    {
+      "id": "torque_bar",
+      "type": "meter",
+      "signal": "torquePct",
+      "min": 0,
+      "max": 100,
+      "x": 140,
+      "y": 381,
+      "w": 432,
+      "h": 8,
+      "z": 3,
+      "conn": 3,
+      "segments": 12,
+      "gap": 2,
+      "colors": [
+        "arc",
+        "fg",
+        "hot"
+      ],
+      "at": [
+        0.72,
+        0.93
+      ]
     }
   ]
 }

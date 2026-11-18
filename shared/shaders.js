@@ -1812,19 +1812,26 @@ void main(){
     col+=vec3(.25,.16,.035)*rimGlow;
     col=mix(col,vec3(.99,.85,.48),line(p.y-deck,.60));
     if(p.y>deck+1.)col=mix(vec3(.035,.036,.07),vec3(.02,.28,.36),exp(-(p.y-deck)*.095-side*.009));
+    float skirt=smoothstep(1.,4.,p.y-deck)*(1.-smoothstep(11.,18.,p.y-deck));
+    col+=vec3(.017,.045,.058)*skirt*(.5+.5*cos((d.x+p.y)*2.));
+    col+=vec3(.15,.29,.33)*line(p.y-deck-3.2,.24);
     if(abs(angle)<1.99){
         col=mix(col,vec3(.86,.72,.42),line(r-116.,.55));
         col=mix(col,vec3(.72,.80,.85),line(r-111.,2.1));
         float bevel=clamp((r-105.)/9.,0.,1.);
         col=mix(col,mix(vec3(.12,.19,.23),vec3(.82,.86,.84),sin(bevel*3.14159)),smoothstep(105.,106.,r)*(1.-smoothstep(113.,114.,r)));
-        float active=step(0.,u_state.x)*(1.-smoothstep(u_state.x-.006,u_state.x+.006,sweep));
+        float passed=step(0.,u_state.x)*(1.-smoothstep(u_state.x-.006,u_state.x+.006,sweep));
         vec3 revInk=mix(vec3(.97,.67,.19),vec3(1.,.13,.17),smoothstep(.73,.91,sweep));
-        col+=revInk*active*.21*exp(-abs(r-106.)*.29);
+        col+=revInk*passed*.21*exp(-abs(r-106.)*.29);
         col+=vec3(.48,.018,.035)*smoothstep(.80,.98,sweep)*smoothstep(60.,102.,r)*(1.-smoothstep(103.,105.,r));
         float tick=abs(fract(sweep*80.+.5)-.5);
         float major=abs(fract(sweep*8.+.5)-.5);
         float inner=mix(97.,89.,1.-smoothstep(.012,.025,major));
         vec3 ink=sweep>.84?vec3(.90,.22,.29):vec3(.87,.91,.94);
+        float proximity = (1.-smoothstep(.008,.049,abs(sweep-u_state.x)))*step(0.,u_state.x);
+        ink = mix(ink,revInk,.50*passed);
+        ink = mix(ink,mix(revInk,vec3(1.),.32),proximity);
+        col += revInk*proximity*.52*(1.-smoothstep(.1,.49,tick))*smoothstep(55.,95.,r)*(1.-smoothstep(104.,109.,r));
         col=mix(col,ink,(1.-smoothstep(.07,.22,tick))*smoothstep(inner-1.,inner,r)*(1.-smoothstep(104.,105.,r)));
         col+=ink*.30*(1.-smoothstep(.04,.45,tick))*smoothstep(40.,95.,r)*(1.-smoothstep(102.,106.,r));
     }
@@ -1841,39 +1848,6 @@ void main(){
         col+=tip*.23*exp(-needle*.50);
         col=mix(col,tip,1.-smoothstep(.8,2.0,needle));
     }
-    // Fine separators behind the real drive and engine values in the left panel.
-    if(p.x>120. && p.x<275. && p.y>142. && p.y<214.){
-        float lines=max(line(p.y-166.,.23),line(p.y-191.,.23));
-        col=mix(col,vec3(.46,.46,.52),max(lines,line(p.x-196.,.24))*.60);
-    }
-    // Fixed circuit diagram, matching the reference's Ricardo Tormo panel.
-    float track=100.;
-    track=min(track,segment(p,vec2(579.,191.),vec2(580.,184.)));
-    track=min(track,segment(p,vec2(580.,184.),vec2(587.,175.)));
-    track=min(track,segment(p,vec2(587.,175.),vec2(600.,167.)));
-    track=min(track,segment(p,vec2(600.,167.),vec2(608.,164.)));
-    track=min(track,segment(p,vec2(608.,164.),vec2(608.,160.)));
-    track=min(track,segment(p,vec2(608.,160.),vec2(604.,157.)));
-    track=min(track,segment(p,vec2(604.,157.),vec2(609.,151.)));
-    track=min(track,segment(p,vec2(609.,151.),vec2(612.,151.)));
-    track=min(track,segment(p,vec2(612.,151.),vec2(611.,157.)));
-    track=min(track,segment(p,vec2(611.,157.),vec2(616.,158.)));
-    track=min(track,segment(p,vec2(616.,158.),vec2(621.,155.)));
-    track=min(track,segment(p,vec2(621.,155.),vec2(620.,149.)));
-    track=min(track,segment(p,vec2(620.,149.),vec2(625.,143.)));
-    track=min(track,segment(p,vec2(625.,143.),vec2(624.,136.)));
-    track=min(track,segment(p,vec2(624.,136.),vec2(629.,128.)));
-    track=min(track,segment(p,vec2(629.,128.),vec2(634.,127.)));
-    track=min(track,segment(p,vec2(634.,127.),vec2(642.,144.)));
-    track=min(track,segment(p,vec2(642.,144.),vec2(642.,151.)));
-    track=min(track,segment(p,vec2(642.,151.),vec2(639.,156.)));
-    track=min(track,segment(p,vec2(639.,156.),vec2(627.,160.)));
-    track=min(track,segment(p,vec2(627.,160.),vec2(616.,169.)));
-    track=min(track,segment(p,vec2(616.,169.),vec2(607.,179.)));
-    track=min(track,segment(p,vec2(607.,179.),vec2(588.,194.)));
-    track=min(track,segment(p,vec2(588.,194.),vec2(582.,196.)));
-    track=min(track,segment(p,vec2(582.,196.),vec2(579.,191.)));
-    col=mix(col,vec3(.92,.97,1.),1.-smoothstep(.7,1.35,track));
     vec2 px=v_uv*vec2(1920.,660.);
     vec2 edge=min(px-u_hole.xy,u_hole.xy+u_hole.zw-px);
     float window=smoothstep(0.,26.,min(edge.x,edge.y))*smoothstep(116.,121.,r)*smoothstep(0.,10.,deck-p.y);
@@ -1899,13 +1873,22 @@ void main() {
     vec2 p = v_uv * vec2(1920.0,660.0);
     vec3 c = vec3(0.011,0.014,0.024);
     float skew = p.x + 0.55*(p.y-170.0);
-    float panel = band(p.y,155.0,574.0)*cover(min(p.x-105.0-0.55*abs(p.y-405.0),
-                                                  1240.0-p.x-0.55*abs(p.y-360.0)));
+    float panel = band(p.y,147.0,583.0)*cover(min(p.x-84.0-0.55*abs(p.y-405.0),
+                                                  1260.0-p.x-0.55*abs(p.y-360.0)));
     vec3 blue = mix(vec3(0.045,0.107,0.25),vec3(0.12,0.28,0.56),(574.0-p.y)/419.0);
     blue += vec3(0.035,0.065,0.11)*band(skew,485.0,553.0);
     blue = mix(blue,vec3(0.35,0.14,0.27),0.68*band(skew,645.0,728.0));
     blue *= 1.0-0.83*band(skew,875.0,1234.0)*band(p.y,261.0,398.0);
     blue *= 1.0-0.75*max(band(skew,868.0,873.0),band(skew,1234.0,1239.0));
+    // Etched facet seams follow the blue panel and stop at its dark gear recess.
+    float lower = band(p.y,396.0,583.0);
+    float seams = max(cover(1.2-abs(skew-473.0))*lower,cover(1.1-abs(skew-1020.0))*lower);
+    float diagonal = p.x-0.54*p.y;
+    seams = max(seams,cover(1.0-abs(diagonal-175.0))*lower);
+    seams = max(seams,cover(1.1-abs(diagonal-1026.0))*band(p.y,147.0,263.0));
+    float corner = max(cover(1.0-abs(skew-1290.0))*band(p.y,526.0,583.0),
+                       cover(1.0-abs(p.y-526.0))*band(skew,1290.0,1500.0));
+    blue += vec3(.065,.11,.16)*max(seams,corner);
     c = mix(c,blue,panel);
     float t = (614.0-p.y)/492.0;
     float x = p.x-(1192.0+286.0*t);

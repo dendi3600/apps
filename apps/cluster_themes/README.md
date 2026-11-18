@@ -37,7 +37,7 @@ A current M8's cluster, traced off a photo of it and drawn on black.
 
 <p align="center"><img src="../../docs/images/cluster-m.png" width="900" alt="M theme"></p>
 
-### Sport
+### M1
 
 The look of BMW's newer Live Cockpit Sport view.
 
@@ -90,11 +90,11 @@ A full-width shift bar and a 0 to 60 mph timer (0 to 100 km/h in metric). Stop f
 
 <p align="center"><img src="../../docs/images/cluster-drag.png" width="900" alt="Drag theme"></p>
 
-### Rally
+### M Circuit
 
-A segmented rev arc sweeps across the top of the screen, white, then rally yellow from the shift zone, red and flashing at the redline. A huge gear sits in the middle with the speed under it. On the left a G-meter: a dot shows the cornering and braking or accelerating force (it moves into the turn and up when you speed up), white, then amber from 0.5 g, then red from 0.8 g, with a fading trail behind it and an outline of the most g you reached this drive in every direction. Under it the g now (left or right, accelerating or braking), and the best of the drive. Boost with a peak-hold bar and three readouts on the right (oil, coolant and fuel out of the box).
+The illuminated ticks follow the tachometer needle. Boost, power and torque occupy the left panel. The right panel shows a circuit outline or the live map when available.
 
-<p align="center"><img src="../../docs/images/cluster-rally.png" width="900" alt="Rally theme"></p>
+<p align="center"><img src="../../docs/images/cluster-m-circuit.png" width="900" alt="M Circuit cluster"></p>
 
 ### Retro 80s
 
@@ -114,13 +114,13 @@ A safety dash for hard pulls, in BMW M colours: twelve tiles in a grid (rpm, spe
 
 <p align="center"><img src="../../docs/images/cluster-dyno.png" width="900" alt="Dyno theme"></p>
 
-### M Track
+### M2
 
 A diagonal red tachometer frames the gear and digital speed. Four live gauges show boost, coolant, oil and intake temperature on the faceted blue panel. Fuel and oil scales sit to the right. BMW's bottom status row remains visible.
 
-<p align="center"><img src="../../docs/images/cluster-m-track.png" width="900" alt="M Track cluster"></p>
+<p align="center"><img src="../../docs/images/cluster-m-track.png" width="900" alt="M2 cluster"></p>
 
-Ramp, Track, Drag, Rally, Retro 80s, Cruise, Dyno and M Track have no map window.
+Ramp, Track, Drag, Retro 80s, Cruise, Dyno and M2 have no map window.
 
 More themes are on the way.
 
