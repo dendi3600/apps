@@ -91,6 +91,7 @@ class Page {
         if (s.type === 'bool') return v ? 'On' : 'Off';
         if (s.type === 'number' && WARN_KEYS.indexOf(k) >= 0) return warnText(k, v, this.get('units') === 'us');
         if (k === 'timeZone') return tzText(v);
+        if (k === 'redSportHue') return fmtInt(v) + '°';
         if (k === 'tankLitres') return fmtInt(v) + ' L';
         if (s.type === 'number') return k === 'shiftBefore' ? (v ? fmtInt(v) + ' rpm before' : 'At the redline') : fmtInt(v) + ' rpm';
         return this.optLabel(k, v);
@@ -239,6 +240,12 @@ class Page {
             const now = MODE_KEY[this.hud.driveMode], cw = (rw - 24) / 3;
             MODES.forEach((m, i) => this.modeCell(cv, rx + i * (cw + 12), y, cw, m[1] + (m[0] === now ? '  ·  now' : ''), m[0]));
         } else this.pickRow(cv, rx, y, rw, 'Theme', 'hudLayout', (v) => this.layoutName(v), 52);
+        if (shown === 'drag' || shown === 'vector') {
+            chip(cv, rx, y + 58, this.layoutName(shown) + ' colors', false, () => {
+                this.tab = 'settings';
+                this.kick();
+            }, 'look:colors');
+        }
         // the gallery, two rows: a tap shows that theme (in the drive mode the car is in, when it changes with it)
         const looks = this.looks(), cols = Math.max(5, Math.ceil(looks.length / 2)), gap = 12, gy = py + ph + 16;
         const gw = (CW - gap * (cols - 1)) / cols, gh = (bottom - gy - 4 - gap) / 2;
@@ -681,18 +688,20 @@ class Page {
     drawPicker(cv, bottom) {
         const p = this.picker, s = this.item(p.key), opts = s.type === 'number' ? (s.steps || []).map((v) => [v, null]) : s.options || [];
         cv.fillRect(0, 36, W, bottom + 20, '#000000b0');
-        const w = 620, rh = 58, h = 76 + opts.length * rh, x = (W - w) / 2, y = Math.max(52, (bottom + 44 - h) / 2);
+        const rh = 58, cols = opts.length * rh + 76 > bottom - 52 ? 2 : 1;
+        const rows = Math.ceil(opts.length / cols), w = cols === 2 ? 940 : 620, cellW = w / cols;
+        const h = 76 + rows * rh, x = (W - w) / 2, y = Math.max(52, (bottom + 44 - h) / 2);
         cv.card(x, y, w, h, 18, [[0, '#18233a'], [1, '#0c111b']]);
         cv.strokeRoundRect(x, y, w, h, 18, 1, A(C.blueHi, 0.3));
         cv.text(p.title.toUpperCase(), x + 26, y + 42, 15, C.label, { font: 'bold', spacing: 2.4, literal: true });
         const v = this.get(p.key);
         opts.forEach((o, i) => {
-            const ry = y + 60 + i * rh, sel = o[0] === v;
-            if (sel) cv.roundRect(x + 12, ry, w - 24, rh - 6, 12, A(C.blue, 0.35));
+            const cellX = x + Math.floor(i / rows) * cellW, ry = y + 60 + (i % rows) * rh, sel = o[0] === v;
+            if (sel) cv.roundRect(cellX + 12, ry, cellW - 24, rh - 6, 12, A(C.blue, 0.35));
             const text = p.fmt ? p.fmt(o[0]) : o[1] !== null ? o[1] : fmtInt(o[0]) + ' rpm';
-            cv.text(text, x + 30, ry + 34, 20, sel ? '#ffffff' : C.text, { font: sel ? 'bold' : 'label', literal: true });
-            if (sel) check(cv, x + w - 50, ry + 26, '#ffffff');
-            cv.target(x + 12, ry, w - 24, rh - 6, () => {
+            cv.text(text, cellX + 30, ry + 34, 20, sel ? '#ffffff' : C.text, { font: sel ? 'bold' : 'label', literal: true });
+            if (sel) check(cv, cellX + cellW - 50, ry + 26, '#ffffff');
+            cv.target(cellX + 12, ry, cellW - 24, rh - 6, () => {
                 this.picker = null;
                 if (LOOK_KEYS.indexOf(p.key) >= 0) this.chooseLayout(p.key, o[0]); else this.set(p.key, o[0]);
             }, 'pick:' + p.key + ':' + o[0], 12);

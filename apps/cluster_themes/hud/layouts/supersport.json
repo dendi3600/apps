@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "name": "AMG Circuit 2 · Supersport",
+  "name": "Super Sport",
   "theme": "sportdash",
   "widgets": [
     {
@@ -462,7 +462,7 @@
       "conn": 3,
       "segments": 4,
       "gap": 2,
-      "style": "trackFooter",
+      "style": "supersportLoad",
       "colors": [
         [
           221,
@@ -485,8 +485,7 @@
         26,
         32
       ],
-      "continuous": true,
-      "tip": true
+      "continuous": true
     },
     {
       "id": "torque_unit",
@@ -530,7 +529,7 @@
       "conn": 3,
       "segments": 4,
       "gap": 2,
-      "style": "trackFooter",
+      "style": "supersportLoad",
       "colors": [
         [
           221,
@@ -553,8 +552,7 @@
         26,
         32
       ],
-      "continuous": true,
-      "tip": true
+      "continuous": true
     },
     {
       "id": "boost_label",
@@ -608,6 +606,84 @@
         40
       ],
       "continuous": true
+    },
+    {
+      "id": "coolant_symbol",
+      "type": "icon",
+      "icon": "therm",
+      "x": 1431,
+      "y": 610,
+      "w": 31,
+      "h": 28,
+      "z": 5,
+      "conn": 2,
+      "color": [
+        100,
+        199,
+        255,
+        255
+      ]
+    },
+    {
+      "id": "coolant_gauge",
+      "type": "meter",
+      "signal": "coolant",
+      "x": 1476,
+      "y": 619,
+      "w": 238,
+      "h": 12,
+      "min": 40,
+      "max": 130,
+      "style": "trackTemperature",
+      "segments": 4,
+      "gap": 2,
+      "colors": [
+        [
+          86,
+          201,
+          255
+        ],
+        [
+          86,
+          201,
+          255
+        ],
+        [
+          244,
+          54,
+          75
+        ]
+      ],
+      "trackColor": [
+        10,
+        33,
+        62
+      ],
+      "at": [
+        0.65,
+        0.83
+      ],
+      "z": 3,
+      "conn": 2
+    },
+    {
+      "id": "coolant_reading",
+      "type": "text",
+      "text": "{{coolant}}{{u:temp}}",
+      "font": "s_unit",
+      "x": 1720,
+      "y": 611,
+      "w": 105,
+      "h": 32,
+      "align": "left",
+      "color": [
+        100,
+        199,
+        255,
+        255
+      ],
+      "z": 5,
+      "conn": 2
     }
   ],
   "packWaste": 3

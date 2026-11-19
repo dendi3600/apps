@@ -2,7 +2,7 @@
   "id": "cluster_themes",
   "title": "Cluster Themes",
   "description": "Custom instrument cluster themes with live gauges and drive-mode selection.",
-  "version": "0.19.43",
+  "version": "0.19.45",
   "vendor": "custom",
   "loggingId": "OAC1",
   "iconGlyph": "CLU",
@@ -112,6 +112,26 @@
       "default": "vector",
       "options": [
         [
+          "supersport",
+          "Super Sport"
+        ],
+        [
+          "rally",
+          "AMG Circuit"
+        ],
+        [
+          "cruise",
+          "AMG Track"
+        ],
+        [
+          "drag",
+          "AMG EQ"
+        ],
+        [
+          "vector",
+          "AMG GT"
+        ],
+        [
           "sport",
           "M1"
         ],
@@ -124,40 +144,12 @@
           "M8"
         ],
         [
-          "rally",
-          "AMG Circuit"
-        ],
-        [
-          "supersport",
-          "AMG Circuit 2 · Supersport"
-        ],
-        [
-          "cruise",
-          "AMG Track"
-        ],
-        [
-          "vector",
-          "Red sport"
-        ],
-        [
-          "srinivas",
-          "Srinivas"
-        ],
-        [
           "mview",
           "M view"
         ],
         [
           "off",
           "Off (BMW's own cluster)"
-        ],
-        [
-          "drag",
-          "Drag"
-        ],
-        [
-          "retro80s",
-          "Retro 80s"
         ],
         [
           "grid",
@@ -170,8 +162,32 @@
       ]
     },
     {
+      "key": "eqSportPalette",
+      "label": "AMG EQ colors",
+      "type": "choice",
+      "default": "classic",
+      "options": [
+        [
+          "classic",
+          "Ice blue → red"
+        ],
+        [
+          "teal",
+          "Teal → gold"
+        ],
+        [
+          "violet",
+          "Indigo → rose"
+        ],
+        [
+          "amber",
+          "Copper → ember"
+        ]
+      ]
+    },
+    {
       "key": "redSportBackground",
-      "label": "Red sport panel finish",
+      "label": "AMG GT panel finish",
       "type": "choice",
       "default": "plain",
       "options": [
@@ -187,7 +203,7 @@
     },
     {
       "key": "redSportColor",
-      "label": "Red sport dial color",
+      "label": "AMG GT dial color",
       "type": "choice",
       "default": "red",
       "options": [
@@ -223,7 +239,7 @@
     },
     {
       "key": "redSportHue",
-      "label": "Red sport custom hue",
+      "label": "AMG GT custom hue",
       "type": "number",
       "unit": "°",
       "default": 50,
@@ -315,6 +331,26 @@
       "default": "off",
       "options": [
         [
+          "supersport",
+          "Super Sport"
+        ],
+        [
+          "rally",
+          "AMG Circuit"
+        ],
+        [
+          "cruise",
+          "AMG Track"
+        ],
+        [
+          "drag",
+          "AMG EQ"
+        ],
+        [
+          "vector",
+          "AMG GT"
+        ],
+        [
           "sport",
           "M1"
         ],
@@ -327,40 +363,12 @@
           "M8"
         ],
         [
-          "rally",
-          "AMG Circuit"
-        ],
-        [
-          "supersport",
-          "AMG Circuit 2 · Supersport"
-        ],
-        [
-          "cruise",
-          "AMG Track"
-        ],
-        [
-          "vector",
-          "Red sport"
-        ],
-        [
-          "srinivas",
-          "Srinivas"
-        ],
-        [
           "mview",
           "M view"
         ],
         [
           "off",
           "Off (BMW's own cluster)"
-        ],
-        [
-          "drag",
-          "Drag"
-        ],
-        [
-          "retro80s",
-          "Retro 80s"
         ]
       ]
     },
@@ -371,6 +379,26 @@
       "default": "vector",
       "options": [
         [
+          "supersport",
+          "Super Sport"
+        ],
+        [
+          "rally",
+          "AMG Circuit"
+        ],
+        [
+          "cruise",
+          "AMG Track"
+        ],
+        [
+          "drag",
+          "AMG EQ"
+        ],
+        [
+          "vector",
+          "AMG GT"
+        ],
+        [
           "sport",
           "M1"
         ],
@@ -383,40 +411,12 @@
           "M8"
         ],
         [
-          "rally",
-          "AMG Circuit"
-        ],
-        [
-          "supersport",
-          "AMG Circuit 2 · Supersport"
-        ],
-        [
-          "cruise",
-          "AMG Track"
-        ],
-        [
-          "vector",
-          "Red sport"
-        ],
-        [
-          "srinivas",
-          "Srinivas"
-        ],
-        [
           "mview",
           "M view"
         ],
         [
           "off",
           "Off (BMW's own cluster)"
-        ],
-        [
-          "drag",
-          "Drag"
-        ],
-        [
-          "retro80s",
-          "Retro 80s"
         ]
       ]
     },
@@ -427,6 +427,26 @@
       "default": "off",
       "options": [
         [
+          "supersport",
+          "Super Sport"
+        ],
+        [
+          "rally",
+          "AMG Circuit"
+        ],
+        [
+          "cruise",
+          "AMG Track"
+        ],
+        [
+          "drag",
+          "AMG EQ"
+        ],
+        [
+          "vector",
+          "AMG GT"
+        ],
+        [
           "sport",
           "M1"
         ],
@@ -439,40 +459,12 @@
           "M8"
         ],
         [
-          "rally",
-          "AMG Circuit"
-        ],
-        [
-          "supersport",
-          "AMG Circuit 2 · Supersport"
-        ],
-        [
-          "cruise",
-          "AMG Track"
-        ],
-        [
-          "vector",
-          "Red sport"
-        ],
-        [
-          "srinivas",
-          "Srinivas"
-        ],
-        [
           "mview",
           "M view"
         ],
         [
           "off",
           "Off (BMW's own cluster)"
-        ],
-        [
-          "drag",
-          "Drag"
-        ],
-        [
-          "retro80s",
-          "Retro 80s"
         ]
       ]
     },

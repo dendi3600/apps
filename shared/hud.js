@@ -303,6 +303,12 @@ const SHEET_AREA_FRAC = 4;       // the first sheet size limit: 1/4 of the targe
 const TICK_MS = 50;              // 20 Hz: shift bar and gauges
 const TEXT_MS = 200;             // text re-draws at most 5 times a second (what BMW's own readouts do)
 const TARGET_SIZES = { hud: [800, 480], panel: [1920, 720] };
+const EQ_POINTER_COLORS = {
+    classic: [[36, 71, 232], [242, 5, 12]],
+    teal: [[12, 169, 173], [255, 149, 17]],
+    violet: [[88, 97, 235], [249, 66, 163]],
+    amber: [[210, 130, 64], [255, 69, 21]],
+};
 const RED_SPORT_HUES = { red: 356, yellow: 51, orange: 26, blue: 215, green: 135, violet: 275 };
 const MODE_KEY = { comfort: 'inComfort', sport: 'inSport', eco: 'inEco' };
 const TYRE_CORNERS = ['FL', 'FR', 'RL', 'RR'];
@@ -2306,7 +2312,7 @@ class HudApp {
             const cs = w.colors || ['fg', 'fg', 'hot'];
             c.uniform(ref, 'u_size', [w.w, w.h]);
             c.uniform(ref, 'u_continuous', [w.continuous ? 1 : 0]);
-            c.uniform(ref, 'u_tip', [w.style === 'mInstrument' ? -3 : w.style === 'redFooter' ? -1.375 : w.style === 'trackTemperature' ? -1.25 : w.style === 'trackFooter' ? (w.tip ? -2 : -1) : (w.tip ? 1 : 0)]);
+            c.uniform(ref, 'u_tip', [w.style === 'mInstrument' ? -3 : w.style === 'redFooter' ? -1.375 : w.style === 'trackTemperature' ? -1.25 : w.style === 'supersportLoad' ? -1.75 : w.style === 'trackFooter' ? (w.tip ? -2 : -1) : (w.tip ? 1 : 0)]);
             c.uniform(ref, 'u_segs', [w.segments || 20]);
             c.uniform(ref, 'u_gap', [isNum(w.gap) ? w.gap : 4]);
             c.uniform(ref, 'u_vertical', [w.vertical ? 1 : 0]);
@@ -2769,7 +2775,7 @@ class HudApp {
             }
             let raw = sig ? this._raw(sig) : null;
             if (ab && isNum(raw)) raw = Math.abs(raw);
-            const v = isNum(raw) && mx !== mn ? Math.min(1, Math.max(0, (raw - mn) / (mx - mn))) : (w.style === 'redFooter' || w.style === 'trackFooter' || w.style === 'trackTemperature' || w.style === 'mInstrument' ? -1 : 0);
+            const v = isNum(raw) && mx !== mn ? Math.min(1, Math.max(0, (raw - mn) / (mx - mn))) : (w.style === 'supersportLoad' || w.style === 'redFooter' || w.style === 'trackFooter' || w.style === 'trackTemperature' || w.style === 'mInstrument' ? -1 : 0);
             const q = Math.round(v * 200) / 200;
             const pk = w.peak ? this._peakHold(x, q, now, w.peak) : -1;
             if (w.style === 'redFooter') this._redSportHue(x, force);
@@ -2792,8 +2798,21 @@ class HudApp {
             const speed = twin ? this._raw('speed') : null;
             const us = this.setting('units') === 'us';
             const speedFraction = isNum(speed) ? Math.min(1, Math.max(0, us ? speed * .621371 / 200 : speed / 300)) : -1;
-            const stateKey = value + '|' + shiftPulse + '|' + speedFraction;
-            if (force || x.last !== stateKey) x.c.uniform(x.ref, 'u_state', [value, shiftPulse, twin ? 1 : 0, speedFraction]);
+            const scaleState = w.type === 'amgtrack' ? this.setting('redline') / 8000 : speedFraction;
+            const motion = w.type === 'amgtrack' ? (now % 1800) * Math.PI / 900 : (twin ? 1 : 0);
+            let light = shiftPulse;
+            if (w.type === 'amgtrack') {
+                const tq = this._raw('torque'), hp = this._raw('horsepower');
+                const sideValues = [isNum(tq) ? tq / 800 : -1, isNum(hp) ? hp / 600 : -1];
+                const key = sideValues.join('|');
+                if (force || x.sideKey !== key) x.c.uniform(x.ref, 'u_sides', sideValues);
+                x.sideKey = key;
+            } else {
+                const limit = this.setting('redline');
+                light = isNum(rpm) ? Math.max(0, Math.min(1, (rpm - limit + 1500) / 1500)) : 0;
+            }
+            const stateKey = value + '|' + light + '|' + scaleState + '|' + motion;
+            if (force || x.last !== stateKey) x.c.uniform(x.ref, 'u_state', [value, light, motion, scaleState]);
             x.last = stateKey;
         } else if (w.type === 'redsport') {
             const d = this.car.data();
@@ -2815,6 +2834,31 @@ class HudApp {
             if (!force && x.last === key) return;
             x.last = key;
             x.c.uniform(x.ref, 'u_state', values);
+        } else if (w.type === 'eqsport') {
+            const palette = EQ_POINTER_COLORS[this.setting('eqSportPalette')] || EQ_POINTER_COLORS.classic;
+            if (force || x.eqPalette !== palette) {
+                x.c.uniform(x.ref, 'u_cool', rgb(palette[0]));
+                x.c.uniform(x.ref, 'u_hot', rgb(palette[1]));
+                x.eqPalette = palette;
+            }
+            const signs = this._gSigns(w);
+            const signal = name => {
+                const value = this._raw(name);
+                return isNum(value) ? value : 0;
+            };
+            const rpm = Math.min(1, Math.max(0, (this.rpmF || 0) / 8000));
+            const values = [rpm, -signs[1] * signal('gLong'), signs[0] * signal('gLat'), signal('speed') / 120];
+            const target = this._shift().rpm;
+            const onset = Math.min(4000, target - 600);
+            const revHeat = Math.max(0, Math.min(1, (rpm * 8000 - onset) / (target - onset)));
+            const gHeat = Math.max(0, Math.min(1, (Math.hypot(values[1], values[2]) - .45) / .30));
+            const heat = this.cue.now.limiter ? 1 : Math.max(revHeat, gHeat);
+            const phase = heat > 0 ? (now % 2400) * Math.PI / 1200 : 0;
+            const key = values.concat([heat, phase]).join('|');
+            if (!force && key === x.last) return;
+            x.last = key;
+            x.c.uniform(x.ref, 'u_state', values);
+            x.c.uniform(x.ref, 'u_flare', [heat, phase]);
         } else if (w.type === 'mtrack') {
             const fraction = (signal, low, high) => {
                 const raw = this._raw(signal);

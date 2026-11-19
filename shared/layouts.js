@@ -32,6 +32,7 @@ const TYPES = {
     mview: ['path', 'scale', 'dial', 'dialAng', 'line'],
     vdash: ['tach', 'segs'],
     redsport: [],
+    eqsport: [],
     amgtrack: [],
     circuit: [],
     redlineRamp: [],
