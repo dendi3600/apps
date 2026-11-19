@@ -358,7 +358,7 @@ function mediaText(v) {
 /** Seconds as m:ss. */
 function clockOf(sec) { const t = Math.max(0, Math.floor(sec)); return Math.floor(t / 60) + ':' + ('0' + (t % 60)).slice(-2); }   // its speed scale: 0..200 mph by 20, 0..330 km/h by 30 (linear)
 const ROAD_DASH_M = 12;            // the Sport road: metres per dash and gap (shaders.js sdash u_road)
-const CUE_TYPES = { mtrack: true, redlineRamp: true, lights: true, shiftbar: true, revbar: true, revarc: true, ribbon: true, mtach: true };
+const CUE_TYPES = { circuit: true, amgtrack: true, eqsport: true, redsport: true, sdash: true, mview: true, mtrack: true, redlineRamp: true, lights: true, shiftbar: true, revbar: true, revarc: true, ribbon: true, mtach: true };
 // the shift-light test (page.js Alerts): rpm climbs from TEST_FROM to just past the shift point, then holds
 const TEST_FROM = 1500, TEST_CLIMB_MS = 2500, TEST_HOLD_MS = 1200;
 // night colours (Cluster Themes "nightDim"): after sunset the theme's whites and greys go to this brightness
@@ -919,7 +919,7 @@ class HudApp {
         this.log.info('connecting to cluster-render at ' + this.socketPath);
         this.started = true;
         this.clients.forEach((c) => c.connect());
-        this.tickTimer = setInterval(() => this._guard('tick', () => this._tick()), TICK_MS);
+        this.tickTimer = setInterval(() => this._guard('tick', () => this._tick()), this.target === 'panel' ? 1000 / 60 : TICK_MS);
         // Auto theme: check for sunrise / sunset once a minute; the status line too
         this.themeTimer = setInterval(() => this._guard('theme check', () => {
             if (this._themeName() !== this.themeName || this._nightDim() !== this.nightOn || this._hudHoliday() !== (this.hudHoliday || null) ||
@@ -1473,6 +1473,13 @@ class HudApp {
     /** The shift lights count in (setting "shiftCue" on "countin", the default), else the fixed rpm band. */
     _countIn() { return !this.ctx.settings.item('shiftCue') || this.setting('shiftCue') !== 'rpm'; }
 
+    _shiftLight(rpm, now) {
+        if (!isNum(rpm)) return 0;
+        if (this._countIn()) return (this.cue.now.shift || this.cue.now.limiter) ? Number(this.cue.blink(now)) : this.cue.fraction(rpm);
+        const at = this._shift().rpm, from = Math.min(3000, at - 500);
+        return rpm >= at ? Number(Math.floor(now / 100) % 2 === 0) : Math.max(0, (rpm - from) / (at - from));
+    }
+
     /** Every tick: the count-in cue from the rpm (the test's while it runs) and the reaction time (shift_cue.js). */
     _cueTick(now) {
         const d = this.car.data(), test = this._testRpm(now), testing = isNum(test);
@@ -1762,6 +1769,8 @@ class HudApp {
             case 'torque': { const v = this._raw('torque'); return fix(isNum(v) ? (us ? v * 0.737562 : v) : v, 0); }
             case 'torquePct': case 'powerPct': { const v = this._raw(tok); return isNum(v) ? String(Math.min(100, Math.round(v))) : '--'; }
             case 'boostHi': return us ? '20' : '1.4';
+            case 'm8BoostMid': return us ? '10' : '0.69';
+            case 'm8BoostMax': return us ? '20' : '1.38';
             case 'boostScaleMid': return us ? '14.5' : '1.0';
             case 'boostScaleMax': return us ? '29' : '2.0';
             case 'boostMid': return us ? '10' : '0.7';
@@ -2142,7 +2151,6 @@ class HudApp {
         else if (w.type === 'nav') this._navCreate(x);
         else if (w.type === 'garland') { x.tw = new Garland.Twinkle(w); this._blit(x, null, Garland.paint(w, x.tw.lvl, null)); }
         else if (w.type === 'icon') this._blit(x, null, paintIcon(w.icon, w.w, w.h, color(t, w.color || 'fg')));
-        else if (w.type === 'circuit') c.uniform(ref, 'u_hole', this._hole(w));
         else if (w.type === 'sdash') {
             c.uniform(ref, 'u_size', [w.w, w.h]);
             c.uniform(ref, 'u_geo', w.geo);
@@ -2245,6 +2253,7 @@ class HudApp {
             const right = w.side === 'right';
             c.uniform(ref, 'u_size', [w.w, w.h]);
             c.uniform(ref, 'u_side', [right ? 1 : -1]);
+            c.uniform(ref, 'u_origin', [w.x, w.y]);
             c.uniform(ref, 'u_geoA', [w.y0 - w.y, w.y8 - w.y, w.ym - w.y, right ? w.x + w.w - w.xm : w.xm - w.x]);
             c.uniform(ref, 'u_geoB', [w.kTop, w.kBot, w.round || 40]);
             c.uniform(ref, 'u_redRail', [w.redRail ? 1 : 0]);
@@ -2559,7 +2568,7 @@ class HudApp {
         const flashing = isNum(rpm) && rpm >= this.setting('redline') - 150;
         this.flash = flashing ? Math.floor(now / 62.5) % 2 === 0 : false;
         // the count-in's latched flash: the shift bars and arcs flash with it at 5 Hz (shift_cue.js)
-        if (!flashing && this._countIn() && this.cue.now.shift) this.flash = this.cue.blink(now);
+        if (this._countIn()) this.flash = this.cue.blink(now);
         this.widgets.forEach((x) => this._guard('widget ' + x.w.id, () => this._update(x, now, false)));
     }
 
@@ -2626,14 +2635,16 @@ class HudApp {
             this._blit(x, null, paintIcon(w.icon, w.w, w.h, ink));
         } else if (w.type === 'atext') {
             if (!force && now - x.lastPaint < (w.rate || TEXT_MS)) return;
+            x.lastPaint = now;
             const s = this._resolve(w.text);
             if (!force && s === x.last) return;
-            x.last = s; x.lastPaint = now;
+            x.last = s;
             x.c.uniform(x.ref, 'u_text', this._atlasCodes(x, s), { type: 'vec4' });
         } else if (w.type === 'nav') this._navUpdate(x, now, force);
         else if (w.type === 'garland') this._garlandTick(x, now);
         else if (w.type === 'text') {
             if (!force && now - x.lastPaint < (w.rate || TEXT_MS)) return;
+            x.lastPaint = now;
             let s = (w.navHide && this.navShown) || smartTemps.hidden(this, w) || !this._shownNow(w) ? '' : this._resolve(w.text);   // nav turn showing / "showWhen"
             let role = w.color || 'fg';
             if (w.text && w.text.indexOf('{{fuelPct}}') >= 0) { const fuel = this._raw('fuel'); if (isNum(fuel) && fuel <= .125) role = [255, 189, 42, 255]; }
@@ -2652,7 +2663,7 @@ class HudApp {
             if (w.warnFlash !== false && this._warning(w) && Math.floor(now / WARN_FLASH_MS) % 2 === 0) role = 'hot';
             const key = s + '|' + role;
             if (!force && key === x.last) return;
-            x.last = key; x.lastPaint = now;
+            x.last = key;
             // "fit": smaller fonts to fall back on when the text is wider than the box (a readout slot showing a
             // longer value than its default) or has a character the font lacks (Retro's seven-segment digits have no
             // letters, + or °), on the same baseline
@@ -2789,27 +2800,28 @@ class HudApp {
             }
             x.c.uniform(x.ref, 'u_value', [q]);
             if (w.peak) x.c.uniform(x.ref, 'u_peak', [pk > q ? pk : -1]);
+        } else if (w.type === 'amgtrackBase') {
+            const rpm = this._raw('rpm');
+            const atLimit = isNum(rpm) && (this._shift().now || this.cue.now.limiter || rpm >= this.setting('redline') - 40);
+            const heat = atLimit ? (this._shiftLight(rpm, now) > .5 ? 1 : .82) : 0;
+            if (force || x.last !== heat) x.c.uniform(x.ref, 'u_floorHeat', [heat]);
+            x.last = heat;
         } else if (w.type === 'circuit' || w.type === 'amgtrack') {
             const rpm = this._raw('rpm');
             const value = isNum(rpm) ? Math.round(rpm / 10) / 800 : -1;
-            const shiftPulse = w.type === 'amgtrack' && isNum(rpm) && rpm >= this._shift().rpm
-                ? (1 + Math.cos(now * Math.PI / 420)) / 2 : 0;
             const twin = w.style === 'supersport';
             const speed = twin ? this._raw('speed') : null;
             const us = this.setting('units') === 'us';
             const speedFraction = isNum(speed) ? Math.min(1, Math.max(0, us ? speed * .621371 / 200 : speed / 300)) : -1;
             const scaleState = w.type === 'amgtrack' ? this.setting('redline') / 8000 : speedFraction;
             const motion = w.type === 'amgtrack' ? (now % 1800) * Math.PI / 900 : (twin ? 1 : 0);
-            let light = shiftPulse;
+            const light = this._shiftLight(rpm, now);
             if (w.type === 'amgtrack') {
                 const tq = this._raw('torque'), hp = this._raw('horsepower');
                 const sideValues = [isNum(tq) ? tq / 800 : -1, isNum(hp) ? hp / 600 : -1];
                 const key = sideValues.join('|');
                 if (force || x.sideKey !== key) x.c.uniform(x.ref, 'u_sides', sideValues);
                 x.sideKey = key;
-            } else {
-                const limit = this.setting('redline');
-                light = isNum(rpm) ? Math.max(0, Math.min(1, (rpm - limit + 1500) / 1500)) : 0;
             }
             const stateKey = value + '|' + light + '|' + scaleState + '|' + motion;
             if (force || x.last !== stateKey) x.c.uniform(x.ref, 'u_state', [value, light, motion, scaleState]);
@@ -2825,10 +2837,7 @@ class HudApp {
                 x.twill = twill;
             }
             this._redSportHue(x, force);
-            const atLimit = isNum(rpm) && rpm >= this.setting('redline');
-            if (!atLimit) x.limiterStart = null;
-            else if (x.limiterStart == null) x.limiterStart = now;
-            const pulse = atLimit ? .65 + .35 * Math.cos((now - x.limiterStart) * Math.PI / 300) : 0;
+            const pulse = this._shiftLight(rpm, now);
             const values = [fraction(rpm, 8000), fraction(d.torque, 800), fraction(hp, 600), pulse];
             const key = values.join('|');
             if (!force && x.last === key) return;
@@ -2848,11 +2857,10 @@ class HudApp {
             };
             const rpm = Math.min(1, Math.max(0, (this.rpmF || 0) / 8000));
             const values = [rpm, -signs[1] * signal('gLong'), signs[0] * signal('gLat'), signal('speed') / 120];
-            const target = this._shift().rpm;
-            const onset = Math.min(4000, target - 600);
-            const revHeat = Math.max(0, Math.min(1, (rpm * 8000 - onset) / (target - onset)));
-            const gHeat = Math.max(0, Math.min(1, (Math.hypot(values[1], values[2]) - .45) / .30));
-            const heat = this.cue.now.limiter ? 1 : Math.max(revHeat, gHeat);
+            const rawRpm = this._raw('rpm');
+            const shifting = isNum(rawRpm) && (this._countIn()
+                ? this.cue.now.shift || this.cue.now.limiter : rawRpm >= this._shift().rpm);
+            const heat = shifting ? 1 : this._shiftLight(rawRpm, now);
             const phase = heat > 0 ? (now % 2400) * Math.PI / 1200 : 0;
             const key = values.concat([heat, phase]).join('|');
             if (!force && key === x.last) return;
@@ -2868,7 +2876,7 @@ class HudApp {
             let lamps = 0;
             if (isNum(rpm)) {
                 if (this._countIn()) {
-                    lamps = this.cue.now.shift ? (this.cue.blink(now) ? 8 : 0) : Math.floor(this.cue.fraction(rpm) * 8);
+                    lamps = Math.floor(this._shiftLight(rpm, now) * 8);
                 } else {
                     // The final half-division leads into the current per-gear shift point.
                     lamps = Math.floor(8 * Math.min(1, Math.max(0, (rpm - shift.rpm + 500) / 500)));
@@ -2896,9 +2904,11 @@ class HudApp {
                 x.roadPhase = ((x.roadPhase || 0) + (isNum(sp) ? Math.max(0, sp) / 3.6 : 0) * dt / ROAD_DASH_M) % 1;
                 vals.push(Math.round(x.roadPhase * 64) / 64);
             }
-            const key = vals.join('|');
+            const cue = this._shiftLight(rpm, now);
+            const key = vals.join('|') + '|' + cue;
             if (!force && key === x.last) return;
             x.last = key;
+            x.c.uniform(x.ref, 'u_shiftCue', [cue]);
             if (w.road) x.c.uniform(x.ref, 'u_road', [w.road[0], w.road[1], vals[4], 1]);
             x.c.uniform(x.ref, 'u_speed', [vals[0]]);
             x.c.uniform(x.ref, 'u_speedMark', [scaleFrac(us ? 80 * 0.621371 : 80, SPEED_SCALE[us ? 'us' : 'metric'])]);
@@ -2932,9 +2942,11 @@ class HudApp {
             const q = (v) => Math.round(Math.min(1, Math.max(0, v)) * 1000) / 1000;
             const vals = [q(isNum(sp) ? (us ? sp * 0.621371 : sp) / MVIEW_SPEED[us ? 'us' : 'metric'] : 0),
                 q(isNum(rpm) ? rpm / MVIEW_RPM : 0), q(isNum(fuel) ? fuel : -1), q(isNum(oil) ? (oil - 50) / 100 : 0)];
-            const key = vals.join('|');
+            const cue = this._shiftLight(rpm, now);
+            const key = vals.join('|') + '|' + cue;
             if (!force && key === x.last) return;
             x.last = key;
+            x.c.uniform(x.ref, 'u_shiftCue', [cue]);
             x.c.uniform(x.ref, 'u_speed', [vals[0]]);
             x.c.uniform(x.ref, 'u_speedMark', [scaleFrac(us ? 80 * 0.621371 : 80, SPEED_SCALE[us ? 'us' : 'metric'])]);
             x.c.uniform(x.ref, 'u_rpm', [vals[1]]);
@@ -2956,18 +2968,18 @@ class HudApp {
             vals.forEach(([u, G, v]) => x.c.uniform(x.ref, u, [G.cx || 0, G.cy || 0, G.r || 0, v]));
             x.c.uniform(x.ref, 'u_segLit', lit);
         } else if (w.type === 'mtach') {
-            const rpm = this._raw('rpm'), sp = this._shift();
+            const rpm = this._raw('rpm'), light = this._shiftLight(rpm, now);
             const v = isNum(rpm) ? Math.min(1, Math.max(0, rpm / (w.max || 8000))) : 0;
             // A decaying envelope retains light briefly as the live marker moves.
             const elapsed = Math.max(0, now - (x.trailTime || now));
             x.trail = isNum(x.trail) && isNum(rpm) ? v + (x.trail-v)*Math.exp(-elapsed/210) : v;
             x.trailTime = now;
-            const key = [Math.round(v*600), Math.round(x.trail*600), sp.now].join('|');
+            const key = [Math.round(v*600), Math.round(x.trail*600), light].join('|');
             if (!force && key === x.last) return;
             x.last = key;
             x.c.uniform(x.ref, 'u_value', [v]);
             x.c.uniform(x.ref, 'u_trail', [x.trail]);
-            x.c.uniform(x.ref, 'u_shiftNow', [sp.now ? 1 : 0]);
+            x.c.uniform(x.ref, 'u_shiftNow', [light]);
         } else if (w.type === 'segbar') {
             const v = this._raw(w.signal);
             const lit = isNum(v) ? Math.max(0, Math.min(w.max, Math.round(v))) : 0;
@@ -2991,8 +3003,8 @@ class HudApp {
             if (this._countIn()) {
                 // the count-in: lit over the cue's span up to its flash point, then all red at 5 Hz while it is latched
                 lit = Math.floor(this.cue.fraction(rpm) * n);
-                strobe = this.cue.now.shift ? (this.cue.blink(now) ? 1 : 0) : 0;
-                if (this.cue.now.shift && !strobe) lit = 0;
+                strobe = Number(this.cue.blink(now));
+                if (this.cue.now.shift || this.cue.now.limiter) lit = strobe * n;
             } else {
                 // the lights fill from "from" rpm (3000) up to the shift point; a "from" at or past it means the last 500 rpm
                 const from = Math.min(isNum(w.from) ? w.from : 3000, sp.rpm - 500);

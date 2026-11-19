@@ -774,13 +774,13 @@
     {
       "id": "sport_emblem",
       "type": "text",
-      "x": 127,
-      "y": 585,
-      "w": 104,
-      "h": 47,
+      "x": 114,
+      "y": 579,
+      "w": 129,
+      "h": 58,
       "z": 5,
       "text": "M",
-      "font": "sport_emblem_large",
+      "font": "circuit_emblem",
       "color": "fg",
       "align": "left"
     }
