@@ -440,7 +440,8 @@
         }
       }
     } catch (e) { addLog({ level: 'error', text: 'bench page: event stream: ' + (e && e.message || e) }); dbgErr = String(e && e.message || e); dirty = true; }
-    setConn('bench server gone', 'bad');
+    setConn('reconnecting…', 'bad');
+    setTimeout(readEvents, 1200);
   })();
   let dbgN = 0, dbgLast = '', dbgReads = 0, dbgBuf = 0, dbgErr = '', dbgPx = 0, pixelCap = 16 * 1048576;
   function onMessage(m) {

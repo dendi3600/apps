@@ -31,8 +31,14 @@
       "h": 38,
       "z": 5,
       "align": "center",
-      "color": "fg",
-      "conn": 1
+      "color": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "conn": 1,
+      "shadow": true
     },
     {
       "id": "rpm1",
@@ -45,8 +51,14 @@
       "h": 38,
       "z": 5,
       "align": "center",
-      "color": "fg",
-      "conn": 1
+      "color": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "conn": 1,
+      "shadow": true
     },
     {
       "id": "rpm2",
@@ -59,8 +71,14 @@
       "h": 38,
       "z": 5,
       "align": "center",
-      "color": "fg",
-      "conn": 1
+      "color": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "conn": 1,
+      "shadow": true
     },
     {
       "id": "rpm3",
@@ -73,8 +91,14 @@
       "h": 38,
       "z": 5,
       "align": "center",
-      "color": "fg",
-      "conn": 1
+      "color": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "conn": 1,
+      "shadow": true
     },
     {
       "id": "rpm4",
@@ -87,8 +111,14 @@
       "h": 38,
       "z": 5,
       "align": "center",
-      "color": "fg",
-      "conn": 1
+      "color": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "conn": 1,
+      "shadow": true
     },
     {
       "id": "rpm5",
@@ -101,8 +131,14 @@
       "h": 38,
       "z": 5,
       "align": "center",
-      "color": "fg",
-      "conn": 1
+      "color": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "conn": 1,
+      "shadow": true
     },
     {
       "id": "rpm6",
@@ -115,8 +151,14 @@
       "h": 38,
       "z": 5,
       "align": "center",
-      "color": "fg",
-      "conn": 1
+      "color": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "conn": 1,
+      "shadow": true
     },
     {
       "id": "rpm7",
@@ -129,8 +171,14 @@
       "h": 38,
       "z": 5,
       "align": "center",
-      "color": "fg",
-      "conn": 1
+      "color": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "conn": 1,
+      "shadow": true
     },
     {
       "id": "rpm8",
@@ -143,8 +191,14 @@
       "h": 38,
       "z": 5,
       "align": "center",
-      "color": "fg",
-      "conn": 1
+      "color": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "conn": 1,
+      "shadow": true
     },
     {
       "id": "speed",
@@ -157,8 +211,14 @@
       "h": 95,
       "z": 5,
       "align": "center",
-      "color": "fg",
-      "conn": 1
+      "color": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "conn": 1,
+      "shadow": true
     },
     {
       "id": "unit",
@@ -171,8 +231,14 @@
       "h": 32,
       "z": 5,
       "align": "center",
-      "color": "fg",
-      "conn": 1
+      "color": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "conn": 1,
+      "shadow": true
     },
     {
       "id": "badge",
@@ -416,7 +482,7 @@
       "h": 12,
       "z": 4,
       "conn": 1,
-      "signal": "fuelSystemPct",
+      "signal": "fuel",
       "min": 0,
       "max": 1,
       "segments": 4,

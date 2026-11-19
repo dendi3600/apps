@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "name": "AMG Circuit 2 \u00b7 Supersport",
+  "name": "AMG Circuit 2 · Supersport",
   "theme": "sportdash",
   "widgets": [
     {
@@ -24,8 +24,14 @@
       "h": 95,
       "z": 5,
       "align": "center",
-      "color": "fg",
-      "conn": 1
+      "color": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "conn": 1,
+      "shadow": true
     },
     {
       "id": "unit",
@@ -38,8 +44,14 @@
       "h": 32,
       "z": 5,
       "align": "center",
-      "color": "fg",
-      "conn": 1
+      "color": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "conn": 1,
+      "shadow": true
     },
     {
       "id": "badge",
@@ -64,7 +76,7 @@
       "h": 12,
       "z": 4,
       "conn": 1,
-      "signal": "fuelSystemPct",
+      "signal": "fuel",
       "min": 0,
       "max": 1,
       "segments": 4,
@@ -146,9 +158,15 @@
       "w": 350,
       "h": 94,
       "align": "center",
-      "color": "fg",
+      "color": [
+        255,
+        255,
+        255,
+        255
+      ],
       "z": 5,
-      "conn": 1
+      "conn": 1,
+      "shadow": true
     },
     {
       "id": "rpm_suffix",
@@ -160,9 +178,15 @@
       "w": 180,
       "h": 36,
       "align": "center",
-      "color": "fg",
+      "color": [
+        255,
+        255,
+        255,
+        255
+      ],
       "z": 5,
-      "conn": 1
+      "conn": 1,
+      "shadow": true
     },
     {
       "id": "range",

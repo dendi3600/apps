@@ -129,20 +129,25 @@ function tint(m, boxW, boxH, opts) {
         halo = blur(m, boxW, boxH, r, 2);
     }
     const out = Buffer.alloc(boxW * boxH * 4, 0);
+    const shadow = opts.shadow ? blur(m, boxW, boxH, 2, 2) : null;
     const ca = color[3] / 255;
     const c2 = opts.color2;          // optional: the colour at the bottom of the box (a top-to-bottom gradient)
     let rowC = color, row = -1;
     for (let i = 0; i < m.length; i++) {
         let a = m[i] / 255;
         if (halo) a = a + (1 - a) * (halo[i] / 255) * glow; // glyph over its own halo
-        if (a <= 0) continue;
+        const y = Math.floor(i / boxW);
+        const shadowAlpha = shadow && y >= 3 && i % boxW >= 1 ? shadow[i - 3 * boxW - 1] / 255 * .82 : 0;
+        const opacity = a * ca + shadowAlpha * (1 - a * ca);
+        if (opacity <= 0) continue;
         if (c2) {
             const y = Math.floor(i / boxW);
             if (y !== row) { row = y; const f = boxH > 1 ? y / (boxH - 1) : 0; rowC = [0, 1, 2].map((j) => Math.round(color[j] + (c2[j] - color[j]) * f)); }
         }
         const o = i * 4;
-        out[o] = rowC[0]; out[o + 1] = rowC[1]; out[o + 2] = rowC[2];
-        out[o + 3] = Math.round(a * ca * 255);
+        const ink = a * ca / opacity;
+        out[o] = Math.round(rowC[0] * ink); out[o + 1] = Math.round(rowC[1] * ink); out[o + 2] = Math.round(rowC[2] * ink);
+        out[o + 3] = Math.round(opacity * 255);
     }
     return out;
 }

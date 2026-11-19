@@ -32,7 +32,7 @@ mgu.run({
             title: ctx.spec.title, what: 'cluster',
             look: { name: 'Themes', style: 'hero', tags: { m: 'M8 style', mview: 'M3 / M5 look', vector: 'red sport tach', srinivas: 'round tach', sport: 'Live Cockpit', track: 'tyres + temps', drag: '0-60 timer', rally: 'circuit tach', supersport: 'speed and RPM wings', retro80s: '80s digital', cruise: 'twin RPM scales', dyno: 'safety tiles', ribbon: 'M track display' } },
             tabs: ['look', 'readouts', 'badge', 'map', 'alerts', 'gmeter', 'settings'],
-            settings: ['units', 'clock', 'timeZone', 'tankLitres', 'redline', 'shiftBefore', 'coldGuard', 'showBoost', 'nightDim', 'cameraNotch', 'keepFactoryStrip', 'holiday', 'demo'],
+            settings: ['redSportBackground', 'redSportColor', 'redSportHue', 'units', 'clock', 'timeZone', 'tankLitres', 'redline', 'shiftBefore', 'coldGuard', 'showBoost', 'nightDim', 'cameraNotch', 'keepFactoryStrip', 'holiday', 'demo'],
             // the drive mode check's candidates this app's app.json listens to (issue #8; shared/hud.js modeDiagLines)
             modeCheck: ['HMI', 'MDrive', 'Engine', 'Sport2'],
         }).start();

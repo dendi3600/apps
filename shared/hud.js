@@ -303,6 +303,7 @@ const SHEET_AREA_FRAC = 4;       // the first sheet size limit: 1/4 of the targe
 const TICK_MS = 50;              // 20 Hz: shift bar and gauges
 const TEXT_MS = 200;             // text re-draws at most 5 times a second (what BMW's own readouts do)
 const TARGET_SIZES = { hud: [800, 480], panel: [1920, 720] };
+const RED_SPORT_HUES = { red: 356, yellow: 51, orange: 26, blue: 215, green: 135, violet: 275 };
 const MODE_KEY = { comfort: 'inComfort', sport: 'inSport', eco: 'inEco' };
 const TYRE_CORNERS = ['FL', 'FR', 'RL', 'RR'];
 // the HUD's place (the page's Position tab): settings that move / scale the layers already there, no rebuild
@@ -1438,6 +1439,16 @@ class HudApp {
         if (!WARN[id]) return null;
         const lim = this.setting(WARN[id]), v = this._raw(id);
         return isNum(lim) && lim > 0 && isNum(v) && v > lim ? id : null;
+    }
+
+    _redSportHue(x, force) {
+        const name = this.setting('redSportColor');
+        const selected = name === 'custom' ? this.setting('redSportHue') : RED_SPORT_HUES[name];
+        const hue = isNum(selected) ? selected : RED_SPORT_HUES.red;
+        if (force || x.dialHue !== hue) {
+            x.c.uniform(x.ref, 'u_hue', [hue / 360]);
+            x.dialHue = hue;
+        }
     }
 
     _barMax(w) { return Math.ceil(this.setting('redline') / 1000) * 1000 + ((w && w.over) || 0); }
@@ -2653,7 +2664,7 @@ class HudApp {
                 font = f;
             }
             const buf = textRaster.drawText(w.w, w.h, s, {
-                font, offsetY, trailingDigitFont: w.trailingDigitFont, slope: w.slope, color: color(this.theme, role), align: w.align, spacing: w.spacing,
+                font, offsetY, shadow: w.shadow, trailingDigitFont: w.trailingDigitFont, slope: w.slope, color: color(this.theme, role), align: w.align, spacing: w.spacing,
                 color2: w.color2 && role !== 'hot' ? color(this.theme, w.color2) : null,
                 glow: w.glow ? this.theme.glow : 0,
             });
@@ -2761,6 +2772,7 @@ class HudApp {
             const v = isNum(raw) && mx !== mn ? Math.min(1, Math.max(0, (raw - mn) / (mx - mn))) : (w.style === 'redFooter' || w.style === 'trackFooter' || w.style === 'trackTemperature' || w.style === 'mInstrument' ? -1 : 0);
             const q = Math.round(v * 200) / 200;
             const pk = w.peak ? this._peakHold(x, q, now, w.peak) : -1;
+            if (w.style === 'redFooter') this._redSportHue(x, force);
             const key = q + '|' + pk;
             if (!force && key === x.last) return;
             x.last = key;
@@ -2786,8 +2798,19 @@ class HudApp {
         } else if (w.type === 'redsport') {
             const d = this.car.data();
             const fraction = (v, max) => isNum(v) ? Math.round(Math.max(0, Math.min(1, v / max)) * 1000) / 1000 : -1;
-            const hp = isNum(d.torque) && isNum(d.rpm) ? d.torque * d.rpm * 1.341 / 9549 : null;
-            const values = [fraction(this._raw('rpm'), 8000), fraction(d.torque, 800), fraction(hp, 600), 0];
+            const hp = this._raw('horsepower');
+            const rpm = this._raw('rpm');
+            const twill = this.setting('redSportBackground') === 'twill' ? 1 : 0;
+            if (force || x.twill !== twill) {
+                x.c.uniform(x.ref, 'u_twill', [twill]);
+                x.twill = twill;
+            }
+            this._redSportHue(x, force);
+            const atLimit = isNum(rpm) && rpm >= this.setting('redline');
+            if (!atLimit) x.limiterStart = null;
+            else if (x.limiterStart == null) x.limiterStart = now;
+            const pulse = atLimit ? .65 + .35 * Math.cos((now - x.limiterStart) * Math.PI / 300) : 0;
+            const values = [fraction(rpm, 8000), fraction(d.torque, 800), fraction(hp, 600), pulse];
             const key = values.join('|');
             if (!force && x.last === key) return;
             x.last = key;

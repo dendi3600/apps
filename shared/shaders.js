@@ -1056,6 +1056,13 @@ void main() {
 }
 `;
 
+const RED_SPORT_LACQUER = `uniform float u_hue;
+vec3 lacquer(){
+ vec3 wheel=abs(fract(u_hue+vec3(0.,2./3.,1./3.))*6.-3.);
+ return mix(vec3(.012),vec3(.99),clamp(wheel-1.,0.,1.));
+}
+`;
+
 const METER = `// A segmented bar meter for a cluster-render "effect" layer (GLSL ES 1.00): u_segs segments along the layer's
 // width (or its height when u_vertical is 1, filling upward), the first u_value of the way lit. A lit segment takes
 // u_c1 below u_at.x of the bar, u_c2 up to u_at.y, u_c3 from there (the retro green / amber / red, or warm-up blue /
@@ -1075,6 +1082,7 @@ uniform vec2 u_at;
 uniform vec4 u_track;
 uniform float u_continuous;
 uniform float u_tip;
+${RED_SPORT_LACQUER}
 uniform float u_peak;
 uniform vec3 u_peakC;
 
@@ -1110,7 +1118,13 @@ void main() {
         vec3 fill=frac<u_at.x?u_c1:(frac<u_at.y?u_c2:u_c3);
         vec3 face=mix(u_track.rgb,fill,step(pos,u_value)*step(.000001,u_value));
         vec3 rim=vec3(.45,.72,.88);
-        if(u_tip == -1.375) rim=vec3(.66,.45,.49);
+        if(u_tip == -1.375){
+            vec3 dye=lacquer();
+            rim=mix(vec3(.33),dye,.28);
+            float lit=step(pos,u_value)*step(.000001,u_value);
+            float head=exp(-abs(pos-u_value)*19.);
+            face=mix(u_track.rgb,mix(dye*(.64+.32*head),vec3(1.),.46*head),lit);
+        }
         if(u_tip == -1.25){
             float hot=smoothstep(.78,.97,pos);
             rim=mix(vec3(.21,.51,.76),vec3(.88,.10,.19),hot);
@@ -1958,7 +1972,13 @@ void main(){
     col+=vec3(.017,.045,.058)*skirt*(.5+.5*cos((d.x+p.y)*2.));
     col+=vec3(.15,.29,.33)*line(p.y-deck-3.2,.24);
     if(abs(angle)<1.99){
-        col=mix(col,gold,line(r-116.,.55));
+        // Amber enamel along the flanks catches a finer gold highlight at the crown.
+        float crownLight=1.-smoothstep(.12,1.42,abs(angle));
+        float rimDistance=r-116.;
+        vec3 amberRim=mix(vec3(.97,.33,.038),vec3(1.,.70,.18),crownLight);
+        col+=vec3(.36,.085,.009)*exp(-abs(rimDistance)*.80);
+        col=mix(col,amberRim,line(rimDistance,.66));
+        col=mix(col,vec3(1.,.84,.42),crownLight*.72*line(rimDistance+.25,.14));
         // Blue-grey bezel, recessed gap and separate fine inner ring.
         float crown=1.-smoothstep(.25,1.25,abs(angle));
         float bevel=sin(3.14159*clamp((r-107.)/7.,0.,1.));
@@ -1966,24 +1986,25 @@ void main(){
         col=mix(col,metal*(.72+.28*bevel),smoothstep(106.5,107.5,r)*(1.-smoothstep(114.,115.,r)));
         col=mix(col,vec3(.035,.054,.077),line(r-106.,.90));
         col=mix(col,vec3(.68,.75,.77),line(r-104.6,.33));
-        float passed=(twin?0.:1.)*step(0.,u_state.x)*(1.-smoothstep(u_state.x-.006,u_state.x+.006,sweep));
-        vec3 revInk=mix(vec3(.97,.67,.19),vec3(1.,.13,.17),smoothstep(.50,.80,sweep));
-        col+=revInk*passed*.21*exp(-abs(r-106.)*.29);
-        col+=(twin?0.:1.)*vec3(.48,.018,.035)*smoothstep(.80,.98,sweep)*smoothstep(60.,102.,r)*(1.-smoothstep(103.,105.,r));
-        // A swept blade has a curved leading edge and a narrow reflective face.
-        float span=clamp((r-41.)/63.,0.,1.);
-        float phase=fract(sweep*80.+1.45*pow(1.-span,1.6)+.5)-.5;
-        float width=mix(.045,.31,span*span);
-        float face=1.-smoothstep(width,width+.065,abs(phase));
-        float glint=1.-smoothstep(.015,.095,abs(phase+width*.62));
-        float active=passed*smoothstep(.02,.15,span);
-        vec3 blade=mix(vec3(.27,.42,.54),vec3(.73,.82,.86),span);
-        blade=twin?mix(vec3(.10,.13,.16),vec3(.51,.61,.65),span):mix(blade,vec3(.89,.19,.25),smoothstep(.80,.91,sweep));
-        blade=mix(blade,revInk,active*.96);
-        float bladeMask=smoothstep(62.,95.,r)*(1.-smoothstep(102.5,104.,r));
-        if(twin) bladeMask*=mix(.42,.88,smoothstep(78.,103.,r));
-        col=mix(col,blade,bladeMask*face*(.28+.70*span));
-        col+=bladeMask*face*glint*span*mix(vec3(.33),revInk*.45,active);
+        // Thin raised flutes: a silver edge tapers into the dark dial well.
+        float depth=smoothstep(50.,104.,r);
+        float phase=fract(sweep*80.+.46*(1.-depth)*(1.-depth)+.5)-.5;
+        float width=mix(.025,.17,depth);
+        float face=1.-smoothstep(width,width+.10,abs(phase));
+        float glint=1.-smoothstep(.015,.105,abs(phase+width*.58));
+        vec3 steel=mix(vec3(.30,.43,.52),vec3(.76,.83,.86),depth);
+        if(!twin){
+            float rpm=clamp(u_state.x,0.,1.);
+            float behind=rpm-sweep;
+            // A pocket of light at the pointer tapers over the preceding five blades.
+            float lit=step(.0001,u_state.x)*smoothstep(-.016,0.,behind)
+                     *(1.-smoothstep(.008,.067,behind));
+            vec3 warm=mix(vec3(1.,.75,.13),vec3(1.,.09,.12),smoothstep(.53,.81,rpm));
+            steel=mix(steel,warm,lit);
+            col+=warm*.10*lit*depth*depth*(1.-smoothstep(100.,104.,r));
+        }
+        float relief=depth*depth*(1.-smoothstep(102.5,104.,r))*(twin?.70:.96);
+        col=mix(col,steel,relief*face*(.53+.47*glint));
 
     }
     // The inner face shades radially into the tips of the spokes.
@@ -1998,11 +2019,18 @@ void main(){
     float a=mix(-1.98,1.98,clamp(u_state.x,0.,1.));
     vec2 dir=vec2(sin(a),-cos(a));
     if(!twin && u_state.x>=0.){
+        // Follow the needle along the inside of the bezel, starting at the zero tick.
+        float travelled=smoothstep(-1.984,-1.976,angle)*(1.-smoothstep(a-.004,a+.004,angle));
+        float rimDistance=abs(r-103.);
+        vec3 red=vec3(.98,.095,.12);
+        col+=red*.32*travelled*exp(-rimDistance*.83);
+        col=mix(col,red,travelled*(1.-smoothstep(.52,1.18,rimDistance)));
         float along=dot(d,dir);
         float needle=segment(d,dir*42.,dir*103.);
-        vec3 tip=mix(vec3(.80,.09,.16),vec3(1.,.73,.29),smoothstep(44.,94.,along));
-        col+=tip*.23*exp(-needle*.50);
-        col=mix(col,tip,1.-smoothstep(.8,2.0,needle));
+        vec3 tip=mix(vec3(1.,.12,.19),vec3(1.,.57,.19),smoothstep(44.,94.,along));
+        col+=tip*.46*exp(-needle*.46);
+        col=mix(col,tip,1.-smoothstep(1.1,2.1,needle));
+        col=mix(col,vec3(1.,.89,.69),.85*(1.-smoothstep(.18,.78,needle)));
     }
     vec2 px=v_uv*vec2(1920.,660.);
     {
@@ -2241,6 +2269,8 @@ void main() {
 const REDSPORT = `precision highp float;
 varying vec2 v_uv;
 uniform vec4 u_state;
+${RED_SPORT_LACQUER}
+uniform float u_twill;
 const float PI=3.14159265;
 float ink(float d){return 1.-smoothstep(-.55,.55,d);}
 float band(float r,float inner,float outer){return ink(max(inner-r,r-outer));}
@@ -2252,11 +2282,19 @@ vec3 side(vec3 c,vec2 q,float amount){
  c=mix(c,vec3(.032,.042,.062),.48*ink(r-143.));
  vec3 rim=mix(vec3(.14,.17,.21),vec3(.45,.48,.52),.5-.5*q.y/145.);
  c=mix(c,rim,visible*(band(r,142.,143.8)+band(r,135.,136.4)));
- float fill=step(span*(1.-clamp(amount,0.,1.)),a)*step(.001,amount);
- c=mix(c,vec3(.86,.018,.105),visible*band(r,137.,141.)*fill);
- float tip=PI*1.20+span*(1.-clamp(amount,0.,1.));
- vec2 n=vec2(sin(tip),-cos(tip));
- return mix(c,vec3(1.,.55,.56),ink(segment(q,n*132.,n*147.)-1.8)*step(0.,amount));
+ // A short bright lobe travels with the reading, leaving a dimmer arc behind it.
+ float load=clamp(amount,0.,1.);
+ float travel=a-span*(1.-load);
+ float active=visible*step(.0001,amount);
+ float trail=smoothstep(-.012,.012,travel)*active;
+ vec3 dye=lacquer();
+ c=mix(c,dye*(.36+.32*load),trail*band(r,136.,142.));
+ float lobe=exp(-pow(abs(travel)/(travel < 0. ? .085 : .34),2.))*active;
+ float radius=139.+4.*lobe;
+ float radial=abs(r-radius);
+ c+=dye*(.58+.38*load)*lobe*exp(-radial/8.);
+ c=mix(c,dye,lobe*ink(radial-(2.5+3.*lobe)));
+ return mix(c,mix(dye,vec3(1.),.55),lobe*exp(-abs(r-radius-1.5)/1.65));
 }
 void main(){
  vec2 p=v_uv*vec2(1920.,660.),q=(p-vec2(960.,378.))/1.072;
@@ -2271,28 +2309,49 @@ void main(){
  float sweep=exp(-pow(abs(ax-252.)/242.,2.));
  c+=vec3(.16,.16,.17)*sweep*panel*(.55+.45*exp(-abs(p.y-top)/140.));
  c+=vec3(.20,.21,.23)*exp(-abs(r-254.)/16.)*panel;
- c=side(c,p-vec2(407.,322.),u_state.y);
- c=side(c,p-vec2(1513.,322.),u_state.z);
+ // Graphite twill is confined to the panel and fades before the instruments.
+ if(u_twill>.5){
+  vec2 tile=p/8.;
+  float over=step(2.,mod(floor(tile.x)+floor(tile.y),4.));
+  float thread=mix(fract(tile.y),fract(tile.x),over);
+  float sheen=sin(PI*thread)*(.70+.30*cos(thread*PI*4.));
+  float clearDial=smoothstep(140.,200.,length(vec2(abs(p.x-960.)-553.,p.y-362.)));
+  c+=vec3(.085,.09,.10)*(sheen-.52)*panel*sideFade*clearDial;
+ }
+ c=side(c,p-vec2(407.,362.),u_state.y);
+ c=side(c,p-vec2(1513.,362.),u_state.z);
  float metal=.32+.44*max(0.,-q.y/max(r,1.))+.14*cos(atan(q.y,q.x)*3.);
  c=mix(c,vec3(.025,.028,.035),ink(r-251.));
  c=mix(c,vec3(.85,.90,.96)*metal,band(r,239.,249.));
  c+=vec3(.63,.65,.69)*exp(-abs(r-248.)*1.9)*(.60-.38*q.y/max(r,1.));
  c=mix(c,vec3(.055,.044,.054),band(r,228.,239.));
+ // Twin raised warning bars flank the bezel, leaving its silver lip visible.
+ if(u_state.w>0.){
+  float angle=acos(clamp(-q.y/max(r,1.),-1.,1.));
+  float taper=smoothstep(.66,.79,angle)*(1.-smoothstep(2.34,2.52,angle));
+  float width=15.*taper;
+  float depth=r-251.;
+  float face=band(depth,1.,1.+width)*taper;
+  float light=.62+.38*u_state.w;
+  c+=vec3(.32,.008,.02)*taper*exp(-abs(depth-6.)/10.)*light;
+  vec3 warning=vec3(.52,.012,.036)+vec3(.44,.065,.075)*exp(-abs(depth-.72*width)/3.8);
+  c=mix(c,warning*light,face);
+ }
  float a=mod(atan(-q.x,q.y)+2.*PI,2.*PI),span=1.5*PI;
  float sector=step(a,span),high=step(span*.875,a);
  float outer=smoothstep(145.,228.,r);
  float inner=exp(-abs(r-113.)/21.);
  float pool=.13+.65*outer+.40*inner+.19*cos(a*2.-1.4);
- vec3 enamel=mix(vec3(.018,.009,.022),vec3(.89,.008,.078),clamp(pool,0.,1.));
- enamel=mix(enamel,vec3(.97,.008,.051)*(.72+.28*outer),.85*high);
+ vec3 enamel=mix(vec3(.018,.009,.022),lacquer()*.90,clamp(pool,0.,1.));
+ enamel=mix(enamel,lacquer()*.98*(.72+.28*outer),.85*high);
  c=mix(c,mix(vec3(.030,.031,.042),enamel,sector),band(r,107.,228.));
- c=mix(c,vec3(.99,.019,.088),band(r,220.,228.)*sector);
+ c=mix(c,lacquer(),band(r,220.,228.)*sector);
  float stepA=span/8.;
  float toTick=abs(mod(a+stepA*.5,stepA)-stepA*.5)*r;
  float ticks=ink(abs(toTick-2.5)-1.35)*band(r,209.,231.)*sector;
  float pin=length(vec2((mod(a+stepA*.125,stepA*.25)-stepA*.125)*r,r-235.));
  c=mix(c,vec3(.90,.90,.93),max(ticks,ink(pin-1.6)*sector));
- c=mix(c,vec3(.79,.028,.084),band(r,112.,116.));
+ c=mix(c,lacquer()*.83,band(r,112.,116.));
  c=mix(c,vec3(.24,.26,.29)*(.92-.42*q.y/max(1.,r)),band(r,103.,111.));
  c=mix(c,vec3(.76,.78,.80),band(r,108.8,110.)*.85);
  // Alternating rows of small diagonal carbon tows on a convex center cap.

@@ -25,7 +25,12 @@
       "h": 112,
       "text": "{{speed}}",
       "font": "circuit_speed",
-      "color": "fg",
+      "color": [
+        255,
+        255,
+        255,
+        255
+      ],
       "align": "center",
       "conn": 1
     },
@@ -39,7 +44,12 @@
       "h": 30,
       "text": "{{u:speedLc}}",
       "font": "s_unit",
-      "color": "fg",
+      "color": [
+        255,
+        255,
+        255,
+        255
+      ],
       "align": "center",
       "conn": 1
     },
@@ -48,7 +58,12 @@
       "type": "text",
       "text": "0",
       "font": "track_rpm_0",
-      "color": "fg",
+      "color": [
+        255,
+        255,
+        255,
+        255
+      ],
       "align": "center",
       "x": 675,
       "y": 342,
@@ -62,7 +77,12 @@
       "type": "text",
       "text": "0",
       "font": "track_rpm_0",
-      "color": "fg",
+      "color": [
+        255,
+        255,
+        255,
+        255
+      ],
       "align": "center",
       "x": 1181,
       "y": 342,
@@ -76,7 +96,12 @@
       "type": "text",
       "text": "1",
       "font": "track_rpm_1",
-      "color": "fg",
+      "color": [
+        255,
+        255,
+        255,
+        255
+      ],
       "align": "center",
       "x": 608,
       "y": 343,
@@ -90,7 +115,12 @@
       "type": "text",
       "text": "1",
       "font": "track_rpm_1",
-      "color": "fg",
+      "color": [
+        255,
+        255,
+        255,
+        255
+      ],
       "align": "center",
       "x": 1248,
       "y": 343,
@@ -104,7 +134,12 @@
       "type": "text",
       "text": "2",
       "font": "track_rpm_2",
-      "color": "fg",
+      "color": [
+        255,
+        255,
+        255,
+        255
+      ],
       "align": "center",
       "x": 542,
       "y": 346,
@@ -118,7 +153,12 @@
       "type": "text",
       "text": "2",
       "font": "track_rpm_2",
-      "color": "fg",
+      "color": [
+        255,
+        255,
+        255,
+        255
+      ],
       "align": "center",
       "x": 1314,
       "y": 346,
@@ -132,7 +172,12 @@
       "type": "text",
       "text": "4",
       "font": "track_rpm_4",
-      "color": "fg",
+      "color": [
+        255,
+        255,
+        255,
+        255
+      ],
       "align": "center",
       "x": 410,
       "y": 349,
@@ -146,7 +191,12 @@
       "type": "text",
       "text": "4",
       "font": "track_rpm_4",
-      "color": "fg",
+      "color": [
+        255,
+        255,
+        255,
+        255
+      ],
       "align": "center",
       "x": 1446,
       "y": 349,
@@ -160,7 +210,12 @@
       "type": "text",
       "text": "6",
       "font": "track_rpm_6",
-      "color": "fg",
+      "color": [
+        255,
+        255,
+        255,
+        255
+      ],
       "align": "center",
       "x": 277,
       "y": 353,
@@ -174,7 +229,12 @@
       "type": "text",
       "text": "6",
       "font": "track_rpm_6",
-      "color": "fg",
+      "color": [
+        255,
+        255,
+        255,
+        255
+      ],
       "align": "center",
       "x": 1579,
       "y": 353,
@@ -257,7 +317,7 @@
       "h": 12,
       "z": 4,
       "conn": 1,
-      "signal": "fuelSystemPct",
+      "signal": "fuel",
       "min": 0,
       "max": 1,
       "segments": 4,
@@ -392,7 +452,12 @@
       "type": "text",
       "text": "x1000/min",
       "font": "m_tiny",
-      "color": "dim",
+      "color": [
+        255,
+        255,
+        255,
+        255
+      ],
       "align": "center",
       "x": 170,
       "y": 409,
@@ -407,7 +472,12 @@
       "type": "text",
       "text": "x1000/min",
       "font": "m_tiny",
-      "color": "dim",
+      "color": [
+        255,
+        255,
+        255,
+        255
+      ],
       "align": "center",
       "x": 1580,
       "y": 409,
