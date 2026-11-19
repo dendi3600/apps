@@ -65,13 +65,14 @@
     <div class="bar">
       <label class="chk"><input type="checkbox" id="outlines" checked> layer outlines</label>
       <label class="chk"><input type="checkbox" id="road"> <span id="backdropName">backdrop</span></label>
+      <label>DKOMBI4 preview <select id="dkState"><option value="">Off</option><option value="sign">25 mph + SET</option><option value="limit">Speed limit control activated</option><option value="assist">Assisted Driving message</option></select></label>
       <label>Assistance preview <select id="assistExample"><option value="">Off</option><option value="Lane assist">Lane assist · example</option><option value="Hands on wheel">Hands-on reminder · example</option></select></label>
       <label id="assistPlacement" hidden>Position for this theme <select id="assistPosition">
         <option value="top">Upper center</option><option value="left">Upper left</option>
         <option value="right">Upper right</option><option value="center">Center</option>
         <option value="bottom">Lower center</option>
       </select></label>
-      <label class="chk" title="What the driver sees: the hood hides the top corners of the cluster and BMW draws its gear box and belt light over us; on the HUD only a window is visible through the windshield. Measured from car photos, Nov 5 2026 (shared/visible.js)."><input type="checkbox" id="carview" checked> car view</label>
+      <label class="chk" title="M850i panel edge and driver-camera housing estimated from the DKOMBI4 grid photos. The HUD uses its windshield viewing window."><input type="checkbox" id="carview" checked> car view</label>
       <span id="fps"></span>
     </div>
     <canvas id="hud" width="800" height="480"></canvas>
@@ -227,7 +228,10 @@
   }
   function updateAssistPosition() {
     assistPlacement.hidden = !assistExample.value || !assistTheme || view !== 'panel';
-    const saved = localStorage.getItem(assistKey());
+    const eq = assistTheme === 'AMG EQ';
+    assistPosition.querySelector('[value="top"]').disabled = eq;
+    let saved = localStorage.getItem(assistKey());
+    if (eq && (!saved || saved === 'top')) saved = 'right';
     assistPosition.value = Object.prototype.hasOwnProperty.call(assistAnchors, saved) ? saved : ({ M1: 'bottom', M8: 'bottom', M2: 'top', 'AMG Track': 'right' }[assistTheme] || 'top');
     dirty = true;
   }
@@ -236,12 +240,19 @@
     if (assistTheme && assistExample.value) localStorage.setItem(assistKey(), assistPosition.value);
     dirty = true;
   });
-  function hoodY(x) {
-    const H = geo.HOOD;
-    if (x <= H[0][0]) return H[0][1];
-    for (let i = 1; i < H.length; i++) { const a = H[i - 1], b = H[i]; if (x <= b[0]) return a[1] + (b[1] - a[1]) * (x - a[0]) / (b[0] - a[0]); }
-    return H[H.length - 1][1];
-  }
+  // M850i DKOMBI4, traced against the photographed 100-pixel grid.
+  const m850Panel = new Path2D(
+    'M0 215 Q64 130 163 80 Q282 21 460 10 Q600 0 740 0 L1170 0 ' +
+    'Q1370 0 1510 28 Q1640 49 1740 92 Q1840 131 1920 198 ' +
+    'L1920 686 Q1920 720 1888 720 L32 720 Q0 720 0 687 Z'
+  );
+  const m850Camera = new Path2D(
+    'M737 0 L1170 0 Q1171 22 1162 45 L1145 108 Q1136 142 1110 146 ' +
+    'Q960 153 802 145 Q778 143 768 119 L740 44 Q728 19 737 0 Z'
+  );
+  const panelMask = new Path2D();
+  panelMask.rect(0, 0, 1920, 720);
+  panelMask.addPath(m850Panel);
   function labelBox(text, x, y, color) {
     ctx.font = '12px ui-monospace, Menlo, monospace';
     const w = ctx.measureText(text).width + 8;
@@ -252,28 +263,18 @@
   function drawCarView() {
     if (!geo) return;
     if (view === 'panel') {
-      // the hood: everything above the curve is hidden (a dark mask), the curve itself in orange
-      ctx.beginPath(); ctx.moveTo(0, 0);
-      geo.HOOD.forEach(([x, y]) => ctx.lineTo(x, y));
-      ctx.lineTo(VW, hoodY(VW)); ctx.lineTo(VW, 0); ctx.closePath();
-      ctx.fillStyle = 'rgba(8,8,10,.78)'; ctx.fill();
-      ctx.beginPath(); geo.HOOD.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
-      ctx.lineTo(VW, hoodY(VW));
-      ctx.strokeStyle = '#ff8c1a'; ctx.lineWidth = 1.5; ctx.stroke();
-      labelBox('hood (hidden above the line)', 150, 60, '#ff8c1a');   // inside the masked corner (hoodY(150) is 111)
+      ctx.fillStyle = '#08080a';
+      ctx.fill(panelMask, 'evenodd');
+      ctx.fill(m850Camera);
+      ctx.strokeStyle = '#ff8c1a';
+      ctx.lineWidth = 1.5;
+      ctx.stroke(m850Panel);
+      ctx.stroke(m850Camera);
       // the seat-belt warning light
       const [sx0, sy0, sx1, sy1] = geo.BELT;
       ctx.fillStyle = 'rgba(232,55,44,.55)'; ctx.fillRect(sx0, sy0, sx1 - sx0, sy1 - sy0);
       ctx.strokeStyle = '#ff8c1a'; ctx.strokeRect(sx0 + .5, sy0 + .5, sx1 - sx0 - 1, sy1 - sy0 - 1);
       labelBox('belt light', sx0 - 10, sy0 - 18, '#ff8c1a');
-      // the driver camera on newer cars (where the model badge sits on cars without it): solid while the app's
-      // "Leave room for the driver camera" is on, so the bench shows what those drivers see; else only outlined
-      if (geo.CAMERA) {
-        const [cx0, cy0, cx1, cy1] = geo.CAMERA;
-        if (settingVals.cameraNotch === true) { ctx.fillStyle = '#000'; ctx.fillRect(cx0, cy0, cx1 - cx0, cy1 - cy0); }
-        ctx.setLineDash([5, 4]); ctx.strokeStyle = '#ff8c1a'; ctx.strokeRect(cx0 + .5, cy0 + .5, cx1 - cx0 - 1, cy1 - cy0 - 1); ctx.setLineDash([]);
-        labelBox('driver camera (newer cars)', cx0 + 4, cy1 + 4, '#ff8c1a');
-      }
     } else if (view === 'hud') {
       // only the window is visible through the windshield; mask the rest
       const w = geo.HUD_WINDOW;
@@ -308,10 +309,18 @@
   // a rough stand-in for BMW's own cluster: two angular gauges and the map window (416,120 1088x480, from the car photo of Nov 4)
   function drawStockCluster() {
     ctx.fillStyle = '#05070a'; ctx.fillRect(0, 0, VW, VH);
+    ctx.save();
+    // M850i map footprint from the owner's grid. Keep the simulated map out of the sign area.
+    if (dkState.value || new URLSearchParams(location.search).has('dk')) {
+      ctx.beginPath();
+      ctx.roundRect(635, 120, 660, 455, 40);
+      ctx.clip();
+    }
     ctx.fillStyle = '#1d3b5c'; ctx.fillRect(416, 120, 1088, 480);
     ctx.strokeStyle = '#2c5a8a'; ctx.lineWidth = 3;
     for (let i = 0; i < 9; i++) { ctx.beginPath(); ctx.moveTo(416 + i * 136, 120); ctx.lineTo(416 + i * 136, 600); ctx.stroke(); }
     ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.font = '28px sans-serif'; ctx.fillText('map window', 860, 370);
+    ctx.restore();
     [[210, 1], [1710, -1]].forEach(([cx, side]) => {
       ctx.strokeStyle = '#c9ced6'; ctx.lineWidth = 6; ctx.beginPath();
       ctx.moveTo(cx - 120 * side, 60); ctx.lineTo(cx + 60 * side, 60); ctx.lineTo(cx + 150 * side, 360); ctx.lineTo(cx + 60 * side, 640); ctx.lineTo(cx - 120 * side, 640); ctx.stroke();
@@ -323,7 +332,42 @@
     // BMW's own bottom strip (y ~662..720; car photo Nov 13 2026 with "Leave BMW's bottom strip clear" on): range, clock,
     // the street, the drive mode, the gear letter, outside temperature. It sits UNDER our layers: a theme drawn over it hides it.
     ctx.fillStyle = 'rgba(235,238,242,.8)'; ctx.font = '30px sans-serif';
-    [['138 mi', 180], ['4:24 pm', 355], ['Main St', 860], ['COMFORT', 1180], ['P', 1372], ['+54 \u00b0F', 1475]].forEach(([t, x]) => ctx.fillText(t, x, 700));
+    [['138 mi', 180], ['4:24 pm', 355], ['COMFORT', 1180], ['P', 1372], ['+54 \u00b0F', 1475]].forEach(([t, x]) => ctx.fillText(t, x, 700));
+  }
+
+  const dkState = document.getElementById('dkState');
+  dkState.value = new URLSearchParams(location.search).get('dk') || '';
+  function drawDkPreview() {
+    // Stock graphics are below the app. Positions estimated from the M850i grid photos.
+    ctx.save();
+    ctx.textAlign = 'center';
+    if (dkState.value) {
+      ctx.fillStyle = '#f5f3ea';
+      ctx.fillRect(510, 580, 60, 76);
+      ctx.fillStyle = '#1a1a1a';
+      ctx.font = '14px sans-serif';
+      ctx.fillText('SPEED', 540, 598);
+      ctx.fillText('LIMIT', 540, 613);
+      ctx.font = '32px sans-serif';
+      ctx.fillText('25', 540, 646);
+      ctx.fillStyle = '#a4e880';
+      ctx.font = 'bold 22px sans-serif';
+      ctx.fillText('SET', 469, 637);
+    }
+    const message = dkState.value === 'limit' || dkState.value === 'assist';
+    if (message) {
+      ctx.fillStyle = '#111316';
+      ctx.fillRect(700, 626, 520, 94);
+      ctx.fillStyle = '#f0eee6';
+      ctx.font = '28px sans-serif';
+      ctx.fillText(dkState.value === 'limit' ? 'Speed limit control' : 'Assisted Driving', 960, 662);
+      if (dkState.value === 'limit') ctx.fillText('activated.', 960, 696);
+    } else if (document.getElementById('road').checked) {
+      ctx.fillStyle = 'rgba(235,238,242,.8)';
+      ctx.font = '30px sans-serif';
+      ctx.fillText('Main St', 960, 700);
+    }
+    ctx.restore();
   }
 
   // ?clean=1: no outlines, for screenshots
@@ -341,6 +385,7 @@
       dirty = false;
       ctx.clearRect(0, 0, VW, VH);
       if (document.getElementById('road').checked) (view === 'panel' ? drawStockCluster : drawRoad)();
+      if (view === 'panel') drawDkPreview();
       // a layer over the layer cap (state waiting) is never drawn, as on the car
       const hud = scene.filter((l) => l.target === view && l.visible && l.state !== 'waiting' && l.kind !== 'asset')
         .sort((a, b) => (CLASS_ORDER[a.class] - CLASS_ORDER[b.class]) || (a.z - b.z));
@@ -387,7 +432,7 @@
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-  ['outlines', 'road', 'carview', 'assistExample'].forEach((id) => document.getElementById(id).addEventListener('change', () => { dirty = true; }));
+  ['outlines', 'road', 'carview', 'assistExample', 'dkState'].forEach((id) => document.getElementById(id).addEventListener('change', () => { dirty = true; }));
   const capEl = document.getElementById('cap');
   capEl.addEventListener('change', () => fetch('/cap', { method: 'POST', body: JSON.stringify({ cap: Number(capEl.value) || 0 }) }));
 
