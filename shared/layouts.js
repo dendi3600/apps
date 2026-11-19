@@ -33,6 +33,7 @@ const TYPES = {
     vdash: ['tach', 'segs'],
     redsport: [],
     eqsport: [],
+    amgtrackBase: [],
     amgtrack: [],
     circuit: [],
     redlineRamp: [],

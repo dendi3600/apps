@@ -957,11 +957,11 @@ void main() {
     vec2 bannerMargin = max(vec2(abs(p.x - 982.5) - 412.5, 555.0 - p.y), 0.0);
     float vehicleFade = smoothstep(0.0, 1.0, length(vehicleMargin / vec2(145.0, 74.0)));
     float bannerFade = smoothstep(0.0, 1.0, length(bannerMargin / vec2(95.0, 70.0)));
-    float signArea = min(min(p.x - 499.0, 605.0 - p.x), p.y - 565.0);
+    float signArea = min(min(p.x - 489.0, 615.0 - p.x), p.y - 555.0);
     // Keep the gauge feet opaque up to the native sign / banner openings.
     float foot = step(u_geo.z - 42.0, p.y);
     float bannerEdge = min(min(p.x - 570.0, 1395.0 - p.x), p.y - 555.0);
-    c.a *= min(vehicleFade, mix(bannerFade, cov(bannerEdge), foot)) * cov(signArea);
+    c.a *= min(vehicleFade, mix(bannerFade, cov(bannerEdge), foot));
 
     // Only these narrow illuminated edges cross the transparent native banner.
     float centerX=u_size.x*.5;
@@ -971,6 +971,7 @@ void main() {
     vec3 trim=p.x<centerX ? BLUE_LINE : RED_LINE;
     c=over(vec4(trim,span*.90*cov(abs(railY)-2.2)),c);
     c=over(vec4(trim,span*.38*exp(-abs(railY-6.)*.52)*step(3.,railY)),c);
+    c.a *= cov(signArea);
     gl_FragColor = c;
 }
 `;
@@ -2078,30 +2079,25 @@ void main(){
 }`;
 
 // Perspective projection shared by both banks. The RPM fraction advances in dial units.
-const AMGTRACK = `precision highp float;
+const AMGTRACK_BASE = `precision highp float;
 varying vec2 v_uv;
-uniform vec4 u_state;
-uniform vec2 u_sides;
 void main() {
     // Reconstruct a curved wall on each side of the vanishing point.
     vec2 p = v_uv * vec2(1000.,450.);
     float x = abs(p.x-500.);
     float y = p.y-245.;
     float wallX = x + .00165*y*y;
-    float depth = clamp((wallX-132.)/276.,0.,1.);
-    float axis = 3.+.091*(x-132.);
     float foot = 42.+.33*(x-132.);
     float wall = smoothstep(92.,145.,x)*(1.-smoothstep(425.,435.,wallX));
     // A shallow crowned sill sweeps down over the two instruments at its outer tips.
     float shoulder=clamp((x-175.)/325.,0.,1.);
     float deck=373.+32.*shoulder*shoulder;
-    float lipWidth=mix(1.1,4.6,smoothstep(180.,460.,x));
-    vec3 col = vec3(.034,.043,.078);
-    // Round the wall-to-sill junction and taper the floor to a single edge.
     float gap=max(deck-(245.+foot),0.);
     float seam=deck-gap*gap/(gap+9.);
     float above=1.-smoothstep(seam-2.,seam+1.,p.y);
     wall*=above;
+    float lipWidth=mix(1.1,4.6,smoothstep(180.,460.,x));
+    vec3 col = vec3(.034,.043,.078);
     float blue = above*exp(-abs(wallX-423.)*.047)*exp(-abs(y)*.005);
     col += vec3(.04,.53,.98)*blue;
     col += vec3(.18,.60,.96)*above*exp(-abs(wallX-431.)*.95);
@@ -2123,6 +2119,57 @@ void main() {
     col+=vec3(.095,.39,.68)*exp(-abs(p.y-deck+lipWidth*.67)*.94);
     col+=vec3(.031,.10,.18)*exp(-abs(p.y-deck-lipWidth*.68)*.85);
     col+=vec3(.18,.36,.41)*floorMask*exp(-x*x/20000.)*smoothstep(40.,115.,y);
+    float rimBand=smoothstep(422.,424.,wallX)*(1.-smoothstep(430.,432.,wallX))*above;
+    col+=vec3(.025,.105,.23)*rimBand+vec3(.11,.35,.64)*exp(-abs(wallX-424.)*.9)*above;
+    // Perspective grooves fan out over the last section of the floor above the lip.
+    float groove=abs(fract(x/max(y,20.)*42.+.5)-.5);
+    col+=vec3(.055,.17,.25)*floorMask*smoothstep(150.,350.,x)
+         *exp(-max(deck-p.y,0.)*.052)*(1.-smoothstep(.05,.23,groove));
+    col += vec3(.12,.36,.61)*exp(-abs(y)*1.1)*exp(-x*.009);
+    // A broad red dome sits above the badge horizon with a short reflection below.
+    vec2 badge=(p-vec2(500.,438.))/vec2(181.,19.);
+    float pool=exp(-1.8*badge.x*badge.x-1.55*badge.y*badge.y);
+    col+=vec3(.82,.015,.045)*pool*(1.-smoothstep(0.,.55,badge.y));
+    col+=vec3(1.,.12,.065)*exp(-3.*badge.x*badge.x-abs(badge.y)*7.);
+    col+=vec3(.96,.38,.20)*exp(-8.*badge.x*badge.x-abs(badge.y)*12.);
+    // Hairlines sit between each caption and the top lip of its segmented bar.
+    float footerDistance=min(abs(p.x-178.65)-68.,abs(p.x-781.25)-71.);
+    col+=vec3(.41,.67,.91)*exp(-abs(p.y-437.)*1.45)*(1.-smoothstep(-2.,1.,footerDistance));
+    // The fuel rail turns down beside zero at the same rake as the segments.
+    vec2 leg=p-vec2(p.x<500.?110.65:710.25,437.);
+    vec2 end=vec2(-6.,10.);
+    float legDist=length(leg-end*clamp(dot(leg,end)/dot(end,end),0.,1.));
+    col+=vec3(.48,.72,.95)*exp(-legDist*1.22);
+    // Tapered silver rules flank the speed unit, with a clear central gap.
+    float ruleT=clamp((x-25.)/141.,0.,1.);
+    float ruleY=163.-2.4*ruleT;
+    float rule=(1.-smoothstep(.38,.98,abs(p.y-ruleY)))*smoothstep(23.,31.,x)*(1.-smoothstep(155.,170.,x));
+    col=mix(col,mix(vec3(.95,.97,1.),vec3(.38,.46,.59),ruleT),rule);
+    gl_FragColor=vec4(col,1.);
+}`;
+
+const AMGTRACK = `precision highp float;
+varying vec2 v_uv;
+uniform vec4 u_state;
+uniform vec2 u_sides;
+void main() {
+    // Reconstruct a curved wall on each side of the vanishing point.
+    vec2 p = v_uv * vec2(1000.,450.);
+    float x = abs(p.x-500.);
+    float y = p.y-245.;
+    float wallX = x + .00165*y*y;
+    float depth = clamp((wallX-132.)/276.,0.,1.);
+    float axis = 3.+.091*(x-132.);
+    float foot = 42.+.33*(x-132.);
+    float wall = smoothstep(92.,145.,x)*(1.-smoothstep(425.,435.,wallX));
+    // A shallow crowned sill sweeps down over the two instruments at its outer tips.
+    float shoulder=clamp((x-175.)/325.,0.,1.);
+    float deck=373.+32.*shoulder*shoulder;
+    float gap=max(deck-(245.+foot),0.);
+    float seam=deck-gap*gap/(gap+9.);
+    float above=1.-smoothstep(seam-2.,seam+1.,p.y);
+    wall*=above;
+    vec3 col=vec3(0.);
     // The OEM auxiliary scales bend in toward the hood at their upper ends.
     float up=(321.-p.y)/177.;
     float gaugeOffset=wallX-457.;
@@ -2132,8 +2179,8 @@ void main() {
     float reading=p.x<500.?u_sides.x:u_sides.y;
     float level=clamp(reading,0.,1.);
     float travel=(up-level)*177.;
-    float active=step(.0001,reading);
-    float lit=(1.-smoothstep(-.6,.6,travel))*active;
+    float hasReading=step(.0001,reading);
+    float lit=(1.-smoothstep(-.6,.6,travel))*hasReading;
     float bevel=exp(-abs(gaugeOffset-6.)*.8);
     float ticks=exp(-abs(fract(up*12.+.5)-.5)*27.)*smoothstep(-2.,4.,gaugeOffset);
     vec3 coolGlass=vec3(.018,.063,.15)+vec3(.035,.15,.32)*(bevel+ticks);
@@ -2144,17 +2191,11 @@ void main() {
     vec3 hotGlass=mix(coolGlass,limiterRed,.17+.75*trailingLight)
                  +limiterRed*.21*(bevel+ticks)*trailingLight;
     vec3 sideInk=mix(coolGlass,hotGlass,lit);
-    sideInk+=active*vec3(.98,.12,.085)*exp(-abs(travel)*.095)*(.63+.74*sparks);
-    sideInk+=active*vec3(1.,.57,.35)*exp(-abs(travel)*.75);
+    sideInk+=hasReading*vec3(.98,.12,.085)*exp(-abs(travel)*.095)*(.63+.74*sparks);
+    sideInk+=hasReading*vec3(1.,.57,.35)*exp(-abs(travel)*.75);
     sideInk+=vec3(.12,.37,.69)*exp(-abs(frame+1.)*1.2);
-    col+=vec3(.53,.11,.025)*active*exp(-abs(travel)*.09-max(0.,frame)*.20);
-    float rimBand=smoothstep(422.,424.,wallX)*(1.-smoothstep(430.,432.,wallX))*above;
-    col+=vec3(.025,.105,.23)*rimBand+vec3(.11,.35,.64)*exp(-abs(wallX-424.)*.9)*above;
+    col+=vec3(.53,.11,.025)*hasReading*exp(-abs(travel)*.09-max(0.,frame)*.20);
     col=mix(col,sideInk,glass);
-    // Perspective grooves fan out over the last section of the floor above the lip.
-    float groove=abs(fract(x/max(y,20.)*42.+.5)-.5);
-    col+=vec3(.055,.17,.25)*floorMask*smoothstep(150.,350.,x)
-         *exp(-max(deck-p.y,0.)*.052)*(1.-smoothstep(.05,.23,groove));
     float rpm = clamp(u_state.x,0.,1.);
     float cursor = 132.+276.*rpm;
     float delta = wallX-cursor;
@@ -2192,29 +2233,15 @@ void main() {
     col+=vec3(1.,.29,.035)*fire*(filament+.95*trail*exp(-edges*.21));
     float tick = abs(fract((x-132.)/34.5+.5)-.5)*34.5;
     col += endFade*ink*exp(-tick*1.8)*(1.-smoothstep(2.+depth*6.,4.+depth*6.,abs(y-axis)))*step(131.,x)*step(x,409.);
-    col += vec3(.12,.36,.61)*exp(-abs(y)*1.1)*exp(-x*.009);
-    // A broad red dome sits above the badge horizon with a short reflection below.
-    vec2 badge=(p-vec2(500.,438.))/vec2(181.,19.);
-    float pool=exp(-1.8*badge.x*badge.x-1.55*badge.y*badge.y);
-    col+=limiterRed*pool*(1.-smoothstep(0.,.55,badge.y));
-    col+=vec3(1.,.12,.065)*exp(-3.*badge.x*badge.x-abs(badge.y)*7.);
-    col+=vec3(.96,.38,.20)*exp(-8.*badge.x*badge.x-abs(badge.y)*12.);
-    // Hairlines sit between each caption and the top lip of its segmented bar.
-    float footerDistance=min(abs(p.x-178.65)-68.,abs(p.x-781.25)-71.);
-    col+=vec3(.41,.67,.91)*exp(-abs(p.y-437.)*1.45)*(1.-smoothstep(-2.,1.,footerDistance));
-    // The fuel rail turns down beside zero at the same rake as the segments.
-    vec2 leg=p-vec2(p.x<500.?110.65:710.25,437.);
-    vec2 end=vec2(-6.,10.);
-    float legDist=length(leg-end*clamp(dot(leg,end)/dot(end,end),0.,1.));
-    col+=vec3(.48,.72,.95)*exp(-legDist*1.22);
-    // Tapered silver rules flank the speed unit, with a clear central gap.
-    float ruleT=clamp((x-25.)/141.,0.,1.);
-    float ruleY=163.-2.4*ruleT;
-    float rule=(1.-smoothstep(.38,.98,abs(p.y-ruleY)))*smoothstep(23.,31.,x)*(1.-smoothstep(155.,170.,x));
-    col=mix(col,mix(vec3(.95,.97,1.),vec3(.38,.46,.59),ruleT),rule);
-    col = mix(col,vec3(.72,.028,.037)+col*.28,u_state.y*.74);
-    gl_FragColor = vec4(col,1.);
-}`;
+
+    // Composite the illuminated scales over the independent tunnel layer.
+    float alpha=clamp(max(glass,max(col.r,max(col.g,col.b))),0.,1.);
+    float flash=u_state.y*.74;
+    col=mix(col,vec3(.72,.028,.037)+col*.28,flash);
+    alpha=mix(alpha,1.,flash);
+    gl_FragColor=vec4(col/max(.001,alpha),alpha);
+}
+`;
 
 const EQSPORT = `precision highp float;
 varying vec2 v_uv;
@@ -2337,7 +2364,8 @@ void main(){
     float inside=1.-smoothstep(.995,1.01,ring);
     float grooves=glow(fract(ring*3.+.5)-.5,.054)*inside;
     float axis=glow(floorPos.x,1.8)*inside;
-    col*=1.-.46*max(grooves,axis);
+    vec3 floorLight=mix(u_cool,vec3(.38,.53,.86),.46);
+    col+=floorLight*(.030*inside+.30*grooves+.12*axis);
     float originLight=glow(floorPos.x,13.)*glow(floorPos.y,2.)+glow(floorPos.x,2.)*glow(floorPos.y,10.);
     col+=u_hot*originLight*(.18+.5*abs(longitudinal));
     vec2 shadow=ground/(vec2(83.,12.)*depth);
@@ -2507,7 +2535,7 @@ vec3 side(vec3 c,vec2 q,float amount){
  return mix(c,mix(dye,vec3(1.),.55),lobe*exp(-abs(r-radius-1.5)/1.65));
 }
 void main(){
- vec2 p=v_uv*vec2(1920.,660.),q=(p-vec2(960.,378.))/1.072;
+ vec2 p=v_uv*vec2(1920.,660.),q=(p-vec2(960.,390.))/1.012;
  float r=length(q), ax=abs(q.x);
  vec3 c=vec3(.009,.014,.025);
  float shoulder=exp(-pow(max(ax-195.,0.)/86.,2.));
@@ -2608,4 +2636,4 @@ void main(){
 }
 `;
 
-module.exports = { eqsport: EQSPORT, redsport: REDSPORT, amgtrack: AMGTRACK, circuit: CIRCUIT, mtrack: MTRACK, shiftbar: SHIFTBAR, arc: ARC, revbar: REVBAR, lights: LIGHTS, fill: FILL, box: BOX, grid: GRID, segbar: SEGBAR, mdash: MDASH, mtach: MTACH, sdash: SDASH, boxes: BOXES, atext: ATEXT, meter: METER, gmeter: GMETER, revarc: REVARC, tiles: TILES, ribbon: RIBBON, deco: DECO, mview: MVIEW, vdash: VDASH };
+module.exports = { eqsport: EQSPORT, redsport: REDSPORT, amgtrack: AMGTRACK, amgtrackBase: AMGTRACK_BASE, circuit: CIRCUIT, mtrack: MTRACK, shiftbar: SHIFTBAR, arc: ARC, revbar: REVBAR, lights: LIGHTS, fill: FILL, box: BOX, grid: GRID, segbar: SEGBAR, mdash: MDASH, mtach: MTACH, sdash: SDASH, boxes: BOXES, atext: ATEXT, meter: METER, gmeter: GMETER, revarc: REVARC, tiles: TILES, ribbon: RIBBON, deco: DECO, mview: MVIEW, vdash: VDASH };

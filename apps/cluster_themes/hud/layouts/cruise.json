@@ -6,10 +6,21 @@
   "_about": "Mirrored perspective RPM scales. The cruise key preserves saved theme selections.",
   "widgets": [
     {
+      "id": "tunnel",
+      "type": "amgtrackBase",
+      "class": "content",
+      "z": 0,
+      "x": 0,
+      "y": 0,
+      "w": 1920,
+      "h": 660,
+      "conn": 3
+    },
+    {
       "id": "bg",
       "type": "amgtrack",
       "class": "content",
-      "z": 0,
+      "z": 1,
       "x": 0,
       "y": 0,
       "w": 1920,
