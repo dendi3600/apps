@@ -1101,7 +1101,13 @@ class HudApp {
         if (this.screen && this.screen.yielded) return 'off';
         if (this.claimBy) return 'off';
         if (this.vstate.hold()) return 'off';           // the switch-off guard (_vehKeep keeps what is up at 8)
-        return this._chosenName();
+        const name = this._chosenName();
+        if (name === 'sport' && this.ctx.spec.id === 'cluster_themes') {
+            // Only the bench adds M1 to the picker. Check again at every render decision.
+            const picker = this.ctx.settings.item('hudLayout');
+            if (!picker || !(picker.options || []).some(option => option[0] === name)) return 'off';
+        }
+        return name;
     }
     /** The layout the driver picked for now, before anything that makes us step aside. */
     _chosenName() {
@@ -2590,6 +2596,9 @@ class HudApp {
     }
 
     _update(x, now, force) {
+        // Keep the last-sent values until this connection can accept another live update.
+        // A forced update seeds a new layer, including its reconnect state.
+        if (!force && x.c.blocked) return;
         const w = x.w;
         if (w.type === 'redlineRamp') {
             const renderer = require('./hud-draw');
