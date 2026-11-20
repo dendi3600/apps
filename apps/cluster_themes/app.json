@@ -2,7 +2,7 @@
   "id": "cluster_themes",
   "title": "Cluster Themes",
   "description": "Custom instrument cluster themes with live gauges and drive-mode selection.",
-  "version": "0.19.49",
+  "version": "0.19.50",
   "vendor": "custom",
   "loggingId": "OAC1",
   "iconGlyph": "CLU",
@@ -130,10 +130,6 @@
         [
           "vector",
           "AMG GT"
-        ],
-        [
-          "sport",
-          "M1"
         ],
         [
           "ribbon",
@@ -351,10 +347,6 @@
           "AMG GT"
         ],
         [
-          "sport",
-          "M1"
-        ],
-        [
           "ribbon",
           "M2"
         ],
@@ -399,10 +391,6 @@
           "AMG GT"
         ],
         [
-          "sport",
-          "M1"
-        ],
-        [
           "ribbon",
           "M2"
         ],
@@ -445,10 +433,6 @@
         [
           "vector",
           "AMG GT"
-        ],
-        [
-          "sport",
-          "M1"
         ],
         [
           "ribbon",

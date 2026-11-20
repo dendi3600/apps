@@ -25,7 +25,7 @@ mgu.run({
         ['hudLayout', 'inSport', 'inComfort', 'inEco'].forEach((key) => {
             const saved = ctx.settings.get(key);
             if (saved === 'gt3' || saved === 'minimal') ctx.settings.set(key, 'vector');
-            else if (['track', 'dyno', 'srinivas', 'retro80s'].indexOf(saved) >= 0) ctx.settings.set(key, key === 'hudLayout' ? 'sport' : 'off');
+            else if (['sport', 'track', 'dyno', 'srinivas', 'retro80s'].indexOf(saved) >= 0) ctx.settings.set(key, 'off');
         });
         hud.start();
         new Page(ctx, hud, {
