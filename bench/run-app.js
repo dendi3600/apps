@@ -37,6 +37,12 @@ try { fs.mkdirSync(dataDir); } catch (e) { /* there */ }
 const { headUnit } = require(path.join(__dirname, '..', 'kit', 'tools', 'hu-stub.js'));
 const hu = headUnit(stage, { live: true, dataDir, log, image: () => Promise.resolve() });
 const { spec, settings, ui } = hu;
+if (spec.id === 'cluster_themes') {
+    const picker = settings.item('hudLayout');
+    if (picker && !picker.options.some(option => option[0] === 'sport')) {
+        picker.options.push(['sport', 'M1 (bench preview)']);
+    }
+}
 // a stand-in for BMW's guidance service (the HUD's directions), driven by POST /nav (fake-nav.js)
 const fakeNav = require('./fake-nav').install(hu, log);
 
