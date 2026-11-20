@@ -974,15 +974,15 @@ void main() {
     float foot = step(u_geo.z - 42.0, p.y);
     float bannerEdge = min(min(p.x - 570.0, 1395.0 - p.x), p.y - 555.0);
 
-    // Mask the trim together with the artwork so it cannot cross a native warning.
+    c.a *= min(vehicleFade, mix(bannerFade, cov(bannerEdge), foot));
+    // Carry the narrow gauge rails to the center above the factory warning text.
     float centerX=u_size.x*.5;
     float railX=min(p.x,u_size.x-p.x);
     float span=cov(outerX(u_geo.z)-railX)*cov(railX-centerX+32.);
     float railY=p.y-u_geo.z;
     vec3 trim=p.x<centerX ? BLUE_LINE : RED_LINE;
     c=over(vec4(trim,span*.90*cov(abs(railY)-2.2)),c);
-    c=over(vec4(trim,span*.38*exp(-abs(railY-6.)*.52)*step(3.,railY)),c);
-    c.a *= min(vehicleFade, mix(bannerFade, cov(bannerEdge), foot));
+    c=over(vec4(trim,span*.38*exp(-abs(railY-6.)*.52)*step(3.,railY)*step(railY,12.)),c);
     c.a *= cov(symbolInterior(p));
     gl_FragColor = c;
 }

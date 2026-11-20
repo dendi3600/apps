@@ -2125,7 +2125,20 @@ class HudApp {
             c = this._clientAt(this._connOf(w));
             const base = { target: this.target, klass: w.class || 'content', z: w.z || 0, x: w.x, y: w.y, w: w.w, h: w.h };
             if (IMAGE_TYPES[w.type]) ref = c.image(Object.assign({ iw: w.w, ih: w.h }, w.type === 'nav' ? this._navImage(w) : w.type === 'redlineRamp' ? { iw: 400, ih: 130, sampling: 'bilinear' } : null, base));
-            else ref = c.effect(Object.assign({ fs: w.type === 'swatch' ? calibration.SWATCH : shaders[w.type] }, base));
+            else {
+                let fs = w.type === 'swatch' ? calibration.SWATCH : shaders[w.type];
+                // Clip each overlapping effect in its own UV coordinates, including smaller gauge layers.
+                if (this.ctx.spec.id === 'cluster_themes' && !CAL_LAYOUTS[this.activeName] &&
+                    w.x < 580 && w.x + w.w > 500 && w.y < 660 && w.y + w.h > 574) {
+                    const uv = (v, origin, size) => ((v - origin) / size).toFixed(8);
+                    const lo = 'vec2(' + uv(500, w.x, w.w) + ',' + uv(574, w.y, w.h) + ')';
+                    const hi = 'vec2(' + uv(580, w.x, w.w) + ',' + uv(660, w.y, w.h) + ')';
+                    fs = fs.replace(/void\s+main\s*\(\s*(?:void)?\s*\)\s*\{/, body => body +
+                        '\n    if (all(greaterThanEqual(v_uv,' + lo + ')) && all(lessThan(v_uv,' + hi +
+                        '))) { gl_FragColor = vec4(0.0); return; }');
+                }
+                ref = c.effect(Object.assign({ fs: fs }, base));
+            }
             if (!ref) { this.log.warn('widget "' + w.id + '": layer refused'); return; }
             this.placed.push({ c, ref, x: w.x, y: w.y, w: w.w, h: w.h });
         }

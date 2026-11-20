@@ -192,7 +192,7 @@
       "id": "range",
       "type": "text",
       "text": "{{range}} {{u:distLc}}",
-      "x": 450,
+      "x": 640,
       "y": 607,
       "font": "s_unit",
       "w": 160,
