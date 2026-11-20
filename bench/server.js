@@ -417,7 +417,6 @@ function startApp() {
     pipe(c.stdout, 'info');
     pipe(c.stderr, 'warn');
     c.on('message', (m) => {
-        if (c !== child) return;
         if (m && m.t === 'settings') lastSettings = m;
         if (m && m.t === 'status') { lastStatus = m; log('info', 'center screen status: ' + m.s); }
         if (m && (m.t === 'values' || m.t === 'settings' || m.t === 'status')) send(m);
@@ -434,9 +433,6 @@ function startApp() {
 }
 
 function restartApp(why) {
-    // A watcher and the restart button can fire before the old child exits.
-    // Its pending restart will build the latest files for both requests.
-    if (stopping) return;
     log('info', 'restarting app: ' + why);
     if (child) {
         const old = child;

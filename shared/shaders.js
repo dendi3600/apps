@@ -742,15 +742,6 @@ void main() {
     gl_FragColor = c;
 }
 `;
-// DKOMBI4 speed-limit sign and SET indicator, estimated from the calibration grid.
-const DK_SYMBOLS = `
-float symbolInterior(vec2 pixel) {
-    vec2 board = vec2(32.,40.) - abs(pixel-vec2(540.,618.));
-    vec2 setMark = vec2(27.,17.) - abs(pixel-vec2(469.,628.));
-    return max(min(board.x,board.y),min(setMark.x,setMark.y));
-}
-`;
-
 const SDASH = `// The Sport theme in one cluster-render "effect" layer (GLSL ES 1.00), after BMW's Live Cockpit Sport view:
 // a blue speed bracket left and a red rev bracket right (the left one mirrored). Each is a thin bright outer
 // line, a band that fills from the bottom (white marker at the value), a dark gap and a thin inner line round a
@@ -900,7 +891,6 @@ vec4 bar(vec2 p, vec4 s, float val, float zones, vec4 c) {
     return c;
 }
 
-${DK_SYMBOLS}
 void main() {
     vec2 p = v_uv * u_size;
     vec2 pm = vec2(u_size.x - p.x, p.y);
@@ -967,6 +957,7 @@ void main() {
     vec2 bannerMargin = max(vec2(abs(p.x - 982.5) - 412.5, 555.0 - p.y), 0.0);
     float vehicleFade = smoothstep(0.0, 1.0, length(vehicleMargin / vec2(145.0, 74.0)));
     float bannerFade = smoothstep(0.0, 1.0, length(bannerMargin / vec2(95.0, 70.0)));
+    float signArea = min(min(p.x - 489.0, 615.0 - p.x), p.y - 555.0);
     // Keep the gauge feet opaque up to the native sign / banner openings.
     float foot = step(u_geo.z - 42.0, p.y);
     float bannerEdge = min(min(p.x - 570.0, 1395.0 - p.x), p.y - 555.0);
@@ -980,7 +971,7 @@ void main() {
     vec3 trim=p.x<centerX ? BLUE_LINE : RED_LINE;
     c=over(vec4(trim,span*.90*cov(abs(railY)-2.2)),c);
     c=over(vec4(trim,span*.38*exp(-abs(railY-6.)*.52)*step(3.,railY)),c);
-    c.a *= cov(symbolInterior(p));
+    c.a *= cov(signArea);
     gl_FragColor = c;
 }
 `;
@@ -2272,7 +2263,6 @@ vec3 wingProfile(vec2 p,float outer,float height){
     float shoulder=smoothstep(.04,.64,q.x);
     return vec3(edge,shoulder,abs(q.y));
 }
-${DK_SYMBOLS}
 void main(){
     vec2 p=v_uv*vec2(1920.,660.)-vec2(960.,360.);
     float x=p.x/960.;
@@ -2406,15 +2396,12 @@ void main(){
     enamel+=mix(u_hot,vec3(.82),.68)*glow(dome.y+.69+.12*dome.x,.11)*exp(-3.5*dome.x*dome.x);
     enamel+=mix(u_hot,vec3(.7),.65)*.72*pow(max(0.,dot(normal,normalize(vec3(.16,-.66,.72)))),30.);
     col=mix(col,enamel,coverage);
-    vec2 badge=(p-vec2(0.,240.))/vec2(149.,32.);
+    vec2 badge=(p-vec2(0.,280.))/vec2(149.,32.);
     float lateral=1.26*exp(-2.*badge.x*badge.x);
     col+=vec3(1.,.019,.052)*lateral*exp(-2.*badge.y*badge.y)*(1.-smoothstep(0.,.50,badge.y));
     col+=vec3(1.,.13,.06)*lateral*exp(-abs(badge.y)*7.);
     col+=vec3(.98,.39,.23)*exp(-8.*badge.x*badge.x-abs(badge.y)*12.);
-    vec2 screen=v_uv*vec2(1920.,660.);
-    vec2 banner = vec2(262.,50.) - abs(screen-vec2(960.,674.));
-    float opening = max(symbolInterior(screen), min(banner.x,banner.y));
-    gl_FragColor=vec4(col,1.-smoothstep(-2.,0.,opening));
+    gl_FragColor=vec4(col,1.);
 }`;
 
 const MTRACK = `precision highp float;
