@@ -1103,8 +1103,9 @@ class HudApp {
         if (this.vstate.hold()) return 'off';           // the switch-off guard (_vehKeep keeps what is up at 8)
         const name = this._chosenName();
         if (name === 'sport' && this.ctx.spec.id === 'cluster_themes') {
-            // Only the bench adds M1 to the picker. Check again at every render decision.
-            const picker = this.ctx.settings.item('hudLayout');
+            // Validate the active selector, including late drive-mode values.
+            const modeKey = this.setting('byMode') && MODE_KEY[this.driveMode];
+            const picker = this.ctx.settings.item(modeKey || 'hudLayout');
             if (!picker || !(picker.options || []).some(option => option[0] === name)) return 'off';
         }
         return name;

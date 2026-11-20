@@ -247,7 +247,11 @@ class Page {
             }, 'look:colors');
         }
         // the gallery, two rows: a tap shows that theme (in the drive mode the car is in, when it changes with it)
-        const looks = this.looks(), cols = Math.max(5, Math.ceil(looks.length / 2)), gap = 12, gy = py + ph + 16;
+        const looks = this.looks();
+        if (!this.get('byMode') && (this.item('hudLayout').options || []).some(o => o[0] === 'sport') && looks.indexOf('sport') < 0) {
+            looks.splice(looks.indexOf('off'), 0, 'sport');
+        }
+        const cols = Math.max(5, Math.ceil(looks.length / 2)), gap = 12, gy = py + ph + 16;
         const gw = (CW - gap * (cols - 1)) / cols, gh = (bottom - gy - 4 - gap) / 2;
         looks.forEach((v, i) => {
             const x = CX + (i % cols) * (gw + gap), yy = gy + Math.floor(i / cols) * (gh + gap), sel = v === shown;

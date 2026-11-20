@@ -920,8 +920,12 @@ void main() {
         midnight = mix(midnight, mix(accent, RED_LINE, step(50.0, stripe)), badge);
         c = over(vec4(midnight, cov(silhouette)), c);
     }
-    c = bracket(p, u_speed, u_speed > u_speedMark ? u_speedMark : 2.0, 2.0, u_ticks.x, BLUE_LINE, BLUE_BAND, BLUE_LIT, BLUE_IN, c);
-    c = bracket(pm, u_rpm, u_redFrom, u_orange, u_ticks.y, RED_LINE, RED_BAND, RED_LIT, RED_IN, c);
+    bool left = p.x < 0.5 * u_size.x;
+    c = bracket(left ? p : pm, left ? u_speed : u_rpm,
+                left ? (u_speed > u_speedMark ? u_speedMark : 2.0) : u_redFrom,
+                left ? 2.0 : u_orange, left ? u_ticks.x : u_ticks.y,
+                left ? BLUE_LINE : RED_LINE, left ? BLUE_BAND : RED_BAND,
+                left ? BLUE_LIT : RED_LIT, left ? BLUE_IN : RED_IN, c);
     // the map window: a rounded hole cut out of the backdrop and brackets, so the map shows clean; the fuel and
     // oil bars come off while it is open (they ran across the map, car photos Nov 7 2026), the bottom strip stays
     if (u_hole.z > 0.0) {
@@ -946,8 +950,7 @@ void main() {
         }
 
     }
-    c = bar(p, u_fuelSeg, u_fuel, 0.0, c);
-    c = bar(p, u_oilSeg, u_oil, 1.0, c);
+    c = bar(p, left ? u_fuelSeg : u_oilSeg, left ? u_fuel : u_oil, left ? 0.0 : 1.0, c);
     // bottom strip: slanted ends, blue left of the middle, red right, thin dividers
     float sy = p.y - u_strip.y;
     if (sy > -2.0 && sy < u_strip.z + 2.0) {
@@ -970,9 +973,8 @@ void main() {
     // Keep the gauge feet opaque up to the native sign / banner openings.
     float foot = step(u_geo.z - 42.0, p.y);
     float bannerEdge = min(min(p.x - 570.0, 1395.0 - p.x), p.y - 555.0);
-    c.a *= min(vehicleFade, mix(bannerFade, cov(bannerEdge), foot));
 
-    // Only these narrow illuminated edges cross the transparent native banner.
+    // Mask the trim together with the artwork so it cannot cross a native warning.
     float centerX=u_size.x*.5;
     float railX=min(p.x,u_size.x-p.x);
     float span=cov(outerX(u_geo.z)-railX)*cov(railX-centerX+32.);
@@ -980,6 +982,7 @@ void main() {
     vec3 trim=p.x<centerX ? BLUE_LINE : RED_LINE;
     c=over(vec4(trim,span*.90*cov(abs(railY)-2.2)),c);
     c=over(vec4(trim,span*.38*exp(-abs(railY-6.)*.52)*step(3.,railY)),c);
+    c.a *= min(vehicleFade, mix(bannerFade, cov(bannerEdge), foot));
     c.a *= cov(symbolInterior(p));
     gl_FragColor = c;
 }
