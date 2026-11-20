@@ -621,7 +621,9 @@ function drawRamp(cv, f, layer, h) {
     if (f.chip) ring(cv, gx, gy + 16, 20, 50, f.chip, h.P);
     // readouts 2-4: a list on the right, label left and value right
     [1, 2, 3].forEach((i, k) => { if (items[i]) small(cv, 262, 68 + dn + k * 21, items[i], h.P, o, RC.text, 'row', 132); });
-    const gearC = cue.limiter && f.blink ? RC.red : RC.text;
+    let gearC = RC.text;
+    if (f.revGlow > 0) gearC = f.revGlow < .55 ? RC.yellow : RC.red;
+    if (cue.limiter) gearC = f.blink ? RC.red : RC.text;
     if (o.gear) {
         if (sq) sqText(cv, h.gearText(d), gx, gy, 27, gearC, 'center');
         else cv.text(h.gearText(d), gx, foot, 42, gearC, { align: 'center', font: h.gearFont(o) });

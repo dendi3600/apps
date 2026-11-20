@@ -21,6 +21,7 @@
       "h": 106,
       "z": 5,
       "text": "{{gearnum}}",
+      "revGlow": true,
       "font": "m2_gear",
       "align": "center",
       "color": "fg"
@@ -482,13 +483,13 @@
     {
       "id": "emblem",
       "type": "text",
-      "x": 160,
-      "y": 590,
-      "w": 104,
-      "h": 47,
+      "x": 147,
+      "y": 584,
+      "w": 129,
+      "h": 58,
       "z": 5,
       "text": "M",
-      "font": "sport_emblem_large",
+      "font": "circuit_emblem",
       "align": "left",
       "color": "fg"
     },

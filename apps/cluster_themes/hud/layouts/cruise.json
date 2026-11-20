@@ -31,7 +31,7 @@
       "type": "text",
       "z": 5,
       "x": 800,
-      "y": 136,
+      "y": 203,
       "w": 320,
       "h": 112,
       "text": "{{speed}}",
@@ -50,7 +50,7 @@
       "type": "text",
       "z": 5,
       "x": 800,
-      "y": 224,
+      "y": 291,
       "w": 320,
       "h": 30,
       "text": "{{u:speedLc}}",
@@ -310,10 +310,10 @@
       "type": "icon",
       "id": "pump",
       "icon": "fuelRight",
-      "x": 285,
-      "y": 604,
-      "w": 35,
-      "h": 26,
+      "x": 44,
+      "y": 627,
+      "w": 50,
+      "h": 36,
       "z": 5,
       "conn": 1,
       "color": "fg",
@@ -322,7 +322,7 @@
     {
       "type": "meter",
       "id": "fuel_bar",
-      "x": 208,
+      "x": 130,
       "y": 646,
       "w": 270,
       "h": 12,
@@ -362,7 +362,7 @@
       "type": "text",
       "id": "fuel_empty",
       "text": "0",
-      "x": 176,
+      "x": 98,
       "y": 633,
       "w": 30,
       "h": 29,
@@ -385,20 +385,6 @@
       "color": "fg",
       "conn": 1,
       "align": "center"
-    },
-    {
-      "id": "fuel_range",
-      "type": "text",
-      "text": "{{range}} {{u:distLc}}",
-      "font": "s_unit",
-      "x": 321,
-      "y": 603,
-      "w": 128,
-      "h": 32,
-      "z": 5,
-      "conn": 1,
-      "align": "left",
-      "color": "fg"
     },
     {
       "id": "rpm_unit_left",
@@ -439,240 +425,6 @@
       "z": 4,
       "conn": 3,
       "slope": 0.07
-    },
-    {
-      "id": "intake_symbol",
-      "type": "icon",
-      "icon": "intakeAir",
-      "x": 754,
-      "y": 311,
-      "w": 38,
-      "h": 34,
-      "z": 5,
-      "conn": 0,
-      "color": [
-        100,
-        199,
-        255,
-        255
-      ]
-    },
-    {
-      "id": "intake_gauge",
-      "type": "meter",
-      "signal": "intake",
-      "x": 805,
-      "y": 322,
-      "w": 215,
-      "h": 12,
-      "min": -20,
-      "max": 80,
-      "style": "trackTemperature",
-      "segments": 4,
-      "gap": 2,
-      "colors": [
-        [
-          86,
-          201,
-          255
-        ],
-        [
-          86,
-          201,
-          255
-        ],
-        [
-          244,
-          54,
-          75
-        ]
-      ],
-      "trackColor": [
-        10,
-        33,
-        62
-      ],
-      "at": [
-        0.65,
-        0.83
-      ],
-      "z": 3,
-      "conn": 0
-    },
-    {
-      "id": "intake_reading",
-      "type": "text",
-      "text": "{{intake}}{{u:temp}}",
-      "font": "s_unit",
-      "x": 1039,
-      "y": 312,
-      "w": 128,
-      "h": 32,
-      "align": "left",
-      "color": [
-        100,
-        199,
-        255,
-        255
-      ],
-      "z": 5,
-      "conn": 0
-    },
-    {
-      "id": "oil_symbol",
-      "type": "icon",
-      "icon": "oilcan",
-      "x": 754,
-      "y": 348,
-      "w": 38,
-      "h": 34,
-      "z": 5,
-      "conn": 0,
-      "color": [
-        100,
-        199,
-        255,
-        255
-      ]
-    },
-    {
-      "id": "oil_gauge",
-      "type": "meter",
-      "signal": "oil",
-      "x": 805,
-      "y": 359,
-      "w": 215,
-      "h": 12,
-      "min": 40,
-      "max": 160,
-      "style": "trackTemperature",
-      "segments": 4,
-      "gap": 2,
-      "colors": [
-        [
-          86,
-          201,
-          255
-        ],
-        [
-          86,
-          201,
-          255
-        ],
-        [
-          244,
-          54,
-          75
-        ]
-      ],
-      "trackColor": [
-        10,
-        33,
-        62
-      ],
-      "at": [
-        0.65,
-        0.83
-      ],
-      "z": 3,
-      "conn": 0
-    },
-    {
-      "id": "oil_reading",
-      "type": "text",
-      "text": "{{oil}}{{u:temp}}",
-      "font": "s_unit",
-      "x": 1039,
-      "y": 349,
-      "w": 128,
-      "h": 32,
-      "align": "left",
-      "color": [
-        100,
-        199,
-        255,
-        255
-      ],
-      "z": 5,
-      "conn": 0
-    },
-    {
-      "id": "coolant_symbol",
-      "type": "icon",
-      "icon": "therm",
-      "x": 754,
-      "y": 385,
-      "w": 38,
-      "h": 34,
-      "z": 5,
-      "conn": 0,
-      "color": [
-        100,
-        199,
-        255,
-        255
-      ]
-    },
-    {
-      "id": "coolant_gauge",
-      "type": "meter",
-      "signal": "coolant",
-      "x": 805,
-      "y": 396,
-      "w": 215,
-      "h": 12,
-      "min": 40,
-      "max": 130,
-      "style": "trackTemperature",
-      "segments": 4,
-      "gap": 2,
-      "colors": [
-        [
-          86,
-          201,
-          255
-        ],
-        [
-          86,
-          201,
-          255
-        ],
-        [
-          244,
-          54,
-          75
-        ]
-      ],
-      "trackColor": [
-        10,
-        33,
-        62
-      ],
-      "at": [
-        0.65,
-        0.83
-      ],
-      "z": 3,
-      "conn": 0
-    },
-    {
-      "id": "coolant_reading",
-      "type": "text",
-      "text": "{{coolant}}{{u:temp}}",
-      "font": "s_unit",
-      "x": 1039,
-      "y": 386,
-      "w": 128,
-      "h": 32,
-      "align": "left",
-      "color": [
-        100,
-        199,
-        255,
-        255
-      ],
-      "z": 5,
-      "conn": 0
     },
     {
       "id": "side_torque",

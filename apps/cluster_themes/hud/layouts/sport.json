@@ -418,6 +418,7 @@
       "w": 240,
       "h": 74,
       "text": "{{gearnum}}",
+      "revGlow": true,
       "font": "sport_drive",
       "color": "fg",
       "align": "center",
