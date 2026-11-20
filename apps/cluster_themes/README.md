@@ -25,7 +25,7 @@ A race dash.
 <p align="center"><img src="../../docs/images/cluster-gt3.png" width="900" alt="GT3 theme"></p>
 <p align="center"><img src="../../docs/images/cluster-gt3-map.png" width="900" alt="GT3 theme with the Waze map inside"></p>
 
-### M
+### M8
 
 A current M8's cluster, traced off a photo of it and drawn on black.
 
@@ -37,7 +37,7 @@ A current M8's cluster, traced off a photo of it and drawn on black.
 
 <p align="center"><img src="../../docs/images/cluster-m.png" width="900" alt="M theme"></p>
 
-### Sport
+### M1
 
 The look of BMW's newer Live Cockpit Sport view.
 
@@ -72,11 +72,11 @@ A race-sim style dash with angled frames and a music panel.
 
 <p align="center"><img src="../../docs/images/cluster-vector.png" width="900" alt="Vector theme"></p>
 
-### Minimal
+### Ramp
 
-Just the speed, big, with the gear and drive mode beside it, a thin fuel line under it (the reserve end is red), and oil and coolant in small print.
+Redline’s G80 Ramp renderer draws the rev rail, red needle, eight shift lights, squared gear and speed. The original image is scaled uniformly above the cluster footer.
 
-<p align="center"><img src="../../docs/images/cluster-minimal.png" width="900" alt="Minimal theme"></p>
+<p align="center"><img src="../../docs/images/cluster-minimal.png" width="900" alt="Ramp theme"></p>
 
 ### Track
 
@@ -90,11 +90,11 @@ A full-width shift bar and a 0 to 60 mph timer (0 to 100 km/h in metric). Stop f
 
 <p align="center"><img src="../../docs/images/cluster-drag.png" width="900" alt="Drag theme"></p>
 
-### Rally
+### AMG Circuit
 
-A segmented rev arc sweeps across the top of the screen, white, then rally yellow from the shift zone, red and flashing at the redline. A huge gear sits in the middle with the speed under it. On the left a G-meter: a dot shows the cornering and braking or accelerating force (it moves into the turn and up when you speed up), white, then amber from 0.5 g, then red from 0.8 g, with a fading trail behind it and an outline of the most g you reached this drive in every direction. Under it the g now (left or right, accelerating or braking), and the best of the drive. Boost with a peak-hold bar and three readouts on the right (oil, coolant and fuel out of the box).
+The illuminated ticks follow the tachometer needle. Boost, power and torque occupy the left panel. The right panel opens onto the live Waze map when enabled and available.
 
-<p align="center"><img src="../../docs/images/cluster-rally.png" width="900" alt="Rally theme"></p>
+<p align="center"><img src="../../docs/images/cluster-m-circuit.png" width="900" alt="AMG Circuit cluster"></p>
 
 ### Retro 80s
 
@@ -114,16 +114,13 @@ A safety dash for hard pulls, in BMW M colours: twelve tiles in a grid (rpm, spe
 
 <p align="center"><img src="../../docs/images/cluster-dyno.png" width="900" alt="Dyno theme"></p>
 
-### Ribbon
+### M2
 
-Calm and premium. One ribbon of light runs along under the top edge of the cluster and fills with the revs, cool white warming to amber, then red near the redline, with a dot and a number at every thousand (the last two in red). The speed sits in the middle in big thin numbers with the gear in a small frame above it. Oil, coolant and boost are on the left, and fuel and your average speed this drive on the right.
+A diagonal red tachometer frames the gear and digital speed. Four live gauges show boost, coolant, oil and intake temperature on the faceted blue panel. Fuel and oil scales sit to the right. BMW's bottom status row remains visible.
 
-**Holiday editions:** Christmas (the ribbon becomes a string of coloured bulbs that light up with the revs, with falling snow), Thanksgiving (falling maple leaves), New Year (bubbles and gold confetti) and the Fourth of July (fireworks), each with its own colours and a greeting under the speed. The decorations stay clear of the numbers. Set by **Holiday editions** in Settings.
+<p align="center"><img src="../../docs/images/cluster-m-track.png" width="900" alt="M2 cluster"></p>
 
-<p align="center"><img src="../../docs/images/cluster-ribbon.png" width="900" alt="Ribbon theme"></p>
-<p align="center"><img src="../../docs/images/cluster-ribbon-christmas.png" width="900" alt="Ribbon theme, Christmas edition"></p>
-
-Minimal, Track, Drag, Rally, Retro 80s, Cruise, Dyno and Ribbon have no map window yet; with "Show Waze map inside the theme" on, Waze stays in its usual place while they show.
+Ramp, Track, Drag, Retro 80s, Cruise, Dyno and M2 have no map window.
 
 More themes are on the way.
 
@@ -139,7 +136,7 @@ More themes are on the way.
 - **Theme**, and one per drive mode.
 - **Readouts:** pick which car sensor each GT3, M, Track, Drag, Rally, Retro 80s or Dyno readout shows (speed, rpm, boost, temperatures, tyres, fuel, g, power and more). Plug-in hybrids can also show **Hybrid battery**, the high-voltage battery's charge in % (not yet checked on a hybrid).
 - **Show Waze map inside the theme:** GT3, Sport and M open a window in the middle and Waze on Cluster draws its map in it, above BMW's own map view, so nothing shows twice. When the map goes away the theme fills back in. While it is on, Waze's map on the HUD is off. Needs robertnisipeanu's Waze on Cluster; turning it off gives Waze its usual place back.
-- **Badge:** the model name, like "BMW X3 M40i", as text in the theme's font (GT3 top left, Sport, M and Minimal top centre, where BMW puts its own). Off by default.
+- **Badge:** the model name, like "BMW X3 M40i", as text in the theme's font (GT3 top left, Sport and M top centre, where BMW puts its own). Off by default.
 - **Warnings:** oil, coolant and boost limits. A readout over its limit flashes red (oil 130°C and coolant 115°C by default, boost off).
 - **Test the shift lights:** runs the rpm up to the shift point for about 4 seconds while the car stands.
 - **Play demo:** the button at the top of the page plays a 60-second show on the cluster while the car stands (a pull through the gears with graded shifts, the limiter, braking, corners, boost, the oil warning once), with a DEMO tag. It stops at the end, on Stop, or as soon as the car moves, and nothing from it is kept.
@@ -154,7 +151,7 @@ More themes are on the way.
 - **Shift point before redline:** how far below the redline the shift lights peak (300 rpm by default).
 - **Cold-engine rev guard:** until the oil reaches 80°C, the shift point starts at 4500 rpm and climbs as the oil warms up.
 - **Show boost.**
-- **Leave room for the driver camera** (off by default): for newer cars with a driver attention camera in the top middle of the cluster, where other cars show the model badge. The shift lights and rev bars (GT3, Track, Dyno, Rally) become two mirrored wings either side of the camera that fill from the outer ends in towards it and meet at the shift point, Track's rpm numbers are left out, M's logo is hidden, and Ribbon's ribbon dips under the camera instead. The camera's spot is taken from where the badge sits on a car without one. Not yet tested on a car with a camera; please report how it lines up on yours.
+- **Leave room for the driver camera** (off by default): for newer cars with a driver attention camera in the top middle of the cluster, where other cars show the model badge. The shift lights and rev bars (GT3, Track, Dyno, Rally) become two mirrored wings either side of the camera that fill from the outer ends in towards it and meet at the shift point, Track's rpm numbers are left out, M's logo is hidden. The camera's spot is taken from where the badge sits on a car without one. Not yet tested on a car with a camera; please report how it lines up on yours.
 - **Holiday editions:** a string of glowing holiday lights along the top of every theme, and Ribbon's own holiday edition. Auto (the default) puts them on by the date: Thanksgiving in its week (Monday to Sunday), Christmas from December 1 to 26, New Year from December 27 to January 2, and the Fourth of July from July 1 to 5, then takes them off again. Or pick one holiday to keep it on, or Off. The date follows the Time zone (clock) setting.
 - **G-meter** (its own tab): the range (0.8, 1.0, 1.2, 1.5 or 2.0 g at the edge; 1.2 by default), the trail (off, 1, 2 or 4 seconds), **Swap left / right** (if the dot goes the wrong way in a turn) and **Brake on top**, the best left, right, accelerating, braking and overall g of the drive with a Reset button, and a live copy of the meter. The g comes from the car's own acceleration sensor: parked on level ground it reads 0.00, and a hill adds a little.
 - **Demo data:** fake driving data for trying it out parked. It switches back to the car's own data as soon as the car moves faster than 5 km/h.

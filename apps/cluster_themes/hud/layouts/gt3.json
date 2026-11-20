@@ -374,6 +374,7 @@
       "w": 256,
       "h": 70,
       "text": "{{gearnum}}",
+      "revGlow": true,
       "font": "value",
       "align": "center",
       "hotWhen": "now",
@@ -575,6 +576,7 @@
       "w": 400,
       "h": 244,
       "text": "{{gearnum}}",
+      "revGlow": true,
       "font": "gear",
       "align": "center",
       "hotWhen": "now",
@@ -651,7 +653,8 @@
       "w": 22,
       "h": 26,
       "color": "dim",
-      "toggle": "mapUp"
+      "toggle": "mapUp",
+      "lowFuelAt": 0.125
     },
     {
       "id": "mfuel",

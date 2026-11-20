@@ -17,7 +17,7 @@ character. `ox` shifts a cell from the pen position (ink overhang), `advance`
 moves the pen. Digits get one shared advance (tabular), so a changing number
 doesn't shift sideways.
 """
-import base64, json, os
+import base64, json, math, os
 from PIL import Image, ImageDraw, ImageFont
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -45,6 +45,7 @@ HUD_FONTS = [
 ]
 # Cluster Themes, 1920x720 LCD. GT3: the race-dash look, Barlow Condensed.
 CLUSTER_FONTS = [
+    ('supersport_rpm_tail', 'Barlow-Medium.ttf', 67, DIGITS, 0, None, None, '', 1.0, .16),
     ('gear', 'BarlowCondensed-Bold.ttf', 330, DIGITS + 'PRND-'),
     ('big', 'BarlowCondensed-Bold.ttf', 124, DIGITS + '.:-'),   # 124: "20.3 PSI" fits a 280 px box beside the hood; ':' for a clock in a readout slot
     ('value', 'BarlowCondensed-Bold.ttf', 92, DIGITS + '.:- PRND°', 0, None, None, '°'),   # °: a readout slot showing a temperature (tucked: the cell keeps its height)
@@ -55,6 +56,14 @@ CLUSTER_FONTS = [
     ('badge', 'BarlowCondensed-SemiBold.ttf', 30, UPPER + LOWER + DIGITS + ' -'),   # the model badge (shared/badges.js)
     # M: the wide squared numbers (Michroma, SIL OFL) and Barlow for the small print
     ('m_num', 'Orbitron[wght].ttf', 36, DIGITS, 0, 'Black', {'0': 'O'}),
+    # Track's mirrored scales use the same face at increasing sizes along the RPM axis.
+    *[('track_rpm_' + str(n), 'BarlowSemiCondensed-Medium.ttf', 21 + 4*n, str(n))
+      for n in (0, 1, 2, 4, 6, 8)],
+    *[('wing_scale_' + str(size), 'BarlowSemiCondensed-Medium.ttf', size, DIGITS, 0, None, None, '', 1.0, .18)
+      for size in (23, 28, 33)],
+    ('track_gear', 'BarlowSemiCondensed-Medium.ttf', 86, DIGITS + 'PRNDSM-', 0, None, None, '', 1.0, .14),
+    ('m2_gear', 'Orbitron[wght].ttf', 105, DIGITS + 'PRNDSM-', 0, 'Bold', {'0': 'O'}, '', 1.13),
+    ('m2_speed', 'Orbitron[wght].ttf', 49, DIGITS + '-', 0, 'SemiBold', {'0': 'O'}, '', 1.12),
     ('m_gear', 'Orbitron[wght].ttf', 125, 'PRNDSM-' + DIGITS, 3, 'Black', {'0': 'O'}),
     ('m_speed', 'Orbitron[wght].ttf', 78, DIGITS + '-', 3, 'Black', {'0': 'O'}),
     ('m_gl', 'Orbitron[wght].ttf', 25, DIGITS + '/.-', 0, 'Black', {'0': 'O'}),
@@ -67,6 +76,8 @@ CLUSTER_FONTS = [
     ('m_badge', 'Barlow-Medium.ttf', 26, UPPER + LOWER + DIGITS + ' -'),
     # Sport: BMW Live Cockpit style, the wide numbers in Michroma like BMW's own
     ('s_scale', 'Michroma-Regular.ttf', 27, DIGITS, 1),
+    ('sport_ticks', 'Barlow-SemiBold.ttf', 30, DIGITS),
+    ('sport_drive', 'Orbitron[wght].ttf', 72, DIGITS + 'PRNDSM-', 0, 'ExtraBold', {'0': 'O'}, '', 1.17),
     ('s_speed', 'Michroma-Regular.ttf', 74, DIGITS + '-', 3),
     ('s_hero', 'Michroma-Regular.ttf', 132, DIGITS + '-', 3),   # the big speed in the middle while no map shows (Nov 13 2026)
     ('s_gear', 'Michroma-Regular.ttf', 70, DIGITS + 'PRNDSM-', 3),
@@ -113,7 +124,7 @@ PAD = 2
 ATLAS_W = 1024
 
 
-def bake(out, name, file, size, chars, stroke=0, weight=None, subs=None, tuck=''):
+def bake(out, name, file, size, chars, stroke=0, weight=None, subs=None, tuck='', width_scale=1.0, slant=0.0):
     """stroke: px of extra weight round every glyph (Michroma has one weight). weight: a named instance of a
     variable font (Orbitron: Regular .. Black), for the M theme's squared BMW-style gear, speed and numbers.
     subs: {char: glyph drawn for it} (Orbitron's zero is slashed; the M8's is plain, so its O stands in).
@@ -142,7 +153,14 @@ def bake(out, name, file, size, chars, stroke=0, weight=None, subs=None, tuck=''
         img = Image.new('L', (w, height), 0)
         ImageDraw.Draw(img).text((PAD - l, PAD - top + drop.get(c, 0)), glyph(c), font=font, fill=255, anchor='ls', stroke_width=stroke, stroke_fill=255)
         shift = (tab - adv) / 2 if c in DIGITS else 0
-        cells.append((c, img, round(l - PAD + shift), round(tab if c in DIGITS else adv)))
+        if slant:
+            extra = math.ceil(height * slant)
+            img = img.transform((w + extra, height), Image.Transform.AFFINE,
+                                (1, slant, -extra, 0, 1, 0), Image.Resampling.BICUBIC)
+            l -= extra // 2
+        if width_scale != 1.0:
+            img = img.resize((round(w * width_scale), height), Image.Resampling.LANCZOS)
+        cells.append((c, img, round((l - PAD + shift) * width_scale), round((tab if c in DIGITS else adv) * width_scale)))
 
     # simple row packing
     x = y = 0

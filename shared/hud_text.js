@@ -49,25 +49,30 @@ function mask(boxW, boxH, text, opts) {
     const font = loadFont(opts.font);
     const spacing = opts.spacing || 0;
     const out = Buffer.alloc(boxW * boxH, 0);
-    const width = measure(text, opts.font, spacing);
+    const mixed = opts.trailingDigitFont && /^\d{2,}$/.test(text);
+    const tail = mixed ? loadFont(opts.trailingDigitFont) : font;
+    const width = mixed ? glyphOf(font, text[0]).advance + spacing +
+        measure(text.slice(1), opts.trailingDigitFont, spacing) : measure(text, opts.font, spacing);
     let pen = (opts.x || 0) + (opts.align === 'right' ? boxW - width : opts.align === 'center' ? Math.round((boxW - width) / 2) : 0);
     const offY = opts.offsetY || 0;
+    let face = font;
     for (const ch of String(text)) {
-        const g = glyphOf(font, ch);
+        const g = glyphOf(face, ch);
         const x0 = Math.round(pen + g.ox);       // spacing can be fractional: snap each glyph to a pixel
         for (let y = 0; y < g.h; y++) {
-            const dy = y + offY;
+            const dy = y + offY + font.metrics.baseline - face.metrics.baseline;
             if (dy < 0 || dy >= boxH) continue;
-            const srcRow = (g.y + y) * font.width + g.x;
+            const srcRow = (g.y + y) * face.width + g.x;
             const dstRow = dy * boxW;
             for (let x = 0; x < g.w; x++) {
                 const dx = x0 + x;
                 if (dx < 0 || dx >= boxW) continue;
-                const a = font.alpha[srcRow + x];
+                const a = face.alpha[srcRow + x];
                 if (a > out[dstRow + dx]) out[dstRow + dx] = a; // overlapping cells: keep the stronger ink
             }
         }
         pen += g.advance + spacing;
+        face = tail;
     }
     return out;
 }
@@ -100,7 +105,18 @@ function blur(src, w, h, r, passes) {
 }
 
 function drawText(boxW, boxH, text, opts) {
-    return tint(mask(boxW, boxH, text, opts), boxW, boxH, opts);
+    const coverage = mask(boxW, boxH, text, opts);
+    if (!opts.slope) return tint(coverage, boxW, boxH, opts);
+    const tilted = Buffer.alloc(coverage.length);
+    for (let x = 0; x < boxW; x++) {
+        const shift = Math.abs(opts.slope) * (boxW - 1) / 2 + opts.slope * (x - (boxW - 1) / 2);
+        const rows = Math.floor(shift), fraction = shift - rows;
+        for (let y = rows; y < boxH; y++) {
+            const src = (y - rows) * boxW + x;
+            tilted[y * boxW + x] = Math.round(coverage[src] * (1 - fraction) + (src >= boxW ? coverage[src - boxW] * fraction : 0));
+        }
+    }
+    return tint(tilted, boxW, boxH, opts);
 }
 
 /** Colour a coverage mask (plus optional glow) into straight RGBA. opts: color, color2 (bottom, for a gradient), glow, font. */
@@ -113,20 +129,25 @@ function tint(m, boxW, boxH, opts) {
         halo = blur(m, boxW, boxH, r, 2);
     }
     const out = Buffer.alloc(boxW * boxH * 4, 0);
+    const shadow = opts.shadow ? blur(m, boxW, boxH, 2, 2) : null;
     const ca = color[3] / 255;
     const c2 = opts.color2;          // optional: the colour at the bottom of the box (a top-to-bottom gradient)
     let rowC = color, row = -1;
     for (let i = 0; i < m.length; i++) {
         let a = m[i] / 255;
         if (halo) a = a + (1 - a) * (halo[i] / 255) * glow; // glyph over its own halo
-        if (a <= 0) continue;
+        const y = Math.floor(i / boxW);
+        const shadowAlpha = shadow && y >= 3 && i % boxW >= 1 ? shadow[i - 3 * boxW - 1] / 255 * .82 : 0;
+        const opacity = a * ca + shadowAlpha * (1 - a * ca);
+        if (opacity <= 0) continue;
         if (c2) {
             const y = Math.floor(i / boxW);
             if (y !== row) { row = y; const f = boxH > 1 ? y / (boxH - 1) : 0; rowC = [0, 1, 2].map((j) => Math.round(color[j] + (c2[j] - color[j]) * f)); }
         }
         const o = i * 4;
-        out[o] = rowC[0]; out[o + 1] = rowC[1]; out[o + 2] = rowC[2];
-        out[o + 3] = Math.round(a * ca * 255);
+        const ink = a * ca / opacity;
+        out[o] = Math.round(rowC[0] * ink); out[o + 1] = Math.round(rowC[1] * ink); out[o + 2] = Math.round(rowC[2] * ink);
+        out[o + 3] = Math.round(opacity * 255);
     }
     return out;
 }

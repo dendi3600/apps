@@ -108,7 +108,7 @@ const THEMES = {
     },
     // Drag (layout drag.json): a full-width shift bar, the 0-60 timer, green for go.
     drag: {
-        name: 'Drag',
+        name: 'EQ Sport',
         fg: [244, 246, 250, 255], dim: [140, 148, 160, 255], track: [255, 255, 255, 30], arc: [80, 230, 110, 255],
         glow: 0, stripe: false,
         bar: { low: [80, 230, 110], mid: [255, 205, 0], high: [255, 42, 42], midAt: 'shift' },

@@ -56,3 +56,13 @@ The page draws whichever target the app's `app.json` `config.target` names. One 
 ```
 
 (800x480 for the HUD.) `?dbg=1` shows whether it worked: `images N px N` means every image layer's pixels arrived.
+
+### M850i DKOMBI4 preview
+
+Run `node bench/server.js cluster_themes` from the repository root and open
+`http://localhost:8078/?clean=1&backdrop=1&dk=limit`. Enable **car view** to
+see the 1920 × 720 panel edge and camera housing traced from the M850i grid
+photos. The DKOMBI4 selector previews the speed-limit sign, SET indicator and
+bottom-center messages underneath the theme. These positions are estimates.
+The panel and camera paths are in `bench/page.html`. M1 and AMG EQ share the
+sign and SET opening geometry in `shared/shaders.js`.

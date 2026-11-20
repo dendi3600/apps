@@ -186,6 +186,8 @@ class Car {
         // speed while driving, not even at the next red light. Set it again (parked) to bring the demo back.
         if (m !== this.demoMode) { this.demoMode = m; this.drove = false; }
         if (this.live.speed > 5) this.drove = true;
+        // Older Cluster Themes installations may still have the former "auto" setting.
+        if (this.ctx.spec.id === 'cluster_themes') return m === 'on' && !this.drove;
         return (m === 'on' && !this.drove) || (m !== 'off' && m !== 'on' && !this.carPresent() && Date.now() - this.t0 > 5000);
     }
 

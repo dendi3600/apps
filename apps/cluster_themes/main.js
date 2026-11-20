@@ -22,12 +22,17 @@ mgu.run({
             ctx.log.error('Cluster failed to start: ' + (e && e.stack || e));
             return;
         }
+        ['hudLayout', 'inSport', 'inComfort', 'inEco'].forEach((key) => {
+            const saved = ctx.settings.get(key);
+            if (saved === 'gt3' || saved === 'minimal') ctx.settings.set(key, 'vector');
+            else if (['sport', 'track', 'dyno', 'srinivas', 'retro80s'].indexOf(saved) >= 0) ctx.settings.set(key, 'off');
+        });
         hud.start();
         new Page(ctx, hud, {
             title: ctx.spec.title, what: 'cluster',
-            look: { name: 'Themes', style: 'hero', tags: { gt3: 'race dash', m: 'M8 style', mview: 'M3 / M5 look', vector: 'music panel', sport: 'Live Cockpit', minimal: 'just the speed', track: 'tyres + temps', drag: '0-60 timer', rally: 'rev arc · G-meter', retro80s: '80s digital', cruise: 'calm · trip', dyno: 'safety tiles', ribbon: 'calm · holidays' } },
+            look: { name: 'Themes', style: 'hero', tags: { m: 'M8 style', mview: 'M3 / M5 look', vector: 'sport tach', sport: 'Live Cockpit', track: 'tyres + temps', drag: 'G-force and revs', rally: 'circuit tach', supersport: 'speed and RPM wings', cruise: 'twin RPM scales', dyno: 'safety tiles', ribbon: 'M track display' } },
             tabs: ['look', 'readouts', 'badge', 'map', 'alerts', 'gmeter', 'settings'],
-            settings: ['units', 'clock', 'timeZone', 'tankLitres', 'redline', 'shiftBefore', 'coldGuard', 'showBoost', 'nightDim', 'cameraNotch', 'holiday', 'demo'],
+            settings: ['eqSportPalette', 'redSportBackground', 'redSportColor', 'redSportHue', 'units', 'clock', 'timeZone', 'tankLitres', 'redline', 'shiftBefore', 'coldGuard', 'showBoost', 'nightDim', 'cameraNotch', 'keepFactoryStrip', 'holiday', 'demo'],
             // the drive mode check's candidates this app's app.json listens to (issue #8; shared/hud.js modeDiagLines)
             modeCheck: ['HMI', 'MDrive', 'Engine', 'Sport2'],
         }).start();
