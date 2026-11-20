@@ -2,7 +2,7 @@
   "id": "cluster_themes",
   "title": "Cluster Themes",
   "description": "Custom instrument cluster themes with live gauges and drive-mode selection.",
-  "version": "0.19.47",
+  "version": "0.19.48",
   "vendor": "custom",
   "loggingId": "OAC1",
   "iconGlyph": "CLU",

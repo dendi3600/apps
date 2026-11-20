@@ -28,12 +28,6 @@ const ICONS = {
         seg(x, y, .37, .64, .52, .49) - .043,
         seg(x, y, .76, .18, .76, .66) - .060,
         ring(x, y, .76, .74, .115) - .046),
-    turbo: (x, y) => {
-        const dx=x-.46, dy=y-.54, r=Math.hypot(dx,dy);
-        const vane=Math.abs(Math.sin(4*(Math.atan2(dy,dx)+r)))*r;
-        return Math.min(Math.abs(r-.32)-.055, Math.max(r-.23,vane-.034),
-            seg(x,y,.48,.22,.84,.22)-.07, seg(x,y,.84,.16,.84,.36)-.045);
-    },
     gauge: (x, y) => Math.min(arc(x, y, 0.5, 0.55, 0.36, -0.75 * Math.PI, 0.75 * Math.PI) - 0.045, seg(x, y, 0.5, 0.55, 0.7, 0.36) - 0.045, disc(x, y, 0.5, 0.55, 0.07)),
     shock: (x, y) => Math.min(seg(x, y, 0.24, 0.78, 0.5, 0.52) - 0.11, seg(x, y, 0.5, 0.52, 0.78, 0.24) - 0.035, seg(x, y, 0.14, 0.88, 0.2, 0.82) - 0.05, seg(x, y, 0.8, 0.22, 0.86, 0.16) - 0.05),
     wheel: (x, y) => Math.min(ring(x, y, 0.5, 0.5, 0.38) - 0.055, disc(x, y, 0.5, 0.55, 0.1), seg(x, y, 0.14, 0.5, 0.42, 0.55) - 0.05, seg(x, y, 0.58, 0.55, 0.86, 0.5) - 0.05, seg(x, y, 0.5, 0.62, 0.5, 0.86) - 0.05),

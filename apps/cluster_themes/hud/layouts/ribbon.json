@@ -482,13 +482,13 @@
     {
       "id": "emblem",
       "type": "text",
-      "x": 147,
-      "y": 584,
-      "w": 129,
-      "h": 58,
+      "x": 160,
+      "y": 590,
+      "w": 104,
+      "h": 47,
       "z": 5,
       "text": "M",
-      "font": "circuit_emblem",
+      "font": "sport_emblem_large",
       "align": "left",
       "color": "fg"
     },

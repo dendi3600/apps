@@ -127,7 +127,7 @@ class ShiftCue {
     }
 
     /** The flash's on phase now (5 Hz), false while it isn't latched. */
-    blink(nowMs) { return (this.now.shift || this.now.limiter) && Math.floor(nowMs / BLINK_MS) % 2 === 0; }
+    blink(nowMs) { return !!this.now.shift && Math.floor(nowMs / BLINK_MS) % 2 === 0; }
 
     _upshift(rpm, tMs, learn) {
         const f = this.flashInfo;
